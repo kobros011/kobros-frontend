@@ -1,0 +1,47 @@
+{
+  "name": "cobros-app-frontend",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint \"src/**/*.{ts,tsx}\"",
+    "lint-fix": "eslint --fix \"src/**/*.{ts,tsx}\""
+  },
+  "dependencies": {
+    "@ant-design/colors": "^7.0.0",
+    "@ant-design/icons": "^5.2.6",
+    "@tanstack/react-query": "5.8.4",
+    "@tanstack/react-query-devtools": "5.8.4",
+    "antd": "5.24.7",
+    "axios": "^1.8.4",
+    "dayjs": "^1.11.13",
+    "jwt-decode": "^4.0.0",
+    "randomcolor": "^0.6.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^7.5.1",
+    "zustand": "4.4.6"
+  },
+  "devDependencies": {
+    "@types/node": "^20.9.0",
+    "@types/randomcolor": "^0.5.9",
+    "@types/react": "^19.0.10",
+    "@types/react-dom": "^19.0.4",
+    "@typescript-eslint/eslint-plugin": "6.11.0",
+    "@typescript-eslint/parser": "6.11.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "eslint": "8.53.0",
+    "eslint-config-airbnb-typescript": "17.1.0",
+    "eslint-import-resolver-typescript": "^3.6.1",
+    "eslint-plugin-import": "2.29.0",
+    "eslint-plugin-react": "7.33.2",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.19",
+    "globals": "^16.0.0",
+    "typescript": "~5.7.2",
+    "vite": "^6.3.1"
+  }
+}

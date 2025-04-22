@@ -1,0 +1,25 @@
+.menu {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100vw;
+    justify-content: center;
+    align-items: center;
+    border-radius: 10px 10px 0 0;
+    height: 4rem;
+}
+
+.logo-container {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: bold;
+    font-size: 15px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    margin-top: 5px;
+}
