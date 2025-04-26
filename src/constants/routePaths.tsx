@@ -7,6 +7,7 @@ const routePaths = {
 
 	LOGIN: 'login',
 	INICIO: 'inicio',
+	ROUTES: 'rutas',
 };
 
 export default routePaths;

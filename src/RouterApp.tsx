@@ -8,12 +8,17 @@ import LoadingComponent from './UI/Components/LoadingComponent';
 import ProtectedRoute, { ProtectedLogin } from './protectedRoute';
 
 const HomeView = lazy(() => import('@routes/HomeView/index'));
+const RoutesView = lazy(() => import('@routes/RoutesView/index'));
 
 const HomeRoutes = () => {
 	const routes: RouteProps[] = [
 		{
 			path: routePaths.INICIO,
 			children: <Route element={<HomeView />} index />,
+		},
+		{
+			path: routePaths.ROUTES,
+			children: <Route element={<RoutesView />} index />,
 		},
 	];
 

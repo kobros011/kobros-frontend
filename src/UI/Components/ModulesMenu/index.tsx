@@ -1,49 +1,48 @@
-import { UserOutlined } from '@ant-design/icons';
 import { Flex, Menu, theme } from 'antd';
 import { FC, ReactNode } from 'react';
 import MenuItem from './MenuItem';
+import routePaths from '@/constants/routePaths';
+import { TbRouteSquare } from 'react-icons/tb';
+import { BsPersonCircle } from 'react-icons/bs';
+import { Link, useLocation } from 'react-router-dom';
 
 type ItemTypeWithKey =  {
-	label: string,
+	label: ReactNode,
 	icon: ReactNode,
 	key: string;
 	isShow: boolean;
-	path: string;
 };
 
 export const ModulesMenu: FC<{ collapsed: boolean, mobile?: boolean }> = ({ collapsed, mobile = false }) => {
 
 	const { token: { colorBgContainer } } = theme.useToken();
 
+	const location = useLocation();
+	const pattern = new RegExp(`${routePaths.DEFAULT_HOME}/([^/]+)`); // Expresión regular construida dinámicamente
+	const locationKey = location.pathname.match(pattern)?.[1];
+
 	const menuItems: ItemTypeWithKey[] = [
 		{   
-			label:'Clientes',
-			path:'',
-			key: 'clients',
+			label:<Link to={`${routePaths.DEFAULT_HOME}/${routePaths.INICIO}`}>Clientes</Link>,
+			key:routePaths.INICIO,
 			isShow: true,
-			icon: <UserOutlined />,
+			icon: <BsPersonCircle />,
 		},
 		{   
-			label:'Clientes',
-			path:'',
-			key: 'client1s',
+			label: <Link to={`${routePaths.DEFAULT_HOME}/${routePaths.ROUTES}`}>Rutas</Link>,
+			key: routePaths.ROUTES,
 			isShow: true,
-			icon: <UserOutlined />,
-		},
-		{   
-			label:'Clientes',
-			path:'',
-			key: 'clien2ts',
-			isShow: true,
-			icon: <UserOutlined />,
+			icon: <TbRouteSquare />,
 		},
 	];
 
 	if (!mobile) {
 		return (
 			<Menu
+				mode='inline'
 				items={menuItems}
 				inlineCollapsed={collapsed}
+				selectedKeys={[ locationKey ?? routePaths.INICIO ]}
 			/>
 		);
 	}

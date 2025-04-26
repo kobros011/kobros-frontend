@@ -44,7 +44,6 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
 		}
 	}, [expiredAccessToken, expiredRefreshToken, jwt.refreshToken]);
 
-
 	if (expiredAccessToken && expiredRefreshToken) {
 		return <Navigate to={`/${routePaths.LOGIN}`} />;
 	}
