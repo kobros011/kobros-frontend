@@ -4,6 +4,17 @@ import { repository } from '../repositories/User';
 import { User } from '@/domain/User';
 import { TypeAction } from '@/constants/types';
 import { Filters } from '@/domain/Filters';
+import axios from 'axios';
+
+function meErrorMessage(error: unknown): string | undefined {
+	if (!axios.isAxiosError(error)) return undefined;
+	const detail = error.response?.data?.detail;
+	if (typeof detail === 'string') return detail;
+	if (Array.isArray(detail)) {
+		return detail.map(item => item?.msg ?? String(item)).join(' ');
+	}
+	return error.message || undefined;
+}
 
 export const getMe = () => {
 	const queryInfo = useQuery({
@@ -16,6 +27,7 @@ export const getMe = () => {
 		isLoading: queryInfo.isLoading,
 		isError: queryInfo.isError,
 		isFetching: queryInfo.isFetching,
+		errorMessage: meErrorMessage(queryInfo.error),
 	};
 };
 

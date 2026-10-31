@@ -15,7 +15,7 @@ const LoginView = lazy(() => import('./UI/Routes/LoginView/index'));
 
 const PostLoginRedirect = () => {
 	const setUser = useUserStore(state => state.setUser);
-	const { user, isLoading, isError, isFetching } = getMe();
+	const { user, isLoading, isError, isFetching, errorMessage } = getMe();
 
 	useEffect(() => {
 		if (user) {
@@ -29,7 +29,13 @@ const PostLoginRedirect = () => {
 
 	if (isError || !user) {
 		return (
-			<ErrorView title="No se pudo cargar el perfil del usuario. Verifica que tu cuenta exista en Kobros (Clerk vinculado)." />
+			<ErrorView
+				title="No se pudo cargar el perfil del usuario."
+				subTitle={
+					errorMessage ??
+					'Verifica que tu cuenta exista en Kobros y que Clerk use el mismo proyecto que la API.'
+				}
+			/>
 		);
 	}
 
