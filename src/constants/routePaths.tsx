@@ -8,6 +8,17 @@ const routePaths = {
 	LOGIN: 'login',
 	INICIO: 'inicio',
 	ROUTES: 'rutas',
+	BRANDS: 'marcas',
+	USERS: 'usuarios',
+	CLIENTS: 'clientes',
+	LOANS: 'creditos',
+	PAYMENTS: 'pagos',
+	EXPENSES: 'gastos',
+	COLLECTION_TODAY: 'cobro-dia',
+	LIQUIDATIONS: 'liquidaciones',
+	REPORTS: 'reportes',
+	REPORTS_PORTFOLIO: 'reportes/cartera',
+	REPORTS_DELINQUENCY: 'reportes/mora',
 };
 
 export default routePaths;

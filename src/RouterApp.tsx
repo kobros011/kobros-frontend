@@ -6,11 +6,52 @@ import { lazy, Suspense } from 'react';
 import LayoutView from '@components/Layout';
 import LoadingComponent from './UI/Components/LoadingComponent';
 import ProtectedRoute, { ProtectedLogin } from './protectedRoute';
+import { getPermission } from './infrastructure/utils/Permissions';
+import useUserStore from './infrastructure/context/User/UserDataStore';
 
 const HomeView = lazy(() => import('@routes/HomeView/index'));
+// Rutas
 const RoutesView = lazy(() => import('@routes/RoutesView/index'));
+const FormRouteView = lazy(() => import('@routes/RoutesView/Form'));
+
+// Marcas
+const BrandsView = lazy(() => import('@routes/BrandsView/index'));
+const FormBrandView = lazy(() => import('@routes/BrandsView/Form'));
+
+// Usuarios
+const UsersView = lazy(() => import('@routes/UsersView/index'));
+const FormUsersView = lazy(() => import('@routes/UsersView/Form'));
+
+// Clientes
+const ClientsView = lazy(() => import('@routes/ClientsView/index'));
+const FormClientsView = lazy(() => import('@routes/ClientsView/Form'));
+
+// Creditos
+const FormLoanView = lazy(() => import('@routes/LoansView/Form'));
+const DetailsLoanView = lazy(() => import('@routes/LoansView/DetailsLoan'));
+const LoansView = lazy(() => import('@routes/LoansView/layout'));
+
+// Pagos
+const PaymentsView = lazy(() => import('@routes/PaymentsView/index'));
+
+// Gastos
+const ExpensesView = lazy(() => import('@routes/ExpensesView/index'));
+const FormExpensesView = lazy(() => import('@routes/ExpensesView/Form'));
+
+// Cobro del día
+const CollectionTodayView = lazy(() => import('./UI/Routes/CollectionTodayView/index'));
+
+// Liquidaciones
+const LiquidationsView = lazy(() => import('./UI/Routes/LiquidationsView/index'));
+
+// Reportes
+const ReportsPortfolioView = lazy(() => import('./UI/Routes/ReportsView/Portfolio'));
+const ReportsDelinquencyView = lazy(() => import('./UI/Routes/ReportsView/Delinquency'));
 
 const HomeRoutes = () => {
+	const { typeUser } = useUserStore(state => state.user);
+	const { hasShowViewsKeys } = getPermission(typeUser);
+
 	const routes: RouteProps[] = [
 		{
 			path: routePaths.INICIO,
@@ -18,14 +59,106 @@ const HomeRoutes = () => {
 		},
 		{
 			path: routePaths.ROUTES,
-			children: <Route element={<RoutesView />} index />,
+			children:  (
+				<>
+					<Route element={<RoutesView />} index />,
+					<Route path={routePaths.DEFAULT_CREATE} element={<FormRouteView />} />
+					<Route path={routePaths.DEFAULT_EDIT} element={<FormRouteView />} />
+					<Route path={routePaths.DEFAULT_SEE} element={<FormRouteView readonly />} />
+				</>
+			),
+		},
+		{
+			path: routePaths.BRANDS,
+			children: (
+				<>
+					<Route element={<BrandsView />} index />,
+					<Route path={routePaths.DEFAULT_CREATE} element={<FormBrandView />} />
+					<Route path={routePaths.DEFAULT_EDIT} element={<FormBrandView />} />
+					<Route path={routePaths.DEFAULT_SEE} element={<FormBrandView readonly />} />
+				</>
+			),
+		},
+		{
+			path: routePaths.USERS,
+			children: (
+				<>
+					<Route element={<UsersView />} index />,
+					<Route path={routePaths.DEFAULT_CREATE} element={<FormUsersView />} />
+					<Route path={routePaths.DEFAULT_EDIT} element={<FormUsersView />} />
+					<Route path={routePaths.DEFAULT_SEE} element={<FormUsersView readonly />} />
+				</>
+			),
+		},
+		{
+			path: routePaths.CLIENTS,
+			children: (
+				<>
+					<Route element={<ClientsView />} index />,
+					<Route path={routePaths.DEFAULT_CREATE} element={<FormClientsView />} />
+					<Route path={routePaths.DEFAULT_EDIT} element={<FormClientsView />} />
+					<Route path={routePaths.DEFAULT_SEE} element={<FormClientsView readonly />} />
+				</>
+			),
+		},
+		{
+			path: routePaths.LOANS,
+			children: (
+				<>
+					<Route element={<LoansView />} index />
+					<Route path={routePaths.DEFAULT_CREATE} element={<FormLoanView />} />
+					<Route path={routePaths.DEFAULT_SEE} element={<DetailsLoanView />} />
+				</>
+			),
+		},
+		{
+			path: routePaths.PAYMENTS,
+			children: (
+				<Route index element={<PaymentsView />} />
+			),
+		},
+		{
+			path: routePaths.EXPENSES,
+			children: (
+				<>
+					<Route element={<ExpensesView />} index />
+					<Route path={routePaths.DEFAULT_CREATE} element={<FormExpensesView />} />
+					<Route path={routePaths.DEFAULT_EDIT} element={<FormExpensesView />} />
+					<Route path={routePaths.DEFAULT_SEE} element={<FormExpensesView readonly />} />
+				</>
+			),
+		},
+		{
+			path: routePaths.COLLECTION_TODAY,
+			children: (
+				<Route index element={<CollectionTodayView />} />
+			),
+		},
+		{
+			path: routePaths.LIQUIDATIONS,
+			children: (
+				<Route index element={<LiquidationsView />} />
+			),
+		},
+		{
+			path: routePaths.REPORTS,
+			children: (
+				<>
+					<Route path='cartera' element={<ReportsPortfolioView />} />
+					<Route path='mora' element={<ReportsDelinquencyView />} />
+				</>
+			),
 		},
 	];
+
+	const routesFiltered = routes?.filter(item =>
+		item.path === routePaths.INICIO || hasShowViewsKeys.includes(item.path ?? ''),
+	);
 
 	return (
 		<Suspense fallback={<LoadingComponent />}>
 			<Routes>
-				{routes.map((route, index) => (
+				{routesFiltered.map((route, index) => (
 					<Route key={index} {...route} />
 				))}
 				<Route path='*' element={<NotFoundView />} />

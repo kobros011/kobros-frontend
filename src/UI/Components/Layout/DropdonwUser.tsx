@@ -9,11 +9,12 @@ import useUserModeStore, { UserFontUse } from '@/infrastructure/context/User/Use
 import { FC, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import routePaths from '@/constants/routePaths';
-import useUserJWTStore from '@/infrastructure/context/User/UserDataJWTStore';
+import { useClerk, useUser } from '@clerk/clerk-react';
 
 export const DropdownUser: FC = () => {
 	const { user: userStore, resetStore: resetUserStore } = useUserStore(state => state);
-	const resetJwt = useUserJWTStore(state => state.resetStore);
+	const { signOut } = useClerk();
+	const { user: clerkUser } = useUser();
 	const { darkMode, userMode, setUserMode, setMode, resetStore } = useUserModeStore(state => state);
 
 	const navigate = useNavigate();
@@ -54,9 +55,8 @@ export const DropdownUser: FC = () => {
 
 	const onHandleLogout = () => {
 		void resetStore();
-		void resetJwt();
 		void resetUserStore();
-		void navigate(`/${routePaths.LOGIN}`);
+		void signOut(() => navigate(`/${routePaths.LOGIN}`));
 	};
 
 	const itemsMenu: MenuProps['items'] = [
@@ -90,6 +90,21 @@ export const DropdownUser: FC = () => {
 		},
 	];
 
+	const getNames = () => {
+		const fullName = clerkUser?.fullName ?? userStore.fullName ?? '';
+		const words = fullName.trim().split(/\s+/);
+		let names = { name: '', lastName: '' };
+		if (words.length === 0) {
+			return names;
+		} else if (words.length === 1) {
+			names = { name: words[0], lastName: '' };
+		} else {
+			names = { name: words[0], lastName: words[words.length - 1] };
+		}
+
+		return names;
+	};
+
 	return (
 		<Dropdown
 			trigger={['click']}
@@ -102,9 +117,9 @@ export const DropdownUser: FC = () => {
 				right: 8,
 			}}>
 				<Flex gap={10}>
-					<UserInitialsLogo name={userStore?.name} lastName={userStore?.lastName} />
+					<UserInitialsLogo name={getNames()?.name ?? ''} lastName={getNames()?.lastName ?? ''} />
 					<Flex vertical align="start">
-						<Typography.Title style={{ margin: 0, padding: 0 }} level={5}>{`${userStore.name?.split(' ')[0]} ${userStore.lastName?.split(' ')[0]}`}</Typography.Title>
+						<Typography.Title style={{ margin: 0, padding: 0 }} level={5}>{`${getNames()?.name} ${getNames()?.lastName}`}</Typography.Title>
 						<Typography.Text style={{ margin: 0, padding: 0, marginTop: '-5px' }} >{getNameTypeUser(userStore.typeUser as TypeUser)}</Typography.Text>
 					</Flex>
 					<DownOutlined />

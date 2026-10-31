@@ -18,6 +18,7 @@ function MyApp() {
 					borderRadius: 8,
 					paddingLG: 16,
 					colorPrimary: token['lime-6'],
+					colorTextDisabled: darkMode ? '#d9d9d9' : '#434343',
 				},
 				algorithm: darkMode ? darkAlgorithm : defaultAlgorithm,
 			}}

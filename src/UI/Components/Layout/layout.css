@@ -3,15 +3,19 @@
     bottom: 0;
     left: 0;
     width: 100vw;
-    justify-content: center;
+    justify-content: space-around;
     align-items: center;
     border-radius: 10px 10px 0 0;
-    height: 4rem;
+    height: calc(4rem + env(safe-area-inset-bottom, 0px));
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    box-sizing: border-box;
+    z-index: 1000;
 }
 
 .logo-container {
     width: 30px;
     height: 30px;
+    margin-top: 3%;
     border-radius: 50%;
     background: black;
     display: flex;
@@ -21,5 +25,8 @@
     font-weight: bold;
     font-size: 15px;
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    margin-top: 5px;
+}
+
+.flex-menu-item > span > a {
+    color: inherit
 }

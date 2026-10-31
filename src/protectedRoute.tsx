@@ -1,20 +1,53 @@
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
-import useUserJWTStore from './infrastructure/context/User/UserDataJWTStore';
+import { useAuth } from '@clerk/clerk-react';
 import routePaths from './constants/routePaths';
-import LoginView from './UI/Routes/LoginView';
-import { refreshToken as mutation } from './infrastructure/querys/Login';
-import { useEffect } from 'react';
+import { Spin } from 'antd';
+import BrandCodeVerification from './UI/Routes/BrandCodeVerification';
+import useUserStore from './infrastructure/context/User/UserDataStore';
+import { getMe } from './infrastructure/querys/User';
+import { buildDefaultHomePath, normalizeTypeUser } from './infrastructure/utils/defaultHomeRoute';
+import { TypeUser } from './constants/types';
+import LoadingComponent from './UI/Components/LoadingComponent';
+import ErrorView from '@components/ErrorView';
 
-export const ProtectedLogin = () => {
-	const { isExpiredAccessToken } = useUserJWTStore(state => state);
+const LoginView = lazy(() => import('./UI/Routes/LoginView/index'));
 
-	const expiredAccessToken = isExpiredAccessToken();
+const PostLoginRedirect = () => {
+	const setUser = useUserStore(state => state.setUser);
+	const { user, isLoading, isError, isFetching } = getMe();
 
-	if (!expiredAccessToken) {
-		return <Navigate to={`/${routePaths.DEFAULT_HOME}/${routePaths.INICIO}`} />;
+	useEffect(() => {
+		if (user) {
+			setUser(user);
+		}
+	}, [user, setUser]);
+
+	if (isLoading || isFetching) {
+		return <LoadingComponent fullHeight label="Cargando sesión" />;
 	}
 
-	return <LoginView />;
+	if (isError || !user) {
+		return <ErrorView title="No se pudo cargar el perfil del usuario" />;
+	}
+
+	return <Navigate to={buildDefaultHomePath(user.typeUser)} replace />;
+};
+
+export const ProtectedLogin = () => {
+	const { isLoaded, isSignedIn } = useAuth();
+
+	if (!isLoaded) return <Spin fullscreen />;
+
+	if (isSignedIn) {
+		return <PostLoginRedirect />;
+	}
+
+	return (
+		<Suspense fallback={<Spin fullscreen />}>
+			<LoginView />
+		</Suspense>
+	);
 };
 
 
@@ -22,33 +55,37 @@ interface ProtectedRouteProps {
 	children: React.ReactNode;
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-	const { isExpiredAccessToken, isExpiredRefreshToken, jwt, setJwt } = useUserJWTStore(state => state);
+const isBrandVerified = (): boolean => {
+	try {
+		return sessionStorage.getItem('brand_verified') === 'true';
+	} catch {
+		return false;
+	}
+};
 
-	const refreshTokenMutation = mutation();
-
-	const expiredAccessToken = isExpiredAccessToken();
-	const expiredRefreshToken = isExpiredRefreshToken();
+function ProtectedRoute({ children }: ProtectedRouteProps) {
+	const { isLoaded, isSignedIn } = useAuth();
+	const { user } = useUserStore();
+	const [verified, setVerified] = useState(isBrandVerified);
 
 	useEffect(() => {
-		const refreshToken = () => {
-			refreshTokenMutation.mutate(jwt.refreshToken, {
-				onSuccess: (response) => {
-					setJwt(response.data);
-				},
-			});
-		};
+		setVerified(isBrandVerified());
+	}, [isSignedIn]);
 
-		if (expiredAccessToken && !expiredRefreshToken) {
-			void refreshToken();
-		}
-	}, [expiredAccessToken, expiredRefreshToken, jwt.refreshToken]);
+	if (!isLoaded) return <Spin fullscreen />;
 
-	if (expiredAccessToken && expiredRefreshToken) {
+	if (!isSignedIn) {
 		return <Navigate to={`/${routePaths.LOGIN}`} />;
 	}
 
+	const isDev = normalizeTypeUser(user?.typeUser) === TypeUser.dev;
+	const hasBrand = Boolean(user?.brandId);
+
+	if (!isDev && hasBrand && !verified) {
+		return <BrandCodeVerification onVerified={() => setVerified(true)} />;
+	}
+
 	return <>{children}</>;
-};
+}
 
 export default ProtectedRoute;

@@ -5,3 +5,66 @@ body {
 body.dark {
     background-color: #1a1a1a;
 }
+
+button, a, [role="button"] {
+    touch-action: manipulation;
+}
+
+.ant-table-body {
+    overscroll-behavior-x: contain;
+}
+
+.page-header {
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+body::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+body::-webkit-scrollbar-track {
+  background: white;
+  border-radius: 10px;
+}
+
+body::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 10px;
+}
+
+body::-webkit-scrollbar-thumb:hover {
+  background: #a0a0a0;
+}
+
+body {
+	scrollbar-width: thin;
+	scrollbar-color: #ccc white;
+}
+
+body.dark::-webkit-scrollbar-track {
+	background: #1a1a1a;
+}
+
+body.dark::-webkit-scrollbar-thumb {
+	background: #888;
+	border-radius: 10px;
+}
+
+body.dark::-webkit-scrollbar-thumb:hover {
+	background: #a0a0a0;
+}
+
+body.dark {
+	scrollbar-color: #888 transparent;
+}
+
+body::-webkit-scrollbar-corner {
+	background: white;
+}
+
+body.dark::-webkit-scrollbar-corner {
+	background: #1a1a1a;
+}

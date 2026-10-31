@@ -12,4 +12,5 @@ export interface PropsTables<
 	scrollX?: number | true | string | undefined,
 	scrollY?: number | string | undefined,
 	isLoading?: boolean
+	readonly?: boolean
 }
