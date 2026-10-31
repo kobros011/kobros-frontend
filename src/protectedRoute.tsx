@@ -28,7 +28,9 @@ const PostLoginRedirect = () => {
 	}
 
 	if (isError || !user) {
-		return <ErrorView title="No se pudo cargar el perfil del usuario" />;
+		return (
+			<ErrorView title="No se pudo cargar el perfil del usuario. Verifica que tu cuenta exista en Kobros (Clerk vinculado)." />
+		);
 	}
 
 	return <Navigate to={buildDefaultHomePath(user.typeUser)} replace />;

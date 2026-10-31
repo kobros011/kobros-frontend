@@ -42,7 +42,9 @@ export const RequestInterceptor = () => {
 		const responseInterceptor = axios.interceptors.response.use(
 			(response) => response,
 			async (error: AxiosError) => {
-				if (error.response?.status === 401) {
+				const requestUrl = error.config?.url ?? '';
+				const isProfileMe = requestUrl.includes('/auth/me');
+				if (error.response?.status === 401 && !isProfileMe) {
 					await signOut();
 				}
 				return Promise.reject(error);
