@@ -41,5 +41,5 @@ export function getDefaultHomeRoute(typeUser: TypeUser | string | undefined): st
 
 export function buildDefaultHomePath(typeUser: TypeUser | string | undefined): string {
 	const segment = getDefaultHomeRoute(typeUser);
-	return `/${routePaths.BASENAME}/${routePaths.DEFAULT_HOME}/${segment}`;
+	return `/${routePaths.DEFAULT_HOME}/${segment}`;
 }

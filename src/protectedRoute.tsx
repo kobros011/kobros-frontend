@@ -83,7 +83,7 @@ function ProtectedRoute({ children }: ProtectedRouteProps) {
 	if (!isLoaded) return <Spin fullscreen />;
 
 	if (!isSignedIn) {
-		return <Navigate to={`/${routePaths.BASENAME}/${routePaths.LOGIN}`} />;
+		return <Navigate to={`/${routePaths.LOGIN}`} />;
 	}
 
 	const isDev = normalizeTypeUser(user?.typeUser) === TypeUser.dev;
