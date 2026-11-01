@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useLayoutEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@clerk/clerk-react';
 import routePaths from './constants/routePaths';
@@ -17,7 +17,7 @@ const PostLoginRedirect = () => {
 	const setUser = useUserStore(state => state.setUser);
 	const { user, isLoading, isError, isFetching, errorMessage } = getMe();
 
-	useEffect(() => {
+	useLayoutEffect(() => {
 		if (user) {
 			setUser(user);
 		}
@@ -83,7 +83,7 @@ function ProtectedRoute({ children }: ProtectedRouteProps) {
 	if (!isLoaded) return <Spin fullscreen />;
 
 	if (!isSignedIn) {
-		return <Navigate to={`/${routePaths.LOGIN}`} />;
+		return <Navigate to={`/${routePaths.BASENAME}/${routePaths.LOGIN}`} />;
 	}
 
 	const isDev = normalizeTypeUser(user?.typeUser) === TypeUser.dev;
