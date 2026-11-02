@@ -247,7 +247,6 @@ const FormUser: FC<{ readonly?: boolean }> = ({ readonly = false }) => {
 							label="Usuario"
 							name={'username'}
 							rules={[ ruleRequired, ruleUsername ]}
-							help="Si usa punto (.), actívelo en Clerk (Configure → Username) o use guión bajo (ej. collector_01)."
 						>
 							<Input placeholder="Nombre de usuario" />
 						</Form.Item>

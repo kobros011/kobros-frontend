@@ -13,6 +13,21 @@ export const ruleEmailOptional: FormRule = {
 };
 
 export const ruleUsername: FormRule = {
-	pattern: /^[a-zA-Z0-9._-]{4,64}$/,
-	message: 'Entre 4 y 64 caracteres: letras, números, . _ -',
+	validator: (_, value) => {
+		if (value === undefined || value === null || value === '') {
+			return Promise.resolve();
+		}
+		const username = String(value);
+		if (username.includes('.')) {
+			return Promise.reject(
+				new Error('No se puede usar punto (.); use guión bajo (_)'),
+			);
+		}
+		if (!/^[a-zA-Z0-9_-]{4,64}$/.test(username)) {
+			return Promise.reject(
+				new Error('Entre 4 y 64 caracteres: letras, números, _ y -'),
+			);
+		}
+		return Promise.resolve();
+	},
 };
