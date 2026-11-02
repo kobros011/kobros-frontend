@@ -4,7 +4,7 @@ import { normalizeTypeUser } from '@/infrastructure/utils/defaultHomeRoute';
 
 export const getPermission = (typeUser: TypeUser | string) => {
 	const role = normalizeTypeUser(typeUser) ?? TypeUser.collector;
-	const hasViewBrands = [TypeUser.dev, TypeUser.super].includes(role);
+	const hasViewBrands = role === TypeUser.dev;
 	const hasViewRoutes = [TypeUser.dev, TypeUser.super, TypeUser.admin, TypeUser.partner].includes(role);
 	const hasViewUsers = [TypeUser.dev, TypeUser.super, TypeUser.admin].includes(role);
 	const hasViewClients = [TypeUser.dev, TypeUser.super, TypeUser.admin, TypeUser.collector].includes(role);

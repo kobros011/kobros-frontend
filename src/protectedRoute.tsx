@@ -86,10 +86,12 @@ function ProtectedRoute({ children }: ProtectedRouteProps) {
 		return <Navigate to={`/${routePaths.LOGIN}`} />;
 	}
 
-	const isDev = normalizeTypeUser(user?.typeUser) === TypeUser.dev;
+	const role = normalizeTypeUser(user?.typeUser);
+	const isDev = role === TypeUser.dev;
+	const isSuper = role === TypeUser.super;
 	const hasBrand = Boolean(user?.brandId);
 
-	if (!isDev && hasBrand && !verified) {
+	if (!isDev && !isSuper && hasBrand && !verified) {
 		return <BrandCodeVerification onVerified={() => setVerified(true)} />;
 	}
 

@@ -26,8 +26,9 @@ export function getDefaultHomeRoute(typeUser: TypeUser | string | undefined): st
 
 	switch (role) {
 		case TypeUser.dev:
-		case TypeUser.super:
 			return routePaths.BRANDS;
+		case TypeUser.super:
+			return routePaths.ROUTES;
 		case TypeUser.admin:
 			return routePaths.USERS;
 		case TypeUser.partner:
