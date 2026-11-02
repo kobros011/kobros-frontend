@@ -1,0 +1,192 @@
+.loan-wizard {
+	--loan-primary: #a0d911;
+	--loan-bg: #ffffff;
+	--loan-border: #d9d9d9;
+	--loan-text-on-primary: #ffffff;
+}
+
+.loan-wizard .ant-collapse {
+	border: none;
+	background: transparent;
+}
+
+.loan-wizard .ant-collapse-item {
+	border: 1px solid var(--loan-border) !important;
+	border-radius: 8px !important;
+	margin-bottom: 8px;
+	overflow: hidden;
+}
+
+.loan-wizard .ant-collapse-header {
+	align-items: center !important;
+	padding: 6px 10px !important;
+	border-radius: 6px !important;
+}
+
+.loan-wizard .ant-collapse-item-active > .ant-collapse-header {
+	background: var(--loan-primary) !important;
+	color: var(--loan-text-on-primary) !important;
+}
+
+.loan-wizard .ant-collapse-item-active > .ant-collapse-header .ant-collapse-expand-icon,
+.loan-wizard .ant-collapse-item-active > .ant-collapse-header .ant-collapse-arrow {
+	color: var(--loan-text-on-primary) !important;
+}
+
+.loan-wizard .ant-collapse-item-disabled {
+	opacity: 0.45;
+}
+
+.loan-wizard .ant-collapse-content-box {
+	padding: 10px !important;
+}
+
+.loan-wizard .ant-form-vertical .ant-form-item-label > label {
+	font-size: 12px;
+	height: auto;
+}
+
+.loan-wizard-editable .ant-input,
+.loan-wizard-editable .ant-input-number,
+.loan-wizard-field .ant-input,
+.loan-wizard-field .ant-input-number,
+.loan-wizard-editable .ant-input-number-affix-wrapper,
+.loan-wizard-field .ant-input-number-affix-wrapper,
+.loan-wizard-editable .ant-input-affix-wrapper,
+.loan-wizard-field .ant-input-affix-wrapper,
+.loan-wizard-editable .ant-select-selector,
+.loan-wizard-field .ant-select-selector {
+	border-color: var(--loan-primary) !important;
+	background: color-mix(in srgb, var(--loan-primary) 10%, var(--loan-bg)) !important;
+	min-height: 28px !important;
+	height: 28px !important;
+	border-radius: 4px !important;
+}
+
+.loan-wizard-editable .ant-input-number-input,
+.loan-wizard-field .ant-input-number-input {
+	height: 26px !important;
+	line-height: 26px !important;
+	padding: 0 6px !important;
+	font-size: 13px !important;
+}
+
+.loan-wizard-editable .ant-input,
+.loan-wizard-field .ant-input {
+	padding: 2px 8px !important;
+	font-size: 13px !important;
+}
+
+.loan-wizard-editable .ant-select-selector,
+.loan-wizard-field .ant-select-selector {
+	padding: 0 8px !important;
+	align-items: center !important;
+	font-size: 13px !important;
+}
+
+.loan-wizard-readonly-field .ant-picker {
+	min-height: 28px !important;
+	height: 28px !important;
+	padding: 0 8px !important;
+	border-radius: 4px !important;
+	border-color: var(--loan-border) !important;
+}
+
+.loan-wizard-readonly-field .ant-picker-input > input {
+	font-size: 13px;
+}
+
+.loan-wizard-editable .ant-input-number,
+.loan-wizard-field .ant-input-number {
+	width: 100%;
+}
+
+.loan-wizard-ficha-label {
+	display: block;
+	font-size: 12px;
+	margin-bottom: 4px;
+}
+
+.loan-wizard-ficha-value {
+	font-size: 15px;
+	font-weight: 600;
+}
+
+.loan-wizard-ref-block {
+	border: 1px solid var(--loan-border);
+	border-radius: 8px;
+	padding: 12px;
+	margin-bottom: 16px;
+}
+
+.loan-wizard-ref-grid {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 12px;
+}
+
+@media (max-width: 767px) {
+	.loan-wizard-ref-grid {
+		grid-template-columns: 1fr;
+	}
+}
+
+.loan-wizard-loan-card {
+	border: 1px solid var(--loan-border);
+	border-radius: 8px;
+	padding: 10px 12px;
+	margin-bottom: 8px;
+}
+
+.loan-wizard-summary-panel {
+	border: 1px solid var(--loan-primary);
+	background: color-mix(in srgb, var(--loan-primary) 10%, var(--loan-bg));
+	border-radius: 8px;
+	padding: 12px 16px;
+	margin-bottom: 16px;
+}
+
+.loan-wizard-viable-panel {
+	border: 1px solid var(--loan-primary);
+	background: color-mix(in srgb, var(--loan-primary) 12%, var(--loan-bg));
+	border-radius: 8px;
+	padding: 12px 16px;
+	margin-bottom: 16px;
+}
+
+.loan-wizard-summary-row {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 6px 0;
+	border-bottom: 1px solid var(--loan-border);
+	gap: 8px;
+}
+
+.loan-wizard-summary-row:last-child {
+	border-bottom: none;
+	font-weight: 700;
+}
+
+.loan-wizard-cta-row {
+	display: flex;
+	justify-content: flex-end;
+	margin-top: 16px;
+}
+
+.loan-wizard-cta-row .ant-btn,
+.loan-wizard-actions .ant-btn {
+	height: 28px;
+	min-height: 28px;
+	padding-inline: 10px;
+	font-size: 13px;
+}
+
+.loan-wizard-cta-row .ant-btn-primary {
+	padding-inline: 12px;
+}
+
+.loan-wizard-risk-track {
+	min-height: 24px;
+	padding: 4px 8px 0;
+}

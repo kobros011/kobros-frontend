@@ -1,0 +1,427 @@
+.collection-today-module-card.ant-card {
+	overflow: auto;
+}
+
+.collection-today-module-card.ant-card > .ant-card-body {
+	padding: 16px 24px;
+}
+
+.collection-today-page {
+	padding: 0 0 8px;
+	width: 100%;
+}
+
+.collection-today-page .ant-typography h4.ant-typography {
+	margin-bottom: 8px !important;
+	font-size: 16px !important;
+	line-height: 1.25 !important;
+}
+
+.collection-today-page .ant-select-selector,
+.collection-today-page .ant-picker {
+	min-height: 28px !important;
+	height: 28px !important;
+	font-size: 12px !important;
+}
+
+.collection-today-page .ant-select-selection-item,
+.collection-today-page .ant-select-selection-placeholder,
+.collection-today-page .ant-picker-input > input {
+	font-size: 12px !important;
+	line-height: 26px !important;
+}
+
+.collection-today-filters {
+	margin-bottom: 8px;
+}
+
+.collection-today-kpis-panel {
+	margin-bottom: 8px;
+}
+
+.collection-today-kpis-toggle {
+	padding: 0 4px !important;
+	height: 24px !important;
+	font-size: 11px !important;
+}
+
+.collection-today-kpis-bar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 4px;
+	margin-bottom: 4px;
+}
+
+.collection-today-kpis-compact {
+	font-size: 11px !important;
+	line-height: 1.35;
+	cursor: pointer;
+	flex: 1;
+	min-width: 0;
+}
+
+.collection-today-kpis-panel .ant-statistic-title {
+	font-size: 10px !important;
+	margin-bottom: 0 !important;
+	line-height: 1.2 !important;
+}
+
+.collection-today-kpis-panel .ant-statistic-content {
+	font-size: 11px !important;
+	line-height: 1.15 !important;
+}
+
+.collection-today-kpis-panel .ant-statistic-content-value {
+	font-size: 11px !important;
+}
+
+.collection-today-kpis-panel .ant-card-body {
+	padding: 6px 8px !important;
+}
+
+.collection-today-kpis-panel .ant-progress-line {
+	margin-bottom: 0 !important;
+	margin-top: 2px !important;
+}
+
+.collection-today-client-card.ant-card .ant-card-body {
+	padding: 8px 10px !important;
+}
+
+.collection-today-client-card {
+	margin-bottom: 8px !important;
+}
+
+.collection-today-client-toggle {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 6px;
+	width: 100%;
+	margin: 0;
+	padding: 0;
+	border: none;
+	background: transparent;
+	cursor: pointer;
+	text-align: left;
+	font: inherit;
+	color: inherit;
+}
+
+.collection-today-client-toggle:focus-visible {
+	outline: 2px solid var(--ant-color-primary);
+	outline-offset: 2px;
+	border-radius: 4px;
+}
+
+.collection-today-client-toggle-icon {
+	flex-shrink: 0;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 20px;
+	height: 20px;
+	font-size: 10px;
+	color: var(--ant-color-text-secondary);
+}
+
+.collection-today-client-header-badges {
+	justify-content: flex-end;
+	flex-shrink: 0;
+}
+
+.collection-today-client-card-collapsed.ant-card .ant-card-body {
+	padding-block: 6px 6px !important;
+}
+
+.collection-today-client-body {
+	animation: collection-today-expand-in 0.2s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.collection-today-client-body {
+		animation: none;
+	}
+}
+
+@keyframes collection-today-expand-in {
+	from {
+		opacity: 0.6;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+.collection-today-client-name {
+	flex: 1;
+	min-width: 0;
+	font-size: 13px !important;
+	line-height: 1.25;
+}
+
+.collection-today-client-meta {
+	display: grid;
+	grid-template-columns: 1fr auto;
+	gap: 2px 8px;
+	margin-top: 4px;
+	font-size: 11px;
+}
+
+.collection-today-client-meta span {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	min-width: 0;
+}
+
+.collection-today-client-meta .anticon {
+	font-size: 11px;
+}
+
+.collection-today-client-meta a {
+	font-size: 11px;
+}
+
+.collection-today-client-meta .meta-full {
+	grid-column: 1 / -1;
+}
+
+.collection-today-tag.ant-tag {
+	margin: 0 !important;
+	font-size: 10px !important;
+	line-height: 16px !important;
+	padding-inline: 5px !important;
+}
+
+.collection-today-quota-card.ant-card .ant-card-body {
+	padding: 6px 8px !important;
+}
+
+.collection-today-quota-card {
+	margin-bottom: 6px !important;
+}
+
+.collection-today-quota-head {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 8px;
+}
+
+.collection-today-quota-head-left {
+	flex: 1;
+	min-width: 0;
+}
+
+.collection-today-quota-dates {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	margin-top: 6px;
+}
+
+.collection-today-quota-date {
+	display: block;
+	font-size: 11px !important;
+	margin-top: 6px;
+}
+
+.collection-today-quota-detail-row {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 6px 12px;
+	margin-top: 4px;
+}
+
+.collection-today-inline-pair {
+	display: inline-flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 4px;
+	font-size: 11px;
+}
+
+.collection-today-inline-pair .collection-today-quota-amount {
+	font-size: 12px !important;
+	font-weight: 600 !important;
+	font-variant-numeric: tabular-nums;
+}
+
+.collection-today-quota-falta {
+	display: block;
+	font-size: 10px !important;
+	text-align: right;
+	margin-top: 2px;
+}
+
+.collection-today-quota-partial {
+	margin-top: 6px;
+}
+
+.collection-today-quota-top {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	gap: 4px;
+}
+
+.collection-today-quota-meta {
+	flex: 1;
+	min-width: 0;
+}
+
+.collection-today-quota-title {
+	font-size: 12px !important;
+}
+
+.collection-today-quota-amount-row {
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	gap: 6px;
+	margin-top: 4px;
+}
+
+.collection-today-quota-amount {
+	font-size: 12px !important;
+	font-variant-numeric: tabular-nums;
+	white-space: nowrap;
+}
+
+.collection-today-pay-all.ant-btn {
+	min-height: 28px !important;
+	height: 28px !important;
+	font-size: 11px !important;
+	font-weight: 600;
+	padding-inline: 8px !important;
+	margin-top: 6px !important;
+}
+
+.collection-today-pay-all .anticon {
+	font-size: 12px;
+}
+
+.collection-today-apply-row {
+	margin-top: 6px !important;
+}
+
+.collection-today-apply-row .ant-input-number,
+.collection-today-apply-row .ant-btn {
+	min-height: 28px !important;
+	height: 28px !important;
+}
+
+.collection-today-apply-row .ant-btn {
+	min-width: 58px !important;
+	font-size: 11px !important;
+	padding-inline: 6px !important;
+}
+
+.collection-today-apply-row .ant-input-number-input {
+	height: 26px !important;
+	font-size: 12px !important;
+	padding: 0 6px !important;
+}
+
+.collection-today-ver-btn.ant-btn {
+	height: 24px !important;
+	min-height: 24px !important;
+	padding: 0 2px !important;
+	font-size: 11px !important;
+	gap: 2px;
+	flex-shrink: 0;
+}
+
+.collection-today-footer {
+	display: block;
+	text-align: center;
+	font-size: 10px;
+	margin-top: 4px;
+}
+
+.collection-today-page .ant-empty {
+	margin: 16px 0;
+}
+
+.collection-today-page .ant-empty-description {
+	font-size: 12px;
+}
+
+/* Modal contextual (App.useApp) — compacto y hereda dark/light del ConfigProvider */
+.collection-today-confirm-modal .ant-modal-content {
+	padding: 14px 16px 12px !important;
+}
+
+.collection-today-confirm-modal .ant-modal-confirm-body {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.collection-today-confirm-modal .ant-modal-confirm-body > .anticon {
+	font-size: 18px !important;
+	margin-inline-end: 10px !important;
+}
+
+.collection-today-confirm-modal .ant-modal-confirm-title {
+	font-size: 14px !important;
+	line-height: 1.3 !important;
+}
+
+.collection-today-confirm-modal .ant-modal-confirm-content {
+	font-size: 12px !important;
+	margin-top: 0 !important;
+	color: inherit;
+	opacity: 0.85;
+}
+
+.collection-today-confirm-modal .ant-modal-confirm-btns {
+	margin-top: 12px !important;
+}
+
+.collection-today-confirm-modal .ant-modal-confirm-btns .ant-btn {
+	min-height: 28px;
+	height: 28px;
+	font-size: 12px;
+}
+
+.collection-today-quotas-grid {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	margin-top: 6px;
+}
+
+.collection-today-quotas-grid .collection-today-quota-card {
+	margin-bottom: 0 !important;
+}
+
+.collection-today-client-list {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+@media (min-width: 768px) {
+	.collection-today-filters {
+		max-width: 480px;
+	}
+
+	.collection-today-kpis-panel .ant-statistic-title {
+		font-size: 12px !important;
+	}
+
+	.collection-today-kpis-panel .ant-statistic-content,
+	.collection-today-kpis-panel .ant-statistic-content-value {
+		font-size: 16px !important;
+	}
+
+	.collection-today-quota-detail-row {
+		gap: 12px 24px;
+	}
+}

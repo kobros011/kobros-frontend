@@ -1,4 +1,4 @@
-import { Payment } from './Payment';
+import { normalizePaymentStatus, Payment } from './Payment';
 import { CollectionTodayDto } from '@/infrastructure/dto/CollectionDto';
 
 export interface Collection extends Payment {
@@ -18,7 +18,7 @@ export class CollectionModel {
 			quotaNumber: dto.quota_number,
 			value: dto.value,
 			creditValue: dto.credit_value,
-			status: dto.status,
+			status: normalizePaymentStatus(dto.status),
 			loanId: dto.loan_id,
 			pendingQuotas: dto.pending_quotas,
 			canceledQuotas: dto.canceled_quotas,

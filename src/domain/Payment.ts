@@ -27,6 +27,15 @@ export interface Payment extends BaseDomain {
 
 export interface PaymentBasic extends Pick<Payment, 'id' | 'payDate' | 'paymentDate' | 'quotaNumber' | 'value' | 'creditValue' | 'status' | 'loanId' | 'active' | 'createdAt' | 'updatedAt'> {}
 
+/** API usa minúsculas (pagado); el front enum usa mayúsculas (PAGADO). */
+export function normalizePaymentStatus(status: string): PaymentStatus {
+	const upper = (status ?? '').trim().toUpperCase();
+	if (upper === PaymentStatus.paid) return PaymentStatus.paid;
+	if (upper === PaymentStatus.pending) return PaymentStatus.pending;
+	if (upper === PaymentStatus.default) return PaymentStatus.default;
+	return PaymentStatus.pending;
+}
+
 export class PaymentModel {
 	payment: Payment;
 
@@ -42,7 +51,7 @@ export class PaymentModel {
 			quotaNumber: DTO.quota_number,
 			value: DTO.value,
 			creditValue: DTO.credit_value,
-			status: DTO.status,
+			status: normalizePaymentStatus(DTO.status),
 			loanId: DTO.loan_id,
 			pendingQuotas: DTO.pending_quotas,
 			canceledQuotas: DTO.canceled_quotas,
@@ -73,7 +82,7 @@ export class PaymentModel {
 			payDate: DTO.pay_date,
 			paymentDate: DTO.payment_date,
 			quotaNumber: DTO.quota_number,
-			status: DTO.status,
+			status: normalizePaymentStatus(DTO.status),
 			value: DTO.value,
 		};
 	}

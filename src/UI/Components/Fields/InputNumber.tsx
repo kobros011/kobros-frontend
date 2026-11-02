@@ -1,25 +1,29 @@
-import React, { FC, useEffect, useRef } from 'react';
+import React, { FC } from 'react';
 import { InputNumber as AntdInputNumber, InputNumberProps as AntdInputNumberProps } from 'antd';
 import { input, inputNumber } from '@/constants/Styles';
 
-// Función para agregar separador de miles
 export const addThousandSeparator = (value: string): string => {
-	const separatorRegex = /\B(?=(\d{3})+(?!\d))/g; // Regex para separar 
+	const separatorRegex = /\B(?=(\d{3})+(?!\d))/g;
 	return value.replace(separatorRegex, ',');
 };
 
-// Limpia y formatea un número según el tipo especificado
 const cleanAndFormatNumber = (value: string, numberType: NumberTypeOptions): string => {
-	const nonNumericRegex = /[^\d.-]/g; // Regex para seleccionar los caracteres no numéricos
+	const nonNumericRegex = /[^\d.-]/g;
 	const cleanedValue = value.replace(nonNumericRegex, '').replace(/-+/g, '-');
 
 	if (cleanedValue === '' || cleanedValue === '-') return cleanedValue;
 
-	return (
-		numberType === 'positive' && cleanedValue[0] === '-' ? cleanedValue.slice(1) : // Eliminamos el signo '-' si el tipo de número es positivo
-			numberType === 'negative' && cleanedValue[0] !== '-' ? `-${cleanedValue}` : // Agregamos el signo '-' si el tipo de número es negativo
-				cleanedValue
-	);
+	if (numberType === 'positive' && cleanedValue[0] === '-') return cleanedValue.slice(1);
+	if (numberType === 'negative' && cleanedValue[0] !== '-') return `-${cleanedValue}`;
+	return cleanedValue;
+};
+
+const parseDisplayToNumber = (displayValue: string | undefined, numberType: NumberTypeOptions): number | null => {
+	if (!displayValue) return null;
+	const cleaned = cleanAndFormatNumber(displayValue, numberType);
+	if (cleaned === '' || cleaned === '-') return null;
+	const parsed = Number(cleaned);
+	return Number.isFinite(parsed) ? parsed : null;
 };
 
 type NumberTypeOptions = 'positive' | 'negative' | 'all';
@@ -30,7 +34,7 @@ export interface InputNumberProps extends Omit<AntdInputNumberProps, 'suffix'> {
 	thousandsSeparator?: boolean;
 	fixedPrefix?: boolean;
 	emptyValueOutput?: EmptyValueOutputOptions;
-	suffix?: string
+	suffix?: string;
 }
 
 const InputNumber: FC<InputNumberProps> = ({
@@ -39,80 +43,73 @@ const InputNumber: FC<InputNumberProps> = ({
 	fixedPrefix = true,
 	emptyValueOutput = 'emptyString',
 	prefix,
-	className,
 	precision,
 	onChange,
 	onBlur,
 	suffix,
+	value,
 	...inputProps
 }) => {
-	const lastValueRef = useRef(inputProps.value); // Referencia para almacenar el último valor del input actualizado internamente
-
 	const precisionCurrency = precision ?? 2;
 
-	const handleFormatter: AntdInputNumberProps['formatter'] = (value, info) => {
-		const currentValue = info.userTyping ? cleanAndFormatNumber(info.input, numberType) : value?.toString() ?? '';
-		if (currentValue === '' || currentValue === '-') return !suffix ? currentValue : `${currentValue}${suffix}`;
+	const handleFormatter: AntdInputNumberProps['formatter'] = (val, info) => {
+		if (val === null || val === undefined || val === '') return '';
 
-		const factor = Math.pow(10, precisionCurrency);
-		const newCurrentValue = Math.round(Number(currentValue) * factor) / factor;
-
-		const [integerPart, decimalPart] = newCurrentValue.toString().split('.');
-	
-		// Formateamos la parte entera del número, añadiendo un separador de miles si está habilitado
-		const formattedIntegerPart = thousandsSeparator ? addThousandSeparator(integerPart) : integerPart;
-		let formattedDecimalPart = '';
-		if (!info.userTyping) {
-			formattedDecimalPart = precisionCurrency > 0 ? (decimalPart ? `.${decimalPart.slice(0, precisionCurrency)}` : '.' + '0'.repeat(precisionCurrency)) : '';
-			return !suffix ? `${formattedIntegerPart}${formattedDecimalPart}` : `${formattedIntegerPart}${formattedDecimalPart}${suffix}`;
+		if (info.userTyping) {
+			const raw = cleanAndFormatNumber(info.input, numberType);
+			if (raw === '' || raw === '-') return raw;
+			const [integerPart, decimalPart] = raw.split('.');
+			const formattedInteger = thousandsSeparator ? addThousandSeparator(integerPart) : integerPart;
+			const decimals =
+				precisionCurrency > 0 && decimalPart !== undefined ? `.${decimalPart.slice(0, precisionCurrency)}` : '';
+			return suffix ? `${formattedInteger}${decimals}${suffix}` : `${formattedInteger}${decimals}`;
 		}
 
-		formattedDecimalPart = precisionCurrency > 0 ? (decimalPart ? `.${decimalPart.slice(0, precisionCurrency)}` : '') : '';
+		const numeric = typeof val === 'number' ? val : Number(cleanAndFormatNumber(String(val), numberType));
+		if (!Number.isFinite(numeric)) return '';
 
-		return !suffix ? `${formattedIntegerPart}${formattedDecimalPart}` : `${formattedIntegerPart}${formattedDecimalPart}${suffix}`;
+		const fixed = precisionCurrency > 0 ? numeric.toFixed(precisionCurrency) : String(Math.round(numeric));
+		const [integerPart, decimalPart] = fixed.split('.');
+		const formattedInteger = thousandsSeparator ? addThousandSeparator(integerPart) : integerPart;
+		const decimals = precisionCurrency > 0 ? `.${decimalPart ?? '0'.repeat(precisionCurrency)}` : '';
+		const formatted = `${formattedInteger}${decimals}`;
+		return suffix ? `${formatted}${suffix}` : formatted;
 	};
 
-	const handleParser: AntdInputNumberProps['parser'] = (value) => value ? cleanAndFormatNumber(value, numberType) : '';
+	const handleParser: AntdInputNumberProps['parser'] = (displayValue) =>
+		parseDisplayToNumber(displayValue, numberType) as unknown as string;
 
-	const handleChange: AntdInputNumberProps['onChange'] = (value) => {
-		lastValueRef.current = value;
-		onChange?.(value);
+	const handleChange: AntdInputNumberProps['onChange'] = (next) => {
+		onChange?.(next);
 	};
 
 	const handleBlur: AntdInputNumberProps['onBlur'] = (e) => {
 		const cleanedValue = cleanAndFormatNumber(e.target.value, numberType);
-
 		const emptyValueOutputMap: Record<EmptyValueOutputOptions, string | null> = {
 			emptyString: '',
 			null: null,
 		};
-
-		if (cleanedValue === '') handleChange(emptyValueOutputMap[emptyValueOutput]);
-
+		if (cleanedValue === '') onChange?.(emptyValueOutputMap[emptyValueOutput] as unknown as number);
 		onBlur?.(e);
 	};
 
 	const prefixToShow = prefix
-		? (fixedPrefix || inputProps.value) ? prefix : '\u200B' // '\u200B': espacio en blanco cero ancho, se utiliza en el prefix para evitar la pérdida del foco del input 
+		? fixedPrefix || value !== undefined && value !== null && value !== ''
+			? prefix
+			: '\u200B'
 		: undefined;
-
-	useEffect(() => {
-		if (inputProps.value !== undefined && inputProps.value !== lastValueRef.current) {
-			handleChange(inputProps.value);
-		}
-	}, [inputProps.value]);
 
 	return (
 		<AntdInputNumber
+			{...inputProps}
+			value={value}
 			prefix={prefixToShow}
 			onChange={handleChange}
 			onBlur={handleBlur}
 			formatter={handleFormatter}
 			controls={false}
 			parser={handleParser}
-			precision={precisionCurrency}
 			style={{ ...inputProps.style, ...input, ...inputNumber }}
-			{...inputProps}
 		/>
 	);
 };

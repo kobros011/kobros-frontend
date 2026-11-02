@@ -10,13 +10,14 @@ import useLoading from '@/infrastructure/hooks/useLoading';
 import { getClient, useMutationType } from '@/infrastructure/querys/Client';
 import { handleError } from '@/infrastructure/utils/handleError';
 import ActionsButton from '@/UI/Components/AcctionButtons';
+import { ClientCreditSummary } from '@components/ClientCreditSummary';
 import InputDate from '@/UI/Components/Fields/InputDate';
 import { SelectBrand } from '@/UI/Components/Fields/SelectBrand';
 import LoadingComponent from '@/UI/Components/LoadingComponent';
 import { useQueryClient } from '@tanstack/react-query';
 import { App, Card, Col, Divider, Form, Input, Result, Row, Typography } from 'antd';
 
-const { Text } = Typography;
+const { Text, Title } = Typography;
 import { ExceptionStatusType } from 'antd/es/result';
 import { AxiosError } from 'axios';
 import { FC, useState } from 'react';
@@ -231,6 +232,16 @@ const FormClient: FC<{ readonly?: boolean }> = ({ readonly = false }) => {
 					))}
 				</Row>
 			</Form>
+
+			{id && (
+				<>
+					<Divider style={{ marginTop: 8 }} />
+					<Title level={5} style={{ marginBottom: 12 }}>
+						Historial de créditos
+					</Title>
+					<ClientCreditSummary clientId={id} />
+				</>
+			)}
 
 			<ActionsButton
 				textAction={id ? 'Actualizar' : 'Crear'}

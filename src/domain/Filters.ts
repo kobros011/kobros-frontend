@@ -12,6 +12,7 @@ export interface Filters {
 	dateSearchRangeinitialDate: string,
 	expenseConceptId: string
 	date: string
+	clientId: string,
 }
 
 export const FiltersKeys = [
@@ -26,6 +27,7 @@ export const FiltersKeys = [
 	{ dto: 'payment_method', domain: 'paymentMethod' },
 	{ dto: 'expense_concept_id', domain: 'expenseConceptId' },
 	{ dto: 'date', domain: 'date' },
+	{ dto: 'client_id', domain: 'clientId' },
 ] as const;
 
 type FiltersDto = {

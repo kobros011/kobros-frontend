@@ -23,7 +23,7 @@ export const getPayment = (payment_id?: string) => {
 export const getListPaymentsBasic = (loanId?: string) => {
 	const queryInfo = useQuery({
 		queryKey: [queryKeyPayments.base, queryKeyDefault.list, loanId],
-		enabled: true,
+		enabled: !!loanId,
 		placeholderData: keepPreviousData,
 		queryFn: () => {
 			return repository.getListPaymentsBasic(loanId);

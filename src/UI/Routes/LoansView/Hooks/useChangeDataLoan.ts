@@ -1,73 +1,133 @@
 import { PaymentMethod } from '@/constants/types';
 import { LoanFull } from '@/domain/Loan';
+import { parseFormNumber } from '@/infrastructure/utils/formaNumber';
 import { FormInstance } from 'antd';
-import dayjs from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 import type { FieldData } from 'rc-field-form/lib/interface';
 
-export const useChangeLoan = (changedFields: FieldData<LoanFull>[], form: FormInstance) => {
-	const keysSetEndDate = ['agreedQuotas', 'paymentMethod'];
-	const keysSetLoanValues = ['agreedQuotas', 'valueQuotaFixed', 'valueCapital'];
+export interface LoanDerivedValues {
+	daysLoan: string;
+	endDate: Dayjs | undefined;
+	interestRate: number;
+	valueUtilityLoan: number;
+	valueTotalLoan: number;
+	totalLoan: number;
+}
 
-	const setEndDate = () => {
-		const payments = form.getFieldValue('agreedQuotas') as number ?? 1;
-		const method = form.getFieldValue('paymentMethod') as PaymentMethod;
+const isFilled = (value: unknown): boolean =>
+	value !== undefined && value !== null && value !== '';
 
-		const endDate = dayjs().startOf('day');
+const emptyDerived = (): LoanDerivedValues => ({
+	daysLoan: '',
+	endDate: undefined,
+	interestRate: 0,
+	valueUtilityLoan: 0,
+	valueTotalLoan: 0,
+	totalLoan: 0,
+});
 
-		const daysConfigData = {
-			[PaymentMethod.diary] : {
-				endDate: endDate.add(payments, 'day'),
-				daysLoan: `${payments} días`,
-			},
-			[PaymentMethod.weekly] : {
-				endDate: endDate.add(payments, 'week'),
-				daysLoan: `${payments} semanas`,
-			},
-			[PaymentMethod.fortnightly] : {
-				endDate: endDate.add(payments * 2, 'week'),
-				daysLoan: `${payments * 2} semanas`,
-			},
-			[PaymentMethod.monthly] : {
-				endDate: endDate.add(payments, 'month'),
-				daysLoan: `${payments} meses`,
-			},
-			[PaymentMethod.fixedDate] : {
-				endDate: endDate.add(payments, 'month'),
-				daysLoan: `${payments} meses (día fijo)`,
-			},
-		};
+const resolvePaymentMethod = (value: unknown): PaymentMethod | undefined => {
+	if (typeof value === 'string' && (Object.values(PaymentMethod) as string[]).includes(value)) {
+		return value as PaymentMethod;
+	}
+	return undefined;
+};
 
-		const config = daysConfigData[method];
-		if (config) {
-			form.setFieldValue('endDate', config.endDate);
-			form.setFieldValue('daysLoan', config.daysLoan);
-		}
+const resolveScheduleStart = (values: Partial<LoanFull>): Dayjs => {
+	const raw = values.dateFirstQuota ?? values.initialDate;
+	if (raw !== undefined && raw !== null && raw !== '') {
+		const parsed = dayjs(raw);
+		if (parsed.isValid()) return parsed.startOf('day');
+	}
+	return dayjs().startOf('day');
+};
+
+const endDateConfig = (
+	method: PaymentMethod,
+	payments: number,
+	start: Dayjs,
+): { endDate: Dayjs; daysLoan: string } => {
+	const map: Record<PaymentMethod, { endDate: Dayjs; daysLoan: string }> = {
+		[PaymentMethod.diary]: {
+			endDate: start.add(payments, 'day'),
+			daysLoan: `${payments} días`,
+		},
+		[PaymentMethod.weekly]: {
+			endDate: start.add(payments, 'week'),
+			daysLoan: `${payments} semanas`,
+		},
+		[PaymentMethod.fortnightly]: {
+			endDate: start.add(payments * 2, 'week'),
+			daysLoan: `${payments * 2} semanas`,
+		},
+		[PaymentMethod.monthly]: {
+			endDate: start.add(payments, 'month'),
+			daysLoan: `${payments} meses`,
+		},
+		[PaymentMethod.fixedDate]: {
+			endDate: start.add(payments, 'month'),
+			daysLoan: `${payments} meses (día fijo)`,
+		},
 	};
+	return map[method];
+};
 
-	const setLoanValues = () => {
-		const payments = form.getFieldValue('agreedQuotas') as number ?? 1;
-		const valueCapital = form.getFieldValue('valueCapital') as string ?? 0;
-		const fixed = form.getFieldValue('valueQuotaFixed') as string ?? 0;
-		const canceledQuotas = form.getFieldValue('canceledQuotas') as number ?? undefined;
-		const totalDefault = form.getFieldValue('totalDefault') as string ?? 0;
+export const formatLoanEndDate = (endDate: Dayjs | undefined): string => {
+	if (!endDate?.isValid()) return '—';
+	return endDate.format('DD/MM/YYYY');
+};
 
-		const calculateValue = (parseFloat(fixed) ?? 0) * (payments ?? 0);
-        
-		const loanUtilidad = calculateValue - (parseFloat(valueCapital) ?? 0);
-		const interestRate = (loanUtilidad && valueCapital) ? (loanUtilidad * 1 / (parseFloat(valueCapital) ?? 0)) * 100 : 0;
+/** Cálculo puro a partir de valores del formulario (no escribe en el form). */
+export const computeLoanDerived = (values: Partial<LoanFull>): LoanDerivedValues => {
+	if (
+		!isFilled(values.agreedQuotas) ||
+		!isFilled(values.valueCapital) ||
+		!isFilled(values.valueQuotaFixed) ||
+		!isFilled(values.paymentMethod)
+	) {
+		return emptyDerived();
+	}
 
-		form.setFieldValue('valueCapital', valueCapital);
-		form.setFieldValue('interestRate', interestRate);
-		form.setFieldValue('valueUtilityLoan', loanUtilidad);
-		form.setFieldValue('valueTotalLoan', calculateValue);
+	const method = resolvePaymentMethod(values.paymentMethod);
+	if (!method) return emptyDerived();
 
-		const totalLoan = (canceledQuotas ?  calculateValue - (parseFloat(fixed) * canceledQuotas) : calculateValue) + parseFloat(totalDefault); 
-		form.setFieldValue('totalLoan', totalLoan ?? '0');
+	const payments = Math.max(1, Math.round(parseFormNumber(values.agreedQuotas)));
+	const valueCapital = parseFormNumber(values.valueCapital);
+	const fixed = parseFormNumber(values.valueQuotaFixed);
+	const canceledQuotas = parseFormNumber(values.canceledQuotas);
+	const totalDefault = parseFormNumber(values.totalDefault);
+
+	const schedule = endDateConfig(method, payments, resolveScheduleStart(values));
+
+	const calculateValue = fixed * payments;
+	const loanUtilidad = calculateValue - valueCapital;
+	const interestRate = valueCapital > 0 ? (loanUtilidad / valueCapital) * 100 : 0;
+	const totalLoan =
+		(canceledQuotas ? calculateValue - fixed * canceledQuotas : calculateValue) + totalDefault;
+
+	return {
+		daysLoan: schedule.daysLoan,
+		endDate: schedule.endDate,
+		interestRate,
+		valueUtilityLoan: loanUtilidad,
+		valueTotalLoan: calculateValue,
+		totalLoan,
 	};
+};
 
+/** Persiste campos derivados en el form (guardar / carga inicial). */
+export const recalculateLoanForm = (form: FormInstance<Partial<LoanFull>>) => {
+	const derived = computeLoanDerived(form.getFieldsValue());
+	form.setFieldsValue({
+		endDate: derived.endDate,
+		daysLoan: derived.daysLoan,
+		interestRate: derived.interestRate,
+		valueUtilityLoan: derived.valueUtilityLoan,
+		valueTotalLoan: derived.valueTotalLoan,
+		totalLoan: derived.totalLoan,
+	});
+};
 
-	const changedKeys = changedFields.map(field => field?.name?.[0]);
-
-	if (changedKeys.some(key => keysSetEndDate.includes(key ?? ''))) setEndDate();
-	if (changedKeys.some(key => keysSetLoanValues.includes(key ?? ''))) setLoanValues();
+export const useChangeLoan = (_changedFields: FieldData<LoanFull>[], form: FormInstance) => {
+	recalculateLoanForm(form);
 };

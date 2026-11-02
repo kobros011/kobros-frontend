@@ -5,21 +5,44 @@ import { User } from '@/domain/User';
 import { TypeAction } from '@/constants/types';
 import { Filters } from '@/domain/Filters';
 import axios from 'axios';
+import { useAuth } from '@clerk/clerk-react';
 
 function meErrorMessage(error: unknown): string | undefined {
 	if (!axios.isAxiosError(error)) return undefined;
-	const detail = error.response?.data?.detail;
+	const data = error.response?.data as { detail?: unknown } | undefined;
+	const detail = data?.detail;
 	if (typeof detail === 'string') return detail;
 	if (Array.isArray(detail)) {
-		return detail.map(item => item?.msg ?? String(item)).join(' ');
+		return detail
+			.map((item: unknown) => {
+				if (item && typeof item === 'object' && 'msg' in item && typeof (item as { msg: unknown }).msg === 'string') {
+					return (item as { msg: string }).msg;
+				}
+				return String(item);
+			})
+			.join(' ');
 	}
 	return error.message || undefined;
 }
 
 export const getMe = () => {
+	const { isSignedIn, getToken } = useAuth();
 	const queryInfo = useQuery({
 		queryKey: [queryKeyUsers.base, queryKeyDefault.get, 'me'],
-		queryFn: () => repository.getMe(),
+		enabled: isSignedIn,
+		queryFn: async () => {
+			const token = await getToken();
+			if (!token) {
+				throw new Error('Sesión de Clerk sin token. Intenta cerrar sesión y volver a entrar.');
+			}
+			return repository.getMe();
+		},
+		retry: (failureCount, error) => {
+			if (axios.isAxiosError(error) && error.response?.status === 401 && failureCount < 2) {
+				return true;
+			}
+			return failureCount < 1;
+		},
 	});
 
 	return {

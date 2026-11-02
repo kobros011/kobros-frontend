@@ -1,9 +1,17 @@
+export const parseFormNumber = (value: string | number | null | undefined): number => {
+	if (value === null || value === undefined || value === '') return 0;
+	if (typeof value === 'number') return Number.isFinite(value) ? value : 0;
+	const normalized = value.toString().replace(/,/g, '').trim();
+	if (normalized === '' || normalized === '-') return 0;
+	const parsed = parseFloat(normalized);
+	return Number.isFinite(parsed) ? parsed : 0;
+};
+
 export const formatNumber = (value: string | number | null | undefined, precision?: number): string => {
 	const precisionCurrency = precision ?? 2;
 	const finalValue = value || 0;
 
-	// Eliminar cualquier carácter que no sea un número o un punto o signo negativo
-	const add = parseFloat(finalValue.toString()).toFixed(2);
+	const add = parseFormNumber(finalValue).toFixed(2);
 	const number = add.toString().replace(/[^\d.-]/g, '');
 
 	// Dividir el valor en parte entera y parte decimal
