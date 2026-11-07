@@ -8,6 +8,7 @@ const routePaths = {
 	LOGIN: 'login',
 	INICIO: 'inicio',
 	ROUTES: 'rutas',
+	ROUTES_CASH: ':id/caja',
 	BRANDS: 'marcas',
 	USERS: 'usuarios',
 	CLIENTS: 'clientes',

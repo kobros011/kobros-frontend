@@ -22,7 +22,7 @@ import { AxiosError } from 'axios';
 import { FC, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
-const FormRoute: FC<{ readonly?: boolean }> = ({ readonly = false }) => {
+const FormRoute: FC<{ readonly?: boolean, bare?: boolean }> = ({ readonly = false, bare = false }) => {
 	const { id } = useParams();
 	const [form] = Form.useForm<Partial<Route>>();
 	const resetRouteStore = useRouteStore(state => state.resetStore);
@@ -97,11 +97,8 @@ const FormRoute: FC<{ readonly?: boolean }> = ({ readonly = false }) => {
 		);
 	}
 
-	return (
-		<Card
-			title={`${isCreate ? 'Crear' : readonly ? 'Ver' : 'Actualizar'} ruta`}
-			style={{ overflowX: 'hidden', overflowY: 'auto', maxHeight: '84vh' }}
-		>
+	const content = (
+		<>
 			<Form
 				form={form}
 				layout="vertical"
@@ -190,6 +187,19 @@ const FormRoute: FC<{ readonly?: boolean }> = ({ readonly = false }) => {
 				onClickSave={form.submit}
 				onClickSaveExit={() => { form.submit(); setExit(true); }}
 			/>
+		</>
+	);
+
+	if (bare) {
+		return content;
+	}
+
+	return (
+		<Card
+			title={`${isCreate ? 'Crear' : readonly ? 'Ver' : 'Actualizar'} ruta`}
+			style={{ overflowX: 'hidden', overflowY: 'auto', maxHeight: '84vh' }}
+		>
+			{content}
 		</Card>
 	);
 };

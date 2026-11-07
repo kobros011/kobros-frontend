@@ -14,6 +14,7 @@ export const getPermission = (typeUser: TypeUser | string) => {
 	const hasViewCollectionToday = [TypeUser.dev, TypeUser.super, TypeUser.admin, TypeUser.partner, TypeUser.collector].includes(role);
 	const hasViewLiquidations = [TypeUser.dev, TypeUser.super, TypeUser.admin, TypeUser.collector].includes(role);
 	const hasViewReports = [TypeUser.dev, TypeUser.super, TypeUser.admin, TypeUser.partner].includes(role);
+	const hasRouteCashAccess = [TypeUser.dev, TypeUser.super, TypeUser.admin].includes(role);
 
 	const hasShowViewsKeys = [];
 
@@ -36,5 +37,6 @@ export const getPermission = (typeUser: TypeUser | string) => {
 		hasShowViewsKeys,
 		hasViewLoans,
 		hasViewReports,
+		hasRouteCashAccess,
 	};
 };

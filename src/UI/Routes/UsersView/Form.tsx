@@ -17,7 +17,7 @@ import InputDate from '@/UI/Components/Fields/InputDate';
 import { SelectBrand } from '@/UI/Components/Fields/SelectBrand';
 import LoadingComponent from '@/UI/Components/LoadingComponent';
 import { useQueryClient } from '@tanstack/react-query';
-import { App, Button, Card, Col, Form, Input, Result, Row, Select, Typography } from 'antd';
+import { App, Button, Card, Col, Divider, Form, Input, Result, Row, Select, Typography } from 'antd';
 import { ExceptionStatusType } from 'antd/es/result';
 import { AxiosError } from 'axios';
 import { FC, useState } from 'react';
@@ -25,11 +25,13 @@ import { useNavigate, useParams } from 'react-router-dom';
 
 const { Text } = Typography;
 
-type UserFormValues = Partial<User> & { newPassword?: string };
+type UserFormValues = Partial<User>;
+type PasswordFormValues = { newPassword: string; confirmPassword: string };
 
 const FormUser: FC<{ readonly?: boolean }> = ({ readonly = false }) => {
 	const { id } = useParams();
 	const [form] = Form.useForm<UserFormValues>();
+	const [passwordForm] = Form.useForm<PasswordFormValues>();
 	const resetUsersStore = useUsersStore(state => state.resetStore);
 
 	const { typeUser: typeUserLogin, brandId } = useUserStore(state => state.user);
@@ -49,37 +51,45 @@ const FormUser: FC<{ readonly?: boolean }> = ({ readonly = false }) => {
 	const isSuperUser = role === TypeUser.dev;
 	const canResetPassword = role === TypeUser.dev || role === TypeUser.super;
 
-	const applyPasswordIfNeeded = async (newPassword?: string) => {
-		if (isCreate || !newPassword?.trim() || !canResetPassword || !id) {
-			return;
-		}
+	const [changingPassword, setChangingPassword] = useState(false);
+	const [savingPassword, setSavingPassword] = useState(false);
+
+	const handleCancelChangePassword = () => {
+		passwordForm.resetFields();
+		setChangingPassword(false);
+	};
+
+	const handleChangePassword = async (values: PasswordFormValues) => {
+		if (!id) return;
+		setSavingPassword(true);
 		try {
-			await userRepository.setPassword(id, newPassword.trim());
-			form.setFieldValue('newPassword', undefined);
+			await userRepository.setPassword(id, values.newPassword.trim());
 			notification.success({ message: 'Contraseña actualizada' });
-		} catch {
-			notification.error({ message: 'No se pudo actualizar la contraseña' });
+			passwordForm.resetFields();
+			setChangingPassword(false);
+		} catch (err) {
+			notification.error({ message: (err as Error)?.message ?? 'No se pudo actualizar la contraseña' });
+		} finally {
+			setSavingPassword(false);
 		}
 	};
 
 	const onFinish = (values: UserFormValues) => {
-		const { newPassword, ...rest } = values;
 		startLoading();
 		userMutation.mutate({
 			...user,
-			...rest,
-			brandId: rest.brandId ? rest.brandId : brandId,
+			...values,
+			brandId: values.brandId ? values.brandId : brandId,
 		}, {
 			onSuccess: (response) => {
 				const data = response?.data;
-				void applyPasswordIfNeeded(newPassword);
 				notification.success({ message: `El usuario fue ${isCreate ? 'creado' : 'actualizado'} exitosamente` });
 				void resetUsersStore();
 
 				if (!isCreate) {
 					void refetch();
 				}
-				
+
 				stopLoading();
 
 				if (exit) {
@@ -101,23 +111,6 @@ const FormUser: FC<{ readonly?: boolean }> = ({ readonly = false }) => {
 			},
 		});
 	};
-
-	const [resettingPassword, setResettingPassword] = useState(false);
-
-	const handleSendPasswordReset = async () => {
-		if (!id) return;
-		setResettingPassword(true);
-		try {
-			await userRepository.sendPasswordReset(id);
-			notification.success({ message: 'Correo de restablecimiento enviado al usuario.' });
-		} catch {
-			notification.error({ message: 'No se pudo enviar el correo de restablecimiento.' });
-		} finally {
-			setResettingPassword(false);
-		}
-	};
-
-	const userHasEmail = Boolean(user?.email?.trim());
 
 	if (isLoadingUser) {
 		return <LoadingComponent label="Cargando usuario" fullHeight />;
@@ -143,20 +136,15 @@ const FormUser: FC<{ readonly?: boolean }> = ({ readonly = false }) => {
 				form={form}
 				layout="vertical"
 				initialValues={user}
-				disabled={isRefetching || isLoading || readonly}
+				disabled={isRefetching || isLoading || readonly || changingPassword}
 				onFinish={onFinish}
 				preserve={false}
 			>
+				<Divider orientation="left" orientationMargin={0} style={{ marginTop: 0 }}>
+					<Typography.Text type="secondary">Datos personales</Typography.Text>
+				</Divider>
+
 				<Row gutter={[16, 0]}>
-					{isSuperUser && <Col {...spanConfigForm.medium}>
-						<Form.Item
-							label="Marca"
-							name='brandId'
-							rules={[ ruleRequired ]}
-						>
-							<SelectBrand  disabled={readonly || !isCreate} placeholder={'Marca de la usuario'} />
-						</Form.Item>
-					</Col>}
 					<Col {...spanConfigForm[isSuperUser ? 'medium' : 'small']}>
 						<Form.Item
 							label="Nombre completo"
@@ -173,15 +161,6 @@ const FormUser: FC<{ readonly?: boolean }> = ({ readonly = false }) => {
 							rules={[ ruleRequired ]}
 						>
 							<Input inputMode="numeric" placeholder="Documento del usuario" />
-						</Form.Item>
-					</Col>
-					<Col {...spanConfigForm[isSuperUser ? 'medium' : 'small']}>
-						<Form.Item
-							label="Tipo de usuario"
-							name={'typeUser'}
-							rules={[ ruleRequired ]}
-						>
-							<Select options={TypeUserOptions} placeholder="Tipo de usuario" />
 						</Form.Item>
 					</Col>
 					<Col {...spanConfigForm[isSuperUser ? 'medium' : 'small']}>
@@ -242,6 +221,38 @@ const FormUser: FC<{ readonly?: boolean }> = ({ readonly = false }) => {
 							<Input type="email" placeholder="Correo (opcional)" />
 						</Form.Item>
 					</Col>
+				</Row>
+
+				<Divider orientation="left" orientationMargin={0}>
+					<Typography.Text type="secondary">Asignación</Typography.Text>
+				</Divider>
+
+				<Row gutter={[16, 0]}>
+					{isSuperUser && <Col {...spanConfigForm.medium}>
+						<Form.Item
+							label="Marca"
+							name='brandId'
+							rules={[ ruleRequired ]}
+						>
+							<SelectBrand  disabled={readonly || !isCreate} placeholder={'Marca de la usuario'} />
+						</Form.Item>
+					</Col>}
+					<Col {...spanConfigForm[isSuperUser ? 'medium' : 'small']}>
+						<Form.Item
+							label="Tipo de usuario"
+							name={'typeUser'}
+							rules={[ ruleRequired ]}
+						>
+							<Select options={TypeUserOptions} placeholder="Tipo de usuario" />
+						</Form.Item>
+					</Col>
+				</Row>
+
+				<Divider orientation="left" orientationMargin={0}>
+					<Typography.Text type="secondary">Acceso</Typography.Text>
+				</Divider>
+
+				<Row gutter={[16, 0]} align="bottom">
 					<Col {...spanConfigForm[isSuperUser ? 'medium' : 'small']}>
 						<Form.Item
 							label="Usuario"
@@ -251,23 +262,43 @@ const FormUser: FC<{ readonly?: boolean }> = ({ readonly = false }) => {
 							<Input placeholder="Nombre de usuario" />
 						</Form.Item>
 					</Col>
+					{!isCreate && canResetPassword && !readonly && !changingPassword && (
+						<Col>
+							<Form.Item label=" ">
+								<Button type="primary" ghost onClick={() => setChangingPassword(true)}>
+									Cambiar contraseña
+								</Button>
+							</Form.Item>
+						</Col>
+					)}
 					{isCreate &&
 						<Col {...spanConfigForm.medium} >
 							<Form.Item
 								label="Contraseña"
 								name={'password'}
 								rules={[ ruleRequired, rulePasswordMin ]}
+								extra={<Text type="secondary" style={{ fontSize: 12 }}>Mínimo 8 caracteres.</Text>}
 							>
 								<Input.Password placeholder="Contraseña (mín. 8 caracteres)" />
 							</Form.Item>
 						</Col>
 					}
-					{!isCreate && canResetPassword && !readonly &&
-						<Col {...spanConfigForm.medium} >
+				</Row>
+			</Form>
+
+			{!isCreate && canResetPassword && !readonly && changingPassword && (
+				<Form
+					form={passwordForm}
+					layout="vertical"
+					onFinish={(values) => void handleChangePassword(values)}
+				>
+					<Row gutter={[16, 0]}>
+						<Col {...spanConfigForm.medium}>
 							<Form.Item
 								label="Nueva contraseña"
 								name="newPassword"
 								rules={[
+									ruleRequired,
 									{
 										validator: (_, value) => {
 											if (!value || String(value).length >= 8) {
@@ -278,39 +309,53 @@ const FormUser: FC<{ readonly?: boolean }> = ({ readonly = false }) => {
 									},
 								]}
 							>
-								<Input.Password placeholder="Dejar vacío para no cambiar" />
+								<Input.Password placeholder="Nueva contraseña (mín. 8 caracteres)" />
 							</Form.Item>
 						</Col>
-					}
-				</Row>
-			</Form>
+						<Col {...spanConfigForm.medium}>
+							<Form.Item
+								label="Confirmar contraseña"
+								name="confirmPassword"
+								dependencies={['newPassword']}
+								rules={[
+									ruleRequired,
+									({ getFieldValue }) => ({
+										validator: (_, value) => {
+											if (!value || getFieldValue('newPassword') === value) {
+												return Promise.resolve();
+											}
+											return Promise.reject(new Error('Las contraseñas no coinciden'));
+										},
+									}),
+								]}
+							>
+								<Input.Password placeholder="Confirmar contraseña" />
+							</Form.Item>
+						</Col>
+					</Row>
+					<div style={{ display: 'flex', justifyContent: 'center', gap: 8 }}>
+						<Button danger onClick={handleCancelChangePassword} disabled={savingPassword}>
+							Cancelar
+						</Button>
+						<Button type="primary" loading={savingPassword} onClick={() => passwordForm.submit()}>
+							Cambiar contraseña
+						</Button>
+					</div>
+				</Form>
+			)}
 
-			<ActionsButton
-				textAction={id ? 'Actualizar' : 'Crear'}
-				hiddenSave={readonly}
-				hiddenSaveAndExit={readonly}
-				isLoading={isRefetching || isLoading}
-				onClickCancel={() => void navigate(-1)}
-				onClickSave={form.submit}
-				onClickSaveExit={() => { form.submit(); setExit(true); }}
-			/>
-			{canResetPassword && id && userHasEmail && (
-				<Button
-					danger
-					type="dashed"
-					size="small"
-					loading={resettingPassword}
-					onClick={() => void handleSendPasswordReset()}
-					style={{ marginTop: 8 }}
-				>
-					Enviar reset de contraseña
-				</Button>
+			{!changingPassword && (
+				<ActionsButton
+					textAction={id ? 'Actualizar' : 'Crear'}
+					hiddenSave={readonly}
+					hiddenSaveAndExit={readonly}
+					isLoading={isRefetching || isLoading}
+					onClickCancel={() => void navigate(-1)}
+					onClickSave={form.submit}
+					onClickSaveExit={() => { form.submit(); setExit(true); }}
+				/>
 			)}
-			{canResetPassword && id && !userHasEmail && (
-				<Text type="secondary" style={{ display: 'block', marginTop: 8, fontSize: 12 }}>
-					Sin correo: asigne la contraseña con el campo &quot;Nueva contraseña&quot; al guardar.
-				</Text>
-			)}
+
 		</Card>
 	);
 };

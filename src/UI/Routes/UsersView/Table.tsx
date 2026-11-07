@@ -51,6 +51,9 @@ export const TableUsers: FC<TableUsersProps> = ({ isSearching, actions, type, se
 			isLoading={isFetching || isLoading || isRefetching}
 			dataSource={users}
 			columns={getColumns(actions)}
+			moduleName={moduleName}
+			titleField="fullName"
+			onRowClick={actions.see}
 		/>
 	);
 };

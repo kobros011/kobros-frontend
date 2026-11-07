@@ -310,6 +310,16 @@ Las tablas vacías muestran el empty state por defecto de AntD. Si se necesita u
 | Fechas | `dayjs(value).locale('es').format('DD/MM/YYYY')` |
 | Locale AntD | `esEs` importado de `antd/locale/es_ES`, aplicado en `ConfigProvider` |
 
+### 6.7 Botones de acción
+
+| Botón | `type` / prop | Notas |
+|-------|----------------|-------|
+| Cancelar | `<Button danger>` | Siempre `danger`, aunque no sea destructivo en sí: marca visualmente la salida/descarte del flujo. |
+| Acción principal (Guardar, Crear, Ingresar, Confirmar) | `<Button type="primary">` | — |
+| Acción secundaria destructiva (Eliminar, Retirar) | `<Button danger>` | Mismo tratamiento visual que Cancelar, coherente con "esto cambia o descarta algo". |
+
+> **Regla:** todo botón **Cancelar** lleva la prop `danger`, en cualquier formulario o modal (edición de usuario, cambio de contraseña, movimientos de caja, etc.).
+
 ---
 
 ## 7. Reglas y buenas prácticas UI/UX

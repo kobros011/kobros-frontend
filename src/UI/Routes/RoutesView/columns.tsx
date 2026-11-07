@@ -22,10 +22,11 @@ export const getColumns = (actions: OnClickActions<Route>) => {
 		},
 		{
 			key: 'initialExpense',
-			title: 'Gatos Iniciales',
+			title: 'Gastos Iniciales',
 			dataIndex: 'initialExpense',
 			width: 120,
 			typeRender: 'money',
+			defaultVisible: false,
 		},
 		{
 			key: 'openingDate',
@@ -47,6 +48,7 @@ export const getColumns = (actions: OnClickActions<Route>) => {
 			dataIndex: 'createdAt',
 			width: 120,
 			typeRender: 'date',
+			defaultVisible: false,
 		},
 		{
 			key: 'updatedAt',
@@ -54,6 +56,7 @@ export const getColumns = (actions: OnClickActions<Route>) => {
 			dataIndex: 'updatedAt',
 			width: 120,
 			typeRender: 'date',
+			defaultVisible: false,
 		},
 		columnActions,
 	];

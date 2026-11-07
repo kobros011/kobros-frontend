@@ -11,41 +11,48 @@ export interface CustomColumn<T> extends ColumnType<T> {
 	typeRender?: 'money' | 'date' | 'number' | 'largeText' | 'boolean'
 	showColumn?: boolean
 	precision?: number
-} 
+	/** Si es false, la columna existe y es activable desde "Columnas", pero no viene visible la primera vez que se abre el módulo. */
+	defaultVisible?: boolean
+}
+
+export const renderTypedValue = (
+	value?: unknown,
+	type?: CustomColumn<object>['typeRender'],
+	width?: number,
+	precision?: number,
+): ReactNode => {
+
+	if (type == 'money' || type == 'number') {
+		return (
+			<>
+				{formatNumber(value?.toString(), precision)}
+			</>
+		);
+	}
+
+	if (type == 'date') {
+		const valueTyped = value as string;
+		return value ? dayjs(valueTyped?.toString()).format('DD/MM/YYYY') : '--:--';
+	}
+
+	if (type == 'largeText') {
+		const valueTyped = value as string;
+		return <TypographyParagraph styles={{ textAlign: 'center', alignContent: 'center', alignItems: 'center' }} text={valueTyped?.toString()} width={width ?? 0} />;
+	}
+
+	if (type == 'boolean') {
+		const valueTyped = value as boolean;
+		return <Button icon={valueTyped ? <CheckCircleOutlined /> : <CloseCircleOutlined /> } type="link" {...(valueTyped ? { style: { color: green[5] } } : { danger: true })} />;
+	}
+
+	return value?.toString();
+};
 
 export const BuildColumns = <T extends object>(columns: CustomColumn<T>[]): ColumnType<T>[] => {
-
-	const getTypeRender = (value?: unknown, type?: CustomColumn<T>['typeRender'], column?: ColumnType<T>, precision?: number): ReactNode => {
-
-		if (type == 'money' || type == 'number') {
-			return (
-				<>
-					{formatNumber(value?.toString(), precision)}
-				</>
-			);
-		}
-
-		if (type == 'date') {
-			const valueTyped = value as string;
-			return value ? dayjs(valueTyped?.toString()).format('DD/MM/YYYY') : '--:--';
-		}
-
-		if (type == 'largeText') {
-			const valueTyped = value as string;
-			return <TypographyParagraph styles={{ textAlign: 'center', alignContent: 'center', alignItems: 'center' }} text={valueTyped?.toString()} width={column?.width ?? 0} />;
-		}
-
-		if (type == 'boolean') {
-			const valueTyped = value as boolean;
-			return <Button icon={valueTyped ? <CheckCircleOutlined /> : <CloseCircleOutlined /> } type="link" {...(valueTyped ? { style: { color: green[5] } } : { danger: true })} />;
-		}
-
-		return value?.toString();
-	};
 
 	return columns?.filter(item => item.showColumn !== false).map(({ typeRender, precision, ...column }) => ({
 		...column,
 		align: 'center',
-		render: column.render && !typeRender ? column.render : (value: unknown ) => getTypeRender(value, typeRender, column, precision),
+		render: column.render && !typeRender ? column.render : (value: unknown ) => renderTypedValue(value, typeRender, typeof column.width === 'number' ? column.width : undefined, precision),
 	}));
 };

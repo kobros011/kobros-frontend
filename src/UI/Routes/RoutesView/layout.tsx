@@ -1,11 +1,13 @@
 import { MODULESNAME } from '@/constants/MODULESNAME';
-import { PlusOutlined } from '@ant-design/icons';
+import { DollarOutlined, PlusOutlined } from '@ant-design/icons';
 import { App, Button, Col, Row, Tabs, Typography } from 'antd';
 import { FC, useState } from 'react';
 import { Route } from '@/domain/Route';
 import { deleteRoute } from '@/infrastructure/querys/Route';
 import { useNavigate } from 'react-router-dom';
 import routePaths from '@/constants/routePaths';
+import useUserStore from '@/infrastructure/context/User/UserDataStore';
+import { getPermission } from '@/infrastructure/utils/Permissions';
 import { OnClickActions } from '@/UI/Components/RowActions';
 import { GlobalFilters } from '@/UI/Components/Filters';
 import { TableRoutes } from './Table';
@@ -20,6 +22,8 @@ export const Layout: FC = () => {
 	const [count, setCount] = useState<{ active: number, inactive: number }>({ active: 0, inactive: 0 });
 
 	const { notification } = App.useApp();
+	const { typeUser } = useUserStore(state => state.user);
+	const { hasRouteCashAccess } = getPermission(typeUser);
 
 	const deleteMutation = deleteRoute();
 	const navigate = useNavigate();
@@ -47,6 +51,14 @@ export const Layout: FC = () => {
 		see: (record: Route) => void navigate(`${record.id}`),
 		edit: (record: Route) => void navigate(`${record.id}/editar`),
 		inactiveTab: activeTab == `${moduleName}-inactive`,
+		...(hasRouteCashAccess ? {
+			moreActions: [{
+				key: 'cash',
+				label: 'Caja de la ruta',
+				icon: <DollarOutlined />,
+				action: (record: Route) => void navigate(`${record.id}/caja`),
+			}],
+		} : {}),
 	};
 
 	return (

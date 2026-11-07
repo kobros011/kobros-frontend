@@ -51,6 +51,9 @@ export const TableRoutes: FC<TableRoutesProps> = ({ isSearching, actions, type, 
 			isLoading={isFetching || isLoading || isRefetching}
 			dataSource={routes}
 			columns={getColumns(actions)}
+			moduleName={moduleName}
+			titleField="name"
+			onRowClick={actions.see}
 		/>
 	);
 };

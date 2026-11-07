@@ -7,6 +7,11 @@ export const queryKeyRoutes = {
 
 };
 
+export const queryKeyRouteMovements = {
+	base: 'route-movements',
+	summary: 'summary',
+};
+
 export const queryKeyBrands = {
 	base: 'brands',
 };

@@ -13,6 +13,7 @@ const HomeView = lazy(() => import('@routes/HomeView/index'));
 // Rutas
 const RoutesView = lazy(() => import('@routes/RoutesView/index'));
 const FormRouteView = lazy(() => import('@routes/RoutesView/Form'));
+const RouteDetailView = lazy(() => import('@routes/RoutesView/RouteDetail'));
 
 // Marcas
 const BrandsView = lazy(() => import('@routes/BrandsView/index'));
@@ -63,8 +64,9 @@ const HomeRoutes = () => {
 				<>
 					<Route element={<RoutesView />} index />,
 					<Route path={routePaths.DEFAULT_CREATE} element={<FormRouteView />} />
-					<Route path={routePaths.DEFAULT_EDIT} element={<FormRouteView />} />
-					<Route path={routePaths.DEFAULT_SEE} element={<FormRouteView readonly />} />
+					<Route path={routePaths.ROUTES_CASH} element={<RouteDetailView />} />
+					<Route path={routePaths.DEFAULT_EDIT} element={<RouteDetailView />} />
+					<Route path={routePaths.DEFAULT_SEE} element={<RouteDetailView readonly />} />
 				</>
 			),
 		},
