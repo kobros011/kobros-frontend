@@ -7,13 +7,15 @@ interface RouteCurrencyFieldProps {
 	/** Marca de la ruta (el dev la elige en el formulario; los demás usan la suya). */
 	brandId?: string
 	disabled?: boolean
+	/** Al crear no se muestra el aviso de cambio de moneda (solo aplica a una ruta que ya existe). */
+	isCreate?: boolean
 }
 
 /**
  * Moneda de la ruta. Solo se elige si la marca tiene más de una: con una sola se muestra (y el servidor la asigna)
  * y con ninguna se avisa que hay que configurarlas antes de crear rutas.
  */
-export const RouteCurrencyField: FC<RouteCurrencyFieldProps> = ({ brandId, disabled }) => {
+export const RouteCurrencyField: FC<RouteCurrencyFieldProps> = ({ brandId, disabled, isCreate }) => {
 	const { settings, isLoading } = getSettings(brandId, true);
 	const { catalog } = getCurrencyCatalog();
 	const currencies = settings?.currencies ?? [];
@@ -45,7 +47,7 @@ export const RouteCurrencyField: FC<RouteCurrencyFieldProps> = ({ brandId, disab
 			label="Moneda"
 			name="currency"
 			rules={[{ required: true, message: 'Elige la moneda de la ruta' }]}
-			extra="No se puede cambiar cuando la ruta ya tiene créditos, gastos, liquidaciones o movimientos."
+			extra={isCreate ? undefined : 'No se puede cambiar cuando la ruta ya tiene créditos, gastos, liquidaciones o movimientos.'}
 		>
 			<Select options={options} disabled={disabled} placeholder="Moneda de la ruta" aria-label="Moneda de la ruta" showSearch optionFilterProp="label" />
 		</Form.Item>

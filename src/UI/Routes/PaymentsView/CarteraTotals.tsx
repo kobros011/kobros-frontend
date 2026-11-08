@@ -19,7 +19,7 @@ interface CarteraTotalsProps {
 
 const TotalLine: FC<{ label: string; currency: string; total: number; count: number; showCurrency: boolean }> = ({ label, currency, total, count, showCurrency }) => (
 	<Text type="secondary" style={{ display: 'block', margin: '8px 0' }}>
-		{label}{showCurrency ? ` en ${currency}` : ''}: <strong>{formatMoney(total, currency)}</strong> — {count} crédito(s)
+		{label}{showCurrency ? ` en ${currency}` : ''}: <strong>{formatMoney(total, currency, { digits: 'brand' })}</strong> — {count} crédito(s)
 	</Text>
 );
 

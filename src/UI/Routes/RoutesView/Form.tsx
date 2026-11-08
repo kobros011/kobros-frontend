@@ -130,7 +130,7 @@ const FormRoute: FC<{ readonly?: boolean, bare?: boolean }> = ({ readonly = fals
 						</Form.Item>
 					</Col>
 					<Col {...spanConfigForm[isSuperUser ? 'medium' : 'small']}>
-						<RouteCurrencyField brandId={isSuperUser ? watchedBrandId : undefined} disabled={readonly} />
+						<RouteCurrencyField brandId={isSuperUser ? watchedBrandId : undefined} disabled={readonly} isCreate={isCreate} />
 					</Col>
 					<Col {...spanConfigForm[isSuperUser ? 'medium' : 'small']}>
 						<Form.Item
