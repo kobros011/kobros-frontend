@@ -33,4 +33,12 @@ export interface PropsTables<
 	cardFooterBadge?: (record: RecordType) => ReactNode
 	/** Paginación del servidor. Sin ella la tabla no pagina y la vista de tarjetas pagina en el cliente. */
 	pagination?: ServerPagination
+	/** Selección múltiple (casillas en la tabla y en las tarjetas). `keys` son los id seleccionados, incluso de otras páginas. */
+	selection?: ServerSelection<RecordType>
+}
+
+export interface ServerSelection<RecordType> {
+	keys: string[]
+	onToggle: (record: RecordType, checked: boolean) => void
+	onToggleMany: (records: RecordType[], checked: boolean) => void
 }

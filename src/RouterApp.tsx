@@ -26,6 +26,7 @@ const FormUsersView = lazy(() => import('@routes/UsersView/Form'));
 // Clientes
 const ClientsView = lazy(() => import('@routes/ClientsView/index'));
 const FormClientsView = lazy(() => import('@routes/ClientsView/Form'));
+const OrderRouteView = lazy(() => import('@routes/ClientsView/priority/OrderRouteView'));
 
 // Creditos
 const FormLoanView = lazy(() => import('@routes/LoansView/Form'));
@@ -102,6 +103,7 @@ const HomeRoutes = () => {
 			children: (
 				<>
 					<Route element={<ClientsView />} index />,
+					<Route path={routePaths.CLIENTS_ORDER} element={<OrderRouteView />} />
 					<Route path={routePaths.DEFAULT_CREATE} element={<FormClientsView />} />
 					<Route path={routePaths.DEFAULT_EDIT} element={<FormClientsView />} />
 					<Route path={routePaths.DEFAULT_SEE} element={<FormClientsView readonly />} />

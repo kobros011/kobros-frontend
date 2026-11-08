@@ -1,4 +1,4 @@
-import { ClientDto, ClientReferenceDto } from '@/infrastructure/dto/ClientDto';
+import { ClientDto, ClientReferenceDto, ClientRouteInfoDto } from '@/infrastructure/dto/ClientDto';
 import { BaseDomain } from './BaseDomain';
 
 export interface ClientReference {
@@ -6,6 +6,15 @@ export interface ClientReference {
 	name: string
 	address?: string
 	phone?: string
+}
+
+/** Prioridad (1 = primero en visitarse) de un cliente en una de sus rutas. */
+export interface ClientRouteInfo {
+	routeId: string
+	routeName: string
+	clientRouteId: string
+	order: number
+	routeTotal: number
 }
 
 export interface Client extends BaseDomain {
@@ -19,6 +28,7 @@ export interface Client extends BaseDomain {
 	beak: number
 	brandId: string
 	routesIds?: string[]
+	routes?: ClientRouteInfo[]
 	routeId?: string,
 	routeName?: string,
 	order?: number,
@@ -54,6 +64,13 @@ export class ClientModel {
 			routeId: DTO.route_id,
 			routeName: DTO.route_name,
 			routesIds: DTO.routes_ids,
+			routes: (DTO.routes ?? []).map((r: ClientRouteInfoDto) => ({
+				routeId: r.route_id,
+				routeName: r.route_name,
+				clientRouteId: r.clientroute_id,
+				order: r.order,
+				routeTotal: r.route_total,
+			})),
 			active: DTO.active,
 			updatedAt: DTO.updated_at,
 			createdAt: DTO.created_at,

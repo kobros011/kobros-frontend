@@ -12,7 +12,7 @@ import { PAGE_SIZE_OPTIONS } from '@/domain/Pagination';
 
 function CustomTable<
 	RecordType extends IRecord = IRecord,
->({ dataSource, loading, onRow, columns = [], moduleName, titleField, onRowClick, cardFooterBadge, pagination, ...props }: PropsTables<RecordType>) {
+>({ dataSource, loading, onRow, columns = [], moduleName, titleField, onRowClick, cardFooterBadge, pagination, selection, ...props }: PropsTables<RecordType>) {
 	const { isMobile } = useUserModeStore(state => state);
 
 	const modulePrefs = useTableViewStore(state => (moduleName ? state.modules[moduleName] : undefined));
@@ -57,6 +57,11 @@ function CustomTable<
 				loading={loadingIndicator}
 				columns={moduleName ? visibleColumns : columns}
 				size="small"
+				rowSelection={selection ? {
+					selectedRowKeys: selection.keys,
+					onSelect: (record, selected) => selection.onToggle(record, selected),
+					onSelectAll: (selected, _rows, changed) => selection.onToggleMany(changed, selected),
+				} : undefined}
 				pagination={pagination ? {
 					current: pagination.page,
 					pageSize: pagination.pageSize,
@@ -121,6 +126,7 @@ function CustomTable<
 					onCardClick={onRowClick}
 					footerBadge={cardFooterBadge}
 					pagination={pagination}
+					selection={selection}
 					isMobile={isMobile}
 				/>
 			)}

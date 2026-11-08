@@ -1,17 +1,36 @@
 import { Client } from '@/domain/Client';
 import { BuildColumns, CustomColumn } from '@/infrastructure/utils/BuildColumns';
 import { OnClickActions, useRowActions } from '@/UI/Components/RowActions';
+import { PriorityBadge, RouteChips } from './priority/PriorityChip';
 
-export const getColumns = (actions: OnClickActions<Client>) => {
+export const getColumns = (actions: OnClickActions<Client>, routeId?: string) => {
 
 	const { columnActions } = useRowActions<Client>(actions);
 
 	const columns: CustomColumn<Client>[] = [
+		// Con una ruta filtrada la lista viene ordenada por su prioridad: se muestra el número de esa ruta.
+		...(routeId ? [{
+			key: 'priority',
+			title: '# Prior',
+			dataIndex: 'routes',
+			width: 80,
+			render: (_value: unknown, record: Client) => {
+				const route = record.routes?.find(item => item.routeId === routeId);
+				return route ? <PriorityBadge order={route.order} size={30} /> : '—';
+			},
+		}] : []),
 		{
 			key: 'fullName',
 			title: 'Nombre completo',
 			dataIndex: 'fullName',
 			width: 250,
+		},
+		{
+			key: 'routes',
+			title: 'Rutas y prioridad',
+			dataIndex: 'routes',
+			width: 260,
+			render: (_value: unknown, record: Client) => <RouteChips routes={record.routes} />,
 		},
 		{
 			key: 'idDocument',

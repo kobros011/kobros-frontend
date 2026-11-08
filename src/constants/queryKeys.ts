@@ -20,6 +20,10 @@ export const queryKeyClients = {
 	base: 'clients',
 };
 
+export const queryKeyClientRoutes = {
+	base: 'clientroutes',
+};
+
 export const queryKeyLoans = {
 	base: 'loans',
 };

@@ -12,6 +12,8 @@ import { Client } from '@/domain/Client';
 interface TableClientsProps {
 	isSearching: boolean
 	actions: OnClickActions<Client>
+	/** Selección masiva (solo administración): clientes elegidos, incluso de otras páginas. */
+	selection?: { clients: Client[], onChange: (clients: Client[]) => void }
 	type: 'active' | 'inactive'
 	setCount:  React.Dispatch<React.SetStateAction<{
 		active: number;
@@ -19,11 +21,12 @@ interface TableClientsProps {
 	}>>
 }
 
-export const TableClients: FC<TableClientsProps> = ({ isSearching, actions, type, setCount }) => {
+export const TableClients: FC<TableClientsProps> = ({ isSearching, actions, type, setCount, selection }) => {
 	const moduleName = MODULESNAME.clients;
 	const filters = filtersStore(state => state.filtersMap[moduleName]);
 
 	const { page, pageSize, onChange, clampToTotal } = usePagination(JSON.stringify(filters ?? {}));
+	const routeId = (filters as { routeId?: string } | undefined)?.routeId;
 
 	const { clients, total, isLoading, isRefetching, isFetching } = getPageClients(
 		{
@@ -56,7 +59,15 @@ export const TableClients: FC<TableClientsProps> = ({ isSearching, actions, type
 		<CustomTable<Client>
 			isLoading={isFetching || isLoading || isRefetching}
 			dataSource={clients}
-			columns={getColumns(actions)}
+			columns={getColumns(actions, routeId)}
+			selection={selection ? {
+				keys: selection.clients.map(client => client.id),
+				onToggle: (record, checked) => selection.onChange(checked ? [...selection.clients.filter(client => client.id !== record.id), record] : selection.clients.filter(client => client.id !== record.id)),
+				onToggleMany: (records, checked) => {
+					const ids = new Set(records.map(record => record.id));
+					selection.onChange(checked ? [...selection.clients.filter(client => !ids.has(client.id)), ...records] : selection.clients.filter(client => !ids.has(client.id)));
+				},
+			} : undefined}
 			moduleName={moduleName}
 			titleField="fullName"
 			onRowClick={actions.see}

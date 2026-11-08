@@ -6,7 +6,7 @@ import {
 	PhoneOutlined,
 	TagOutlined,
 } from '@ant-design/icons';
-import { Avatar, Card, Col, Divider, Empty, Flex, Pagination, Row, Skeleton, Tag, Typography, theme } from 'antd';
+import { Avatar, Card, Col, Divider, Empty, Flex, Pagination, Row, Skeleton, Tag, Typography, theme, Checkbox } from 'antd';
 import { CSSProperties, KeyboardEvent, ReactNode, useState } from 'react';
 import { FieldDef } from './fieldCatalog';
 import { FieldPref } from '@/infrastructure/context/TableViewStore';
@@ -28,6 +28,8 @@ interface CardListViewProps<T extends IRecord> {
 	footerBadge?: (record: T) => ReactNode;
 	/** Paginación del servidor: `dataSource` ya es la página actual. Sin ella se pagina en el cliente. */
 	pagination?: ServerPagination;
+	/** Casilla de selección en cada tarjeta (selección masiva). */
+	selection?: { keys: string[]; onToggle: (record: T, checked: boolean) => void };
 	isMobile?: boolean;
 }
 
@@ -129,7 +131,7 @@ function InfoBlock({ label, icon, primary, secondary }: { label: string; icon: R
  * bloques de información agrupados de a 2 (con botón de llamar en los campos de teléfono)
  * y pie con fecha + píldora opcional específica del módulo.
  */
-export function CardListView<T extends IRecord>({ dataSource, fields, prefs, titleField, isLoading, renderActions, onCardClick, footerBadge, pagination, isMobile }: CardListViewProps<T>) {
+export function CardListView<T extends IRecord>({ dataSource, fields, prefs, titleField, isLoading, renderActions, onCardClick, footerBadge, pagination, selection, isMobile }: CardListViewProps<T>) {
 	const [page, setPage] = useState(1);
 	const [hoveredId, setHoveredId] = useState<string | null>(null);
 	const { token } = theme.useToken();
@@ -210,6 +212,15 @@ export function CardListView<T extends IRecord>({ dataSource, fields, prefs, tit
 							>
 								<Flex justify="space-between" align="flex-start" gap={8}>
 									<Flex gap={10} align="center" style={{ minWidth: 0 }}>
+										{selection && (
+											<span onClick={event => event.stopPropagation()} style={{ display: 'inline-flex', padding: 6, margin: -6 }}>
+												<Checkbox
+													aria-label={`Seleccionar ${title ?? 'registro'}`}
+													checked={selection.keys.includes(recordKey)}
+													onChange={event => selection.onToggle(record, event.target.checked)}
+												/>
+											</span>
+										)}
 										<div style={{ position: 'relative', flexShrink: 0 }}>
 											<Avatar size={38} style={{ background: AVATAR_COLORS[recordIndex % AVATAR_COLORS.length], fontWeight: 600 }}>
 												{initialsOf(title)}

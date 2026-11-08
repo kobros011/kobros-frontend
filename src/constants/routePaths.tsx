@@ -12,6 +12,7 @@ const routePaths = {
 	BRANDS: 'marcas',
 	USERS: 'usuarios',
 	CLIENTS: 'clientes',
+	CLIENTS_ORDER: 'ordenar',
 	LOANS: 'creditos',
 	PAYMENTS: 'cartera',
 	PAYMENTS_DELINQUENCY: 'cartera/mora',

@@ -14,7 +14,7 @@ export interface OnClickActions<T> {
 	canEdit?: boolean
 	/** Por defecto true. En false se oculta la acción de desactivar/activar. */
 	canDelete?: boolean
-	moreActions?: [{ label: string, key: number | string, action: (record: T) => void, icon: ReactNode }]
+	moreActions?: { label: string, key: number | string, action: (record: T) => void, icon: ReactNode }[]
 }
 
 type IconActionProps = {
