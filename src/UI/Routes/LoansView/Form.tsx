@@ -56,7 +56,6 @@ const FormLoan: FC = () => {
 
 	const [form] = Form.useForm<Partial<LoanFull>>();
 	const { routes, resetStore } = useRouteStore(store => store);
-	const getRoute = useRouteStore(store => store.getRoute);
 	useRoutes();
 
 	const availableRoutes = routes.filter(item => routeIds?.includes(item.id));
@@ -132,8 +131,10 @@ const FormLoan: FC = () => {
 				clientId: client?.id,
 			},
 			{
-				onSuccess: () => {
-					notification.success({ message: 'El crédito fue creado exitosamente' });
+				onSuccess: (response) => {
+					// El servidor asigna el número real del crédito.
+					const created = response?.data?.loan_number;
+					notification.success({ message: created ? `El crédito #${created} fue creado exitosamente` : 'El crédito fue creado exitosamente' });
 					void refetch();
 					void resetStore();
 					stopLoading();
@@ -142,7 +143,7 @@ const FormLoan: FC = () => {
 				},
 				onError: (error) => {
 					stopLoading();
-					notification.error({ message: error?.message ?? 'Ocurrió un error al crear el crédito' });
+					notification.error({ message: handleError(error, 'Ocurrió un error al crear el crédito') });
 				},
 			},
 		);
@@ -165,19 +166,7 @@ const FormLoan: FC = () => {
 		}
 
 		startLoading();
-
-		getRoute(availableRoute?.id ?? '').then((response) => {
-			if (values.loanNumber != (response?.loansNumber ?? 0) + 1) {
-				setAvailableRoute(response);
-				form.setFieldValue('loanNumber', Number(response?.loansNumber) + 1);
-				notification.info({ message: `Crédito No. modificado a ${Number(response?.loansNumber) + 1}` });
-			}
-		}).catch(() => {
-			stopLoading();
-			notification.error({ message: 'Error al actualizar el número de crédito' });
-		}).finally(() => {
-			saveLoan({ ...values, loanNumber: form.getFieldValue('loanNumber') as number });
-		});
+		saveLoan(values);
 	};
 
 	const openKeys = Array.isArray(activeKey) ? activeKey : activeKey ? [activeKey] : [];

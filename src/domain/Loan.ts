@@ -36,6 +36,8 @@ export interface LoanFullRead extends Partial<Loan> {
 	order?: number
 	clientId?: string
 	routeId?: string
+	paid?: number
+	balance?: number
 }
 
 export class LoanModel {
@@ -119,6 +121,7 @@ export class LoanModel {
 			agreedQuotas: DTO.agreed_quotas,
 			dateFirstQuota: DTO.date_first_quota,
 			paymentMethod: DTO.payment_method,
+			fixedPaymentDay: DTO.fixed_payment_day,
 			valueCapital: DTO.value_capital,
 			valueUtilityLoan: DTO.value_utility_loan,
 			valueTotalLoan: DTO.value_total_loan,
@@ -135,6 +138,8 @@ export class LoanModel {
 			routeId: DTO.route_id,
 			order: DTO.order,
 			routeName: DTO.route_name,
+			paid: DTO.paid,
+			balance: DTO.balance,
 			active: DTO.active,
 			updatedAt: DTO.updated_at,
 			createdAt: DTO.created_at,
@@ -158,7 +163,7 @@ export class LoanModel {
 			clientroute_id: domain.clientrouteId,
 			current_address: domain.currentAddress,
 			current_mobile: domain.currentMobile,
-			value_payment: domain.valuePayment,
+			value_payment: domain.valuePayment ? Number(domain.valuePayment) : undefined,
 			new_order: domain.newOrder,
 			client_id: domain.clientId,
 			...(domain.id ? { id: domain.id } : {}),

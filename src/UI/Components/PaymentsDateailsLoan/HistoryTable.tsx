@@ -38,7 +38,17 @@ export const HistoryTable: FC<HistoryTableProps> = ({ items, summary, loading, t
 			},
 		},
 		{ title: 'Valor cuota', dataIndex: 'value', key: 'value', align: 'right', render: money },
-		{ title: 'Pagado', dataIndex: 'applied', key: 'applied', align: 'right', render: (value: number) => <span className="kb-mono" style={{ color: value > 0 ? 'var(--kb-ok)' : undefined }}>{formatCOP(value)}</span> },
+		{
+			title: 'Pagado',
+			key: 'applied',
+			align: 'right',
+			render: (_, item) => (
+				<span className="kb-mono" style={{ color: item.applied > 0 ? 'var(--kb-ok)' : undefined }}>
+					{formatCOP(item.applied)}
+					{item.excess > 0 && <div style={{ fontSize: 11 }}>+{formatCOP(item.excess)} a favor</div>}
+				</span>
+			),
+		},
 		{ title: 'Saldo', dataIndex: 'balance', key: 'balance', align: 'right', render: (value: number) => <span className="kb-mono" style={{ color: value > 0 ? 'var(--kb-warn)' : undefined }}>{formatCOP(value)}</span> },
 		{
 			title: 'Estado',

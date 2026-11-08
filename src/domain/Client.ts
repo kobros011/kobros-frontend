@@ -16,7 +16,7 @@ export interface Client extends BaseDomain {
 	currentMobile: string
 	neighborhood: string
 	linkingDate: string
-	beak: string
+	beak: number
 	brandId: string
 	routesIds?: string[]
 	routeId?: string,
@@ -45,7 +45,7 @@ export class ClientModel {
 			idDocument: DTO.id_document,
 			currentPhone: DTO.current_phone,
 			currentAddress: DTO.current_address,
-			beak: DTO.beak,
+			beak: Number(DTO.beak ?? 0),
 			currentMobile: DTO.current_mobile,
 			linkingDate: DTO.linking_date,
 			neighborhood: DTO.neighborhood,

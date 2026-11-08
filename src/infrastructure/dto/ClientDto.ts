@@ -15,7 +15,7 @@ export interface ClientDto extends BaseDto {
 	current_mobile: string
 	neighborhood: string
 	linking_date: string
-	beak: string
+	beak: number
 	brand_id: string
 	routes_ids?: string[]
 	route_id?: string,

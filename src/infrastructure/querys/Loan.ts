@@ -1,5 +1,5 @@
-import { queryKeyLoans, queryKeyDefault } from '@/constants/queryKeys';
-import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query';
+import { queryKeyLoans, queryKeyDefault, queryKeyClients, queryKeyPayments, queryKeyCollection, queryKeyReports } from '@/constants/queryKeys';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { repository } from '../repositories/Loan';
 import { Loan, LoanFull } from '@/domain/Loan';
 import { TypeAction } from '@/constants/types';
@@ -74,9 +74,16 @@ export const getLoanMoreInfo = (loan_id?: string) => {
 
 
 export const createLoan = () => {
+	const queryClient = useQueryClient();
 	const mutation = useMutation({
 		mutationFn: (data: Partial<LoanFull>) => {
 			return repository.create(data);
+		},
+		// Un crédito nuevo mueve cartera, historial del cliente, Cobro del día y reportes (y el cobro inicial, los pagos).
+		onSuccess: () => {
+			for (const key of [queryKeyLoans.base, queryKeyClients.base, queryKeyPayments.base, queryKeyCollection.base, queryKeyReports.base]) {
+				void queryClient.invalidateQueries({ queryKey: [key] });
+			}
 		},
 	});
 

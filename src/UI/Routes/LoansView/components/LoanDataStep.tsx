@@ -9,7 +9,7 @@ import { ThunderboltOutlined } from '@ant-design/icons';
 import { Button, Col, Form, FormInstance, Row, Select, Typography } from 'antd';
 import { FC, useMemo } from 'react';
 import { FieldDateTable } from '@/UI/Components/Fields/MultiFieldsFormItem';
-import { computeLoanDerived, formatLoanEndDate } from '../Hooks/useChangeDataLoan';
+import { computeLoanDerived, describeInitialPayment, formatLoanEndDate } from '../Hooks/useChangeDataLoan';
 
 const { Text } = Typography;
 
@@ -51,6 +51,8 @@ export const LoanDataStep: FC<LoanDataStepProps> = ({
 	const agreedQuotas = Form.useWatch('agreedQuotas', form);
 
 	const dateFirstQuota = Form.useWatch('dateFirstQuota', form);
+	const valuePayment = Form.useWatch('valuePayment', form);
+	const initialPaymentEffect = describeInitialPayment(parseFormNumber(valueQuotaFixed), parseFormNumber(valuePayment));
 
 	const derived = useMemo(
 		() =>
@@ -139,6 +141,9 @@ export const LoanDataStep: FC<LoanDataStepProps> = ({
 			<Form.Item label="Valor pagado hoy" name="valuePayment" style={{ marginBottom: 12 }} className="loan-wizard-field">
 				<InputNumber size="small" thousandsSeparator style={{ width: '100%' }} disabled={disabled} />
 			</Form.Item>
+			{initialPaymentEffect && (
+				<Text type="secondary" style={{ display: 'block', fontSize: 12, marginBottom: 12 }}>{initialPaymentEffect}</Text>
+			)}
 
 			<div className="loan-wizard-actions" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-end', alignItems: 'center', gap: 8 }}>
 				<Button size="small" onClick={onCancel} disabled={isLoading}>

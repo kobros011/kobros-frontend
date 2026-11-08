@@ -47,6 +47,13 @@ export const getColumns = (actions: OnClickActions<Client>) => {
 			width: 120,
 		},
 		{
+			key: 'beak',
+			title: 'Saldo a favor',
+			dataIndex: 'beak',
+			width: 130,
+			typeRender: 'money',
+		},
+		{
 			key: 'linkingDate',
 			title: 'Fecha vinculación',
 			dataIndex: 'linkingDate',

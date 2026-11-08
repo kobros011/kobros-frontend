@@ -24,7 +24,7 @@ export interface LoanFullDTO extends Partial<LoanDto> {
 	current_address?: string,
 	current_mobile?: string,
 	new_order?: number,
-	value_payment?: string
+	value_payment?: number
 	client_id?: string
 }
 
@@ -37,4 +37,6 @@ export interface LoanFullReadDTO extends Partial<LoanDto> {
 	order?: number
 	client_id?: string
 	route_id?: string
+	paid?: number
+	balance?: number
 }

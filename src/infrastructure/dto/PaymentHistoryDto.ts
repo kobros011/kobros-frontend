@@ -10,6 +10,7 @@ export interface PaymentHistoryItemDto {
 	value: number;
 	applied: number;
 	balance: number;
+	excess: number;
 	status: PaymentHistoryStatus;
 	days_overdue: number;
 	paid_late_days: number;

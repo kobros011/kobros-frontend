@@ -63,11 +63,20 @@ export const TableClients: FC<TableClientsProps> = ({ isSearching, actions, type
 			pagination={{ page, pageSize, total, onChange }}
 			cardFooterBadge={(client) => {
 				const count = client.activeLoansCount ?? 0;
-				if (count === 0) return null;
+				if (count === 0 && !(client.beak > 0)) return null;
 				return (
-					<Tag color="blue" style={{ borderRadius: 999, margin: 0 }}>
-						{count} {count === 1 ? 'crédito activo' : 'créditos activos'}
-					</Tag>
+					<>
+						{count > 0 && (
+							<Tag color="blue" style={{ borderRadius: 999, margin: 0 }}>
+								{count} {count === 1 ? 'crédito activo' : 'créditos activos'}
+							</Tag>
+						)}
+						{client.beak > 0 && (
+							<Tag color="success" style={{ borderRadius: 999, margin: 0 }}>
+								Saldo a favor ${Math.round(client.beak).toLocaleString('es-CO')}
+							</Tag>
+						)}
+					</>
 				);
 			}}
 		/>

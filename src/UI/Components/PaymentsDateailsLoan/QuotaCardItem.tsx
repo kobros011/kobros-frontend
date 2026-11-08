@@ -49,7 +49,10 @@ export const QuotaCardItem: FC<{ item: PaymentHistoryItemDto }> = ({ item }) => 
 
 			{item.status === 'pagado' && (
 				<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, fontSize: 12 }}>
-					<span className="kb-mono" style={{ color: 'var(--kb-ok)' }}>Pagó {formatCOP(item.applied)} · {formatDate(item.payment_date)}</span>
+					<span className="kb-mono" style={{ color: 'var(--kb-ok)' }}>
+						Pagó {formatCOP(item.applied)} · {formatDate(item.payment_date)}
+						{item.excess > 0 && <> · +{formatCOP(item.excess)} a favor</>}
+					</span>
 					{item.collected_by_name && (
 						<span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: 'var(--kb-muted)' }}>
 							<span className="kb-avatar kb-tone-neutral" aria-hidden>{getInitials(item.collected_by_name)}</span>

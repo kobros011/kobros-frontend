@@ -120,6 +120,11 @@ export const ClientGroupCard: FC<ClientGroupCardProps> = ({ items, selectedDate 
 				<Text strong className="collection-today-client-name" ellipsis>
 					{order}. {first.clientFullName}
 				</Text>
+				{first.clientBeak > 0 && (
+					<Tag color="success" className="collection-today-tag" aria-label="Saldo a favor del cliente">
+						A favor {formatMoneyCOP(first.clientBeak)}
+					</Tag>
+				)}
 				{(expanded || hasPending) && (
 				<Space size={2} wrap className="collection-today-client-header-badges">
 					{badges.pendingCount > 0 && (
@@ -141,6 +146,7 @@ export const ClientGroupCard: FC<ClientGroupCardProps> = ({ items, selectedDate 
 				<span>
 					<Text type="secondary">CC {first.idDocument}</Text>
 				</span>
+
 				{first.clientMobile && (
 					<span style={{ justifyContent: 'flex-end' }}>
 						<PhoneOutlined aria-label="Teléfono" />

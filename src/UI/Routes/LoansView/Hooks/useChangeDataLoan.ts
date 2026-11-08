@@ -46,30 +46,43 @@ const endDateConfig = (
 	method: PaymentMethod,
 	payments: number,
 	start: Dayjs,
+	fixedDay?: number,
 ): { endDate: Dayjs; daysLoan: string } => {
+	// Día fijo: la última cuota cae en el día elegido del mes (ajustado al último día si el mes es más corto).
+	const lastMonth = start.add(payments - 1, 'month');
+	const fixedEnd = fixedDay ? lastMonth.date(Math.min(fixedDay, lastMonth.daysInMonth())) : lastMonth;
 	const map: Record<PaymentMethod, { endDate: Dayjs; daysLoan: string }> = {
 		[PaymentMethod.diary]: {
-			endDate: start.add(payments, 'day'),
+			endDate: start.add(payments - 1, 'day'),
 			daysLoan: `${payments} días`,
 		},
 		[PaymentMethod.weekly]: {
-			endDate: start.add(payments, 'week'),
+			endDate: start.add(payments - 1, 'week'),
 			daysLoan: `${payments} semanas`,
 		},
 		[PaymentMethod.fortnightly]: {
-			endDate: start.add(payments * 2, 'week'),
+			endDate: start.add((payments - 1) * 2, 'week'),
 			daysLoan: `${payments * 2} semanas`,
 		},
 		[PaymentMethod.monthly]: {
-			endDate: start.add(payments, 'month'),
+			endDate: start.add(payments - 1, 'month'),
 			daysLoan: `${payments} meses`,
 		},
 		[PaymentMethod.fixedDate]: {
-			endDate: start.add(payments, 'month'),
+			endDate: fixedEnd,
 			daysLoan: `${payments} meses (día fijo)`,
 		},
 	};
 	return map[method];
+};
+
+/** Qué pasará con la cuota 1 al registrar el "valor pagado hoy" (misma regla del servidor). */
+export const describeInitialPayment = (quota: number, payment: number): string | undefined => {
+	if (!(payment > 0) || !(quota > 0)) return undefined;
+	const money = (value: number) => `$${Math.round(value).toLocaleString('es-CO')}`;
+	if (payment < quota) return `Cuota 1 parcial · faltan ${money(quota - payment)}`;
+	if (payment > quota) return `Cuota 1 pagada · saldo a favor ${money(payment - quota)}`;
+	return 'Cuota 1 pagada completa';
 };
 
 export const formatLoanEndDate = (endDate: Dayjs | undefined): string => {
@@ -97,7 +110,7 @@ export const computeLoanDerived = (values: Partial<LoanFull>): LoanDerivedValues
 	const canceledQuotas = parseFormNumber(values.canceledQuotas);
 	const totalDefault = parseFormNumber(values.totalDefault);
 
-	const schedule = endDateConfig(method, payments, resolveScheduleStart(values));
+	const schedule = endDateConfig(method, payments, resolveScheduleStart(values), Number(values.fixedPaymentDay) || undefined);
 
 	const calculateValue = fixed * payments;
 	const loanUtilidad = calculateValue - valueCapital;

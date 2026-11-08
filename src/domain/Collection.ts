@@ -6,6 +6,7 @@ export interface Collection extends Payment {
 	idDocument: string;
 	clientAddress: string | null;
 	clientMobile: string | null;
+	clientBeak: number;
 	loanNumber: number;
 }
 
@@ -39,6 +40,7 @@ export class CollectionModel {
 			idDocument: dto.id_document,
 			clientAddress: dto.client_address,
 			clientMobile: dto.client_mobile,
+			clientBeak: Number(dto.client_beak ?? 0),
 			loanNumber: dto.loan_number,
 		};
 	}

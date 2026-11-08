@@ -13,6 +13,7 @@ import { spanConfigForm } from '@/constants/getSpan';
 import { Col, Row, Typography } from 'antd';
 import dayjs from 'dayjs';
 import { StepHeader } from './components/StepHeader';
+import { computeLoanDerived } from './Hooks/useChangeDataLoan';
 import { LoanWizardShell } from './components/LoanWizardShell';
 import { FichaField } from './components/FichaField';
 import { ExceptionStatusType } from 'antd/es/result';
@@ -70,6 +71,13 @@ const DetailsLoanView: FC = () => {
 	}
 
 	const isFixedDate = loan.paymentMethod === PaymentMethod.fixedDate;
+	const term = computeLoanDerived({
+		agreedQuotas: loan.agreedQuotas,
+		valueCapital: loan.valueCapital,
+		valueQuotaFixed: loan.valueQuotaFixed,
+		paymentMethod: loan.paymentMethod,
+		dateFirstQuota: loan.dateFirstQuota,
+	}).daysLoan;
 
 	const createLoanState = {
 		clientId: state?.clientId ?? loan.clientId,
@@ -139,17 +147,18 @@ const DetailsLoanView: FC = () => {
 
 					<div className="loan-wizard-summary-panel" style={{ marginTop: 16 }}>
 						<Text strong style={{ display: 'block', marginBottom: 8 }}>Resumen calculado</Text>
-						<SummaryRow label="Saldo capital préstamo" value={`$${formatNumber(loan.valueCapital)}`} />
-						<SummaryRow label="Saldo utilidad préstamo" value={`$${formatNumber(loan.valueUtilityLoan)}`} />
-						<SummaryRow label="Saldo préstamo + utilidad" value={`$${formatNumber(loan.valueTotalLoan)}`} />
-						<SummaryRow label="Plazo del préstamo" value={String(loan.daysLoan ?? '—')} />
+						<SummaryRow label="Capital prestado" value={`$${formatNumber(loan.valueCapital)}`} />
+						<SummaryRow label="Utilidad" value={`$${formatNumber(loan.valueUtilityLoan)}`} />
+						<SummaryRow label="Total del crédito" value={`$${formatNumber(loan.valueTotalLoan)}`} />
+						<SummaryRow label="Plazo del préstamo" value={term || '—'} />
 						<SummaryRow label="Tasa de interés" value={`${formatNumber(loan.interestRate, 4)}%`} />
 						<SummaryRow label="Cuotas canceladas" value={String(loan.canceledQuotas ?? 0)} />
 						<SummaryRow label="Cuotas pendientes" value={String(loan.pendingQuotas ?? 0)} />
-						{loan.totalDefault && parseFloat(loan.totalDefault) > 0 && (
+						{Number(loan.totalDefault ?? 0) > 0 && (
 							<SummaryRow label="Total en mora" value={`$${formatNumber(loan.totalDefault)}`} danger />
 						)}
-						<SummaryRow label="Total deuda" value={`$${formatNumber(String(loan.totalLoan ?? ''))}`} bold />
+						<SummaryRow label="Pagado" value={`$${formatNumber(String(loan.paid ?? 0))}`} />
+						<SummaryRow label="Saldo pendiente" value={`$${formatNumber(String(loan.balance ?? 0))}`} bold />
 					</div>
 				</>
 			),

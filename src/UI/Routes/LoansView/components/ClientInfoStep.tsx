@@ -124,6 +124,11 @@ export const ClientInfoStep: FC<ClientInfoStepProps> = ({
 					<FichaField label="Cédula del cliente (DNI)">
 						{idDocument}
 					</FichaField>
+					{(client?.beak ?? 0) > 0 && (
+						<FichaField label="Saldo a favor">
+							${Math.round(client?.beak ?? 0).toLocaleString('es-CO')}
+						</FichaField>
+					)}
 
 					<FichaField label="Nombre del cliente">
 						<div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8, justifyContent: 'space-between' }}>

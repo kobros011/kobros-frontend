@@ -346,6 +346,12 @@ Pantallas: `UI/Routes/ReportsView/` — `Dashboard` (Resumen, compuesto por `Res
 - **Abonar** aparece únicamente si `can_pay` (la cuota vence hoy o está en mora). Pagadas y futuras no lo muestran; el backend rechaza con 400 abonar cuotas futuras o ya pagadas.
 - `usePayPayment` invalida pagos, Cobro del día, créditos y reportes. `payments.collected_by` guarda quién abonó (pagos anteriores muestran «—»).
 
+### 6.10 Crear crédito y saldo a favor (beak)
+
+- El asistente de crédito (`LoansView/Form.tsx`) solo captura capital, cuota fija, cuotas, forma de pago, día fijo y «Valor pagado hoy»; el **servidor calcula y manda**: total = cuota × cuotas, utilidad, interés, número de crédito, fecha final (vencimiento de la última cuota) y calendario de cuotas. La vista previa del asistente (`computeLoanDerived`) usa las mismas fórmulas y debe coincidir con lo que luego muestra el detalle.
+- El «Valor pagado hoy» se aplica a la cuota 1 con la misma regla de un abono: menor → mora parcial, igual → pagada, mayor → el excedente pasa al **saldo a favor** del cliente (`client.beak`, se acumula y no se pisa). Solo si la cuota 1 vence hoy o antes; si no, el servidor responde 400 con el motivo.
+- Crear el crédito invalida préstamos, clientes, pagos, Cobro del día y reportes. El saldo a favor se ve en Clientes (columna y etiqueta en tarjeta), en el asistente de crédito, en Cobro del día (etiqueta «A favor $X» en el encabezado de cada cliente) y como «+ $X a favor» en las cuotas del historial.
+
 ## 7. Reglas y buenas prácticas UI/UX
 
 ### 7.1 Mobile-first (breakpoint 768px)
