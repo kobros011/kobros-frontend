@@ -7,9 +7,7 @@ interface LoadingComponentProps {
 }
 
 const LoadingComponent = ({ label, fullHeight = false }: LoadingComponentProps): JSX.Element => {
-	const { getDesignToken } = theme;
-
-	const token = getDesignToken();
+	const { token } = theme.useToken(); // del ConfigProvider: lleva el color de la marca (getDesignToken ignora el tema)
 	return (
 		<div style={{
 			display: 'flex', width: '100%', justifyContent: 'center', alignItems: 'center', flexDirection: 'column',

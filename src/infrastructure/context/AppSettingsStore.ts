@@ -21,9 +21,29 @@ interface State {
 	resetStore: () => void
 }
 
+const PRIMARY_CACHE_KEY = 'kobros:primary-color';
+
+/** Último color de marca conocido: así los spinners y pantallas de carga ya salen con el color de la marca antes de que lleguen los ajustes. */
+const readCachedPrimary = (): string | null => {
+	try {
+		return localStorage.getItem(PRIMARY_CACHE_KEY);
+	} catch {
+		return null;
+	}
+};
+
+const writeCachedPrimary = (color: string | null) => {
+	try {
+		if (color) localStorage.setItem(PRIMARY_CACHE_KEY, color);
+		else localStorage.removeItem(PRIMARY_CACHE_KEY);
+	} catch {
+		// sin almacenamiento disponible (modo privado): se usa el verde por defecto hasta que cargue la marca
+	}
+};
+
 const initialState: Omit<State, 'apply' | 'markLoaded' | 'resetStore'> = {
 	appName: '',
-	primaryColor: null,
+	primaryColor: readCachedPrimary(),
 	logoFullUrl: null,
 	logoFullWidth: null,
 	logoFullHeight: null,
@@ -40,21 +60,24 @@ const initialState: Omit<State, 'apply' | 'markLoaded' | 'resetStore'> = {
 /** Configuración de marca aplicada a toda la app (white label + formato de números). */
 const useAppSettingsStore = create<State>()((set) => ({
 	...initialState,
-	apply: (settings) => set({
-		appName: settings.appName,
-		primaryColor: settings.primaryColor,
-		logoFullUrl: settings.logoFullUrl,
-		logoFullWidth: settings.logoFullWidth,
-		logoFullHeight: settings.logoFullHeight,
-		logoFullTone: settings.logoFullTone,
-		logoMarkUrl: settings.logoMarkUrl,
-		logoMarkWidth: settings.logoMarkWidth,
-		logoMarkHeight: settings.logoMarkHeight,
-		logoMarkTone: settings.logoMarkTone,
-		numberFormatStyle: settings.numberFormatStyle,
-		numberDecimals: settings.numberDecimals,
-		loaded: true,
-	}),
+	apply: (settings) => {
+		writeCachedPrimary(settings.primaryColor);
+		set({
+			appName: settings.appName,
+			primaryColor: settings.primaryColor,
+			logoFullUrl: settings.logoFullUrl,
+			logoFullWidth: settings.logoFullWidth,
+			logoFullHeight: settings.logoFullHeight,
+			logoFullTone: settings.logoFullTone,
+			logoMarkUrl: settings.logoMarkUrl,
+			logoMarkWidth: settings.logoMarkWidth,
+			logoMarkHeight: settings.logoMarkHeight,
+			logoMarkTone: settings.logoMarkTone,
+			numberFormatStyle: settings.numberFormatStyle,
+			numberDecimals: settings.numberDecimals,
+			loaded: true,
+		});
+	},
 	markLoaded: () => set({ loaded: true }),
 	resetStore: () => set({ ...initialState }),
 }));
