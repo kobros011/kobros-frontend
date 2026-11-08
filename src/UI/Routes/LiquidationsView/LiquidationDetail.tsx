@@ -91,10 +91,12 @@ export const LiquidationDetail: FC<{ id: string; isAdmin: boolean; onDone?: () =
 				</Section>
 			)}
 
-			<div className="lq-audit-footer">
-				<LiquidationActions id={detail.id} status={detail.status} outdated={detail.outdated} isAdmin={isAdmin} onDone={onDone} />
-				{onDone && <Button type="primary" size="small" onClick={onDone}>Listo</Button>}
-			</div>
+			{(isAdmin || onDone) && (
+				<div className="lq-audit-footer">
+					<LiquidationActions id={detail.id} status={detail.status} outdated={detail.outdated} isAdmin={isAdmin} onDone={onDone} />
+					{onDone && <Button type="primary" size="small" onClick={onDone}>Listo</Button>}
+				</div>
+			)}
 		</div>
 	);
 };

@@ -83,23 +83,23 @@ export const ClientEditDrawer: FC<ClientEditDrawerProps> = ({ clientId, open, on
 							</Form.Item>
 						</Col>
 						<Col xs={24} md={12}>
-							<Form.Item label="Dirección" name="currentAddress">
+							<Form.Item label="Celular" name="currentMobile" rules={[ruleRequired]}>
+								<Input inputMode="tel" placeholder="Celular del cliente" />
+							</Form.Item>
+						</Col>
+						<Col xs={24} md={12}>
+							<Form.Item label="Dirección" name="currentAddress" rules={[ruleRequired]}>
 								<Input placeholder="Dirección del cliente" />
 							</Form.Item>
 						</Col>
 						<Col xs={24} md={12}>
-							<Form.Item label="Barrio" name="neighborhood">
+							<Form.Item label="Barrio" name="neighborhood" rules={[ruleRequired]}>
 								<Input placeholder="Barrio" />
 							</Form.Item>
 						</Col>
 						<Col xs={24} md={12}>
 							<Form.Item label="Teléfono" name="currentPhone">
 								<Input inputMode="tel" placeholder="Teléfono fijo" />
-							</Form.Item>
-						</Col>
-						<Col xs={24} md={12}>
-							<Form.Item label="Teléfono móvil" name="currentMobile">
-								<Input inputMode="tel" placeholder="Teléfono móvil" />
 							</Form.Item>
 						</Col>
 						<Col xs={24} md={12}>
@@ -143,7 +143,15 @@ export const ClientEditDrawer: FC<ClientEditDrawerProps> = ({ clientId, open, on
 								</Divider>
 								<Row gutter={[16, 0]}>
 									<Col xs={24} md={12}>
-										<Form.Item label="Nombre" name={['references', idx, 'name']}>
+										<Form.Item
+											label="Nombre"
+											name={['references', idx, 'name']}
+											dependencies={[['references', idx, 'phone'], ['references', idx, 'address']]}
+											rules={[({ getFieldValue }) => ({
+												required: !!(getFieldValue(['references', idx, 'phone']) || getFieldValue(['references', idx, 'address'])),
+												message: 'Ingresa el nombre de la referencia',
+											})]}
+										>
 											<Input placeholder={`Nombre referencia ${idx + 1}`} />
 										</Form.Item>
 									</Col>

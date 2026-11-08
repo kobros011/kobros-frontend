@@ -223,7 +223,7 @@ export function CardListView<T extends IRecord>({ dataSource, fields, prefs, tit
 													width: 10,
 													height: 10,
 													borderRadius: '50%',
-													background: isInactive ? token.colorTextQuaternary : '#17A673',
+													background: isInactive ? token.colorTextQuaternary : token.colorPrimary,
 													border: `2px solid ${token.colorBgContainer}`,
 												}}
 											/>

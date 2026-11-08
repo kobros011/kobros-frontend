@@ -25,7 +25,7 @@ export const FieldDateTable: FC<FieldDateProps> = ({ label, name, rules, onChang
 	const borderedStyle: CSSProperties = { border: '1px solid' + token.colorPrimary };
 
 	const onHandleChange = (date: Dayjs | undefined, dateString: string | string[]) => {
-		setIsEmpty(!dateString.toString().trim());
+		setIsEmpty(!dateString?.toString().trim());
 		onChange?.(date, dateString);
 	};
 

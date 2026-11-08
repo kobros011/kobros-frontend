@@ -139,16 +139,18 @@ const FormClient: FC<{ readonly?: boolean }> = ({ readonly = false }) => {
 					</Col>
 					<Col {...spanConfigForm.medium}>
 						<Form.Item
-							label="Teléfono"
-							name={'currentPhone'}
+							label="Celular"
+							name={'currentMobile'}
+							rules={[ ruleRequired ]}
 						>
-							<Input inputMode="tel" placeholder="Teléfono del cliente" />
+							<Input inputMode="tel" placeholder="Celular del cliente" />
 						</Form.Item>
 					</Col>
 					<Col {...spanConfigForm.medium}>
 						<Form.Item
 							label="Dirección"
 							name={'currentAddress'}
+							rules={[ ruleRequired ]}
 						>
 							<Input placeholder="Dirección del cliente" />
 						</Form.Item>
@@ -157,16 +159,17 @@ const FormClient: FC<{ readonly?: boolean }> = ({ readonly = false }) => {
 						<Form.Item
 							label="Barrio"
 							name={'neighborhood'}
+							rules={[ ruleRequired ]}
 						>
 							<Input placeholder="Barrio del cliente" />
 						</Form.Item>
 					</Col>
 					<Col {...spanConfigForm.medium}>
 						<Form.Item
-							label="Teléfono movil"
-							name={'currentMobile'}
+							label="Teléfono"
+							name={'currentPhone'}
 						>
-							<Input inputMode="tel" placeholder="Teléfono movil del cliente" />
+							<Input inputMode="tel" placeholder="Teléfono del cliente" />
 						</Form.Item>
 					</Col>
 					<Col {...spanConfigForm.medium}>
@@ -214,7 +217,15 @@ const FormClient: FC<{ readonly?: boolean }> = ({ readonly = false }) => {
 							</Divider>
 							<Row gutter={[16, 0]}>
 								<Col {...spanConfigForm.medium}>
-									<Form.Item label="Nombre" name={['references', idx, 'name']}>
+									<Form.Item
+										label="Nombre"
+										name={['references', idx, 'name']}
+										dependencies={[['references', idx, 'phone'], ['references', idx, 'address']]}
+										rules={[({ getFieldValue }) => ({
+											required: !!(getFieldValue(['references', idx, 'phone']) || getFieldValue(['references', idx, 'address'])),
+											message: 'Ingresa el nombre de la referencia',
+										})]}
+									>
 										<Input placeholder={`Nombre referencia ${idx + 1}`} />
 									</Form.Item>
 								</Col>

@@ -45,7 +45,7 @@ export const LiquidationActions: FC<LiquidationActionsProps> = ({ id, status, ou
 	if (status === 'reabierta') return null;
 	const canConfirm = isAdmin && status === 'pendiente' && !outdated;
 	const canReopen = isAdmin && (status === 'confirmada' || outdated);
-	const canDelete = status === 'pendiente';
+	const canDelete = isAdmin && status === 'pendiente';
 
 	return (
 		<Space wrap size={6}>

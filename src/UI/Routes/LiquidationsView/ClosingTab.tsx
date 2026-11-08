@@ -24,7 +24,7 @@ export const ClosingTab: FC<{ isAdmin: boolean }> = ({ isAdmin }) => {
 				isAdmin={isAdmin} collectorId={collectorId} onCollectorChange={setCollectorId}
 			/>
 
-			{!routeId && <Empty description="Selecciona una ruta para ver o cerrar la caja del día" />}
+			{!routeId && <Empty description={isAdmin ? 'Selecciona una ruta para ver o cerrar la caja del día' : 'Selecciona una ruta para ver la caja del día'} />}
 			{routeId && isLoading && !preview && <Skeleton active paragraph={{ rows: 8 }} />}
 			{routeId && isError && (
 				<Alert type="error" showIcon message="No se pudo calcular el cierre" action={<a onClick={() => void refetch()}>Reintentar</a>} />
@@ -45,7 +45,9 @@ export const ClosingTab: FC<{ isAdmin: boolean }> = ({ isAdmin }) => {
 						</div>
 					</div>
 					<div className="lq-stack">
-						<ClosingForm preview={preview} collectorId={collectorId} />
+						{isAdmin
+							? <ClosingForm preview={preview} collectorId={collectorId} />
+							: <Alert type="info" showIcon message="El cierre de caja lo realiza un administrador" description="Aquí solo consultas el recaudo, los gastos y los créditos del día." />}
 					</div>
 				</div>
 			)}

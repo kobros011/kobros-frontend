@@ -1,7 +1,8 @@
 import { LoanFullRead } from '@/domain/Loan';
 import { BuildColumns, CustomColumn } from '@/infrastructure/utils/BuildColumns';
 import { EyeOutlined } from '@ant-design/icons';
-import { Button, Tag, Tooltip } from 'antd';
+import { Button, Tag } from 'antd';
+import { PrimaryTooltip } from '@/UI/Components/PrimaryTooltip';
 
 export const getColumns = (onSee: (record: LoanFullRead) => void) => {
 
@@ -102,7 +103,7 @@ export const getColumns = (onSee: (record: LoanFullRead) => void) => {
 			title: 'Acciones',
 			width: 80,
 			render: (record: LoanFullRead) => (
-				<Button onClick={() => onSee(record)} size='small' type='primary'><Tooltip color='lime' title='Ver'><EyeOutlined /></Tooltip></Button>
+				<Button onClick={() => onSee(record)} size='small' type='primary'><PrimaryTooltip title='Ver'><EyeOutlined /></PrimaryTooltip></Button>
 			),
 		},
 	];

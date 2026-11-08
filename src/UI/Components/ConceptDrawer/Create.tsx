@@ -21,7 +21,7 @@ interface ConceptExpenseCreateProps {
 
 export const ConceptExpenseCreate: FC<ConceptExpenseCreateProps> = ({ isCreating, setIsCreating, expenseConcept }) => {
 	const [form] = Form.useForm<Partial<ExpensesConcepts>>();
-	const { token: { lime6 } } = theme.useToken();
+	const { token: { colorPrimary } } = theme.useToken();
 	const { notification } = App.useApp();
 	const queryClient = useQueryClient();
 
@@ -107,7 +107,7 @@ export const ConceptExpenseCreate: FC<ConceptExpenseCreateProps> = ({ isCreating
 
 				<Col xs={5} md={3}>
 					<Flex gap={5}>
-						<Tooltip title="Guardar" color={lime6} >
+						<Tooltip title="Guardar" color={colorPrimary} >
 							<Button
 								size="small"
 								icon={<SaveOutlined />}

@@ -1,8 +1,7 @@
 import { esES } from '@clerk/localizations';
 import { SignIn } from '@clerk/clerk-react';
-import { Flex, Image, Typography, theme } from 'antd';
+import { Flex, Typography, theme } from 'antd';
 import { useMemo } from 'react';
-import Logo from '@assets/logo-transparent.png';
 import useUserModeStore from '@/infrastructure/context/User/UserModeStore';
 
 const { Text } = Typography;
@@ -61,9 +60,6 @@ const LoginView = () => {
 				background: darkMode ? '#1a1a1a' : token.colorBgLayout,
 			}}
 		>
-			<Flex vertical align="center" style={{ marginBottom: 8 }}>
-				<Image src={Logo} preview={false} width={240} alt="Kobros" />
-			</Flex>
 			<SignIn routing="hash" appearance={appearance} localization={esES} />
 			<Text
 				type="secondary"

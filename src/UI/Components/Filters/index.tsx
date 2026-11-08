@@ -2,7 +2,8 @@ import { MODULESNAME } from '@/constants/MODULESNAME';
 import { Filters } from '@/domain/Filters';
 import { filtersStore } from '@/infrastructure/context/FiltersStore';
 import useUserModeStore from '@/infrastructure/context/User/UserModeStore';
-import { Button, Col, Drawer, Flex, Form, Input, Row, Tooltip } from 'antd';
+import { Button, Col, Drawer, Flex, Form, Input, Row } from 'antd';
+import { PrimaryTooltip } from '@/UI/Components/PrimaryTooltip';
 import React, { FC, useEffect, useState } from 'react';
 import { AiOutlineClear } from 'react-icons/ai';
 
@@ -111,9 +112,9 @@ export const GlobalFilters: FC<FiltersProps> = ({ filters, moduleName, initialFi
 				</Col>
 				{!isMobile && 
 					<Col span={1.5}>
-						<Tooltip title="Limpiar filtros" color='lime'>
+						<PrimaryTooltip title="Limpiar filtros">
 							<Button onClick={() => onClear()} type='primary' ghost><AiOutlineClear /></Button>
-						</Tooltip>
+						</PrimaryTooltip>
 					</Col>
 				}
 				{isMobile && showFilters.length > 0 &&

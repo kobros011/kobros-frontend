@@ -24,7 +24,7 @@ export const DashboardShell: FC<{ children: ReactNode }> = ({ children }) => {
 		'--kb-text': token.colorText,
 		'--kb-muted': token.colorTextTertiary,
 		'--kb-card-bg': darkMode
-			? `color-mix(in srgb, ${token.colorPrimary} 5%, #0e130e)`
+			? `color-mix(in srgb, ${token.colorPrimary} 5%, #0e0e0e)`
 			: token.colorBgContainer,
 		'--kb-border': darkMode
 			? `color-mix(in srgb, ${token.colorPrimary} 20%, transparent)`

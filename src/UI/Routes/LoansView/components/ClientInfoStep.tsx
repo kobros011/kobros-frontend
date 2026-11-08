@@ -174,8 +174,8 @@ export const ClientInfoStep: FC<ClientInfoStepProps> = ({
 						<Input size="small" placeholder="Dirección del cliente" />
 					</Form.Item>
 
-					<Form.Item label="Teléfono móvil" name="currentMobile" style={{ marginBottom: 12 }} className="loan-wizard-field">
-						<Input size="small" inputMode="tel" placeholder="Teléfono móvil del cliente" />
+					<Form.Item label="Celular" name="currentMobile" style={{ marginBottom: 12 }} className="loan-wizard-field">
+						<Input size="small" inputMode="tel" placeholder="Celular del cliente" />
 					</Form.Item>
 
 					{routes.length <= 1 && (

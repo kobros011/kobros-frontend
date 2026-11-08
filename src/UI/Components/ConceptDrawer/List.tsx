@@ -20,7 +20,7 @@ interface ListItemProps {
 
 const ListItem: FC<ListItemProps> = ({ expenseConcept, canManage, isInactive, onToggle }) => {
 	const [isEditing, setIsEditing] = useState<boolean>(false);
-	const { token: { lime6 } } = theme.useToken();
+	const { token: { colorPrimary } } = theme.useToken();
 
 	const Icon = iconMap[expenseConcept?.keyIcon as keyof typeof iconMap]?.component;
 	const color = expenseConcept?.color;
@@ -48,7 +48,7 @@ const ListItem: FC<ListItemProps> = ({ expenseConcept, canManage, isInactive, on
 					<Col xs={7} md={5} style={{ textAlign: 'right' }}>
 						<Space.Compact>
 							{!isInactive && (
-								<Tooltip color={lime6} title='Editar'>
+								<Tooltip color={colorPrimary} title='Editar'>
 									<Button
 										size="small"
 										type="primary"
@@ -57,7 +57,7 @@ const ListItem: FC<ListItemProps> = ({ expenseConcept, canManage, isInactive, on
 									/>
 								</Tooltip>
 							)}
-							<Tooltip color={isInactive ? lime6 : 'red'} title={isInactive ? 'Activar' : 'Desactivar'}>
+							<Tooltip color={isInactive ? colorPrimary : 'red'} title={isInactive ? 'Activar' : 'Desactivar'}>
 								<Button
 									size="small"
 									type="primary"

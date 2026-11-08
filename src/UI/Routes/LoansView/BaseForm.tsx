@@ -36,8 +36,8 @@ const BaseFormLoan: FC<BaseFormLoanProps> = ({ clientId, routeId, ...props }) =>
 			descriptions: <FieldTextTable readOnly={props.hasReadOnly} placeholder='Dirección del cliente' name={'currentAddress'} />,
 		},
 		{
-			label: 'Teléfono móvil:',
-			descriptions: <FieldTextTable readOnly={props.hasReadOnly} placeholder='Teléfono móvil del cliente' name={'currentMobile'} />,
+			label: 'Celular:',
+			descriptions: <FieldTextTable readOnly={props.hasReadOnly} placeholder='Celular del cliente' name={'currentMobile'} />,
 		},
 		{
 			label: 'Ruta del cliente:',

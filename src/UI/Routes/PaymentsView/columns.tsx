@@ -2,7 +2,8 @@ import routePaths from '@/constants/routePaths';
 import { DelinquencyItemDto, PortfolioItemDto } from '@/infrastructure/dto/ReportDto';
 import { BuildColumns, CustomColumn } from '@/infrastructure/utils/BuildColumns';
 import { HistoryOutlined } from '@ant-design/icons';
-import { Button, Tag, Tooltip } from 'antd';
+import { Button, Tag } from 'antd';
+import { PrimaryTooltip } from '@/UI/Components/PrimaryTooltip';
 import { useNavigate } from 'react-router-dom';
 
 /** El reporte de cartera no trae `id`; se usa `loan_id` como tal (requerido por CustomTable). */
@@ -19,7 +20,7 @@ const buildActionColumn = <T extends { loan_id: string; client_id: string; route
 			size='small'
 			type='primary'
 		>
-			<Tooltip color='lime' title='Historial'><HistoryOutlined /></Tooltip>
+			<PrimaryTooltip title='Historial'><HistoryOutlined /></PrimaryTooltip>
 		</Button>
 	),
 });

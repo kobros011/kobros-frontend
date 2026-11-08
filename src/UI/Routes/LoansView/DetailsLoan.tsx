@@ -93,7 +93,7 @@ const DetailsLoanView: FC = () => {
 					<FichaField label="Cédula del cliente (DNI)">{loan.idDocument}</FichaField>
 					<FichaField label="Nombre del cliente">{loan.fullName}</FichaField>
 					<FichaField label="Dirección">{loan.currentAddress}</FichaField>
-					<FichaField label="Teléfono móvil">{loan.currentMobile}</FichaField>
+					<FichaField label="Celular">{loan.currentMobile}</FichaField>
 					<FichaField label="Ruta del cliente">{loan.routeName}</FichaField>
 				</>
 			),

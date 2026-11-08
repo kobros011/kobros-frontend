@@ -87,7 +87,7 @@ export class ClientModel {
 			guarantor_cedula: domain.guarantorCedula ?? undefined,
 			guarantor_phone: domain.guarantorPhone ?? undefined,
 			guarantor_address: domain.guarantorAddress ?? undefined,
-			references: domain.references?.map(r => ({
+			references: domain.references?.filter(r => r?.name || r?.phone || r?.address).map(r => ({
 				name: r.name,
 				address: r.address,
 				phone: r.phone,

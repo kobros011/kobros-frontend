@@ -57,32 +57,34 @@ const RiskIndicatorTrack: FC<{ riskLevel: RiskLevel }> = ({ riskLevel }) => {
 
 	return (
 		<div className="loan-wizard-risk-track" style={{ position: 'relative', marginTop: 4, marginBottom: 4 }}>
-			<div
-				aria-hidden
-				style={{
-					height: 10,
-					borderRadius: 5,
-					background: `linear-gradient(to right, ${token.colorSuccess}, ${token.colorWarning}, ${token.colorError})`,
-					opacity: 0.85,
-				}}
-			/>
-			<div
-				role="img"
-				aria-label={`Nivel de riesgo: ${RISK_LABELS[riskLevel]}`}
-				style={{
-					position: 'absolute',
-					left: `${markerLeft}%`,
-					top: '50%',
-					transform: 'translate(-50%, -50%)',
-					width: 16,
-					height: 16,
-					borderRadius: '50%',
-					background: token.colorBgContainer,
-					border: `3px solid ${markerColor}`,
-					boxShadow: `0 0 0 1px ${token.colorBorder}, 0 2px 6px rgba(0,0,0,0.25)`,
-					transition: 'left 200ms ease-out',
-				}}
-			/>
+			<div style={{ position: 'relative', height: 10 }}>
+				<div
+					aria-hidden
+					style={{
+						height: 10,
+						borderRadius: 5,
+						background: `linear-gradient(to right, ${token.colorSuccess}, ${token.colorWarning}, ${token.colorError})`,
+						opacity: 0.85,
+					}}
+				/>
+				<div
+					role="img"
+					aria-label={`Nivel de riesgo: ${RISK_LABELS[riskLevel]}`}
+					style={{
+						position: 'absolute',
+						left: `${markerLeft}%`,
+						top: '50%',
+						transform: 'translate(-50%, -50%)',
+						width: 16,
+						height: 16,
+						borderRadius: '50%',
+						background: token.colorBgContainer,
+						border: `3px solid ${markerColor}`,
+						boxShadow: `0 0 0 1px ${token.colorBorder}, 0 2px 6px rgba(0,0,0,0.25)`,
+						transition: 'left 200ms ease-out',
+					}}
+				/>
+			</div>
 		</div>
 	);
 };
@@ -113,7 +115,7 @@ export const ClientCreditSummaryView: FC<{ loans: LoanFullRead[] }> = ({ loans }
 								<Tag color={active ? 'warning' : 'success'}>{active ? 'Activo' : 'Cancelado'}</Tag>
 							</div>
 							<Text type="secondary" style={{ fontSize: 12, display: 'block' }}>
-								{loan.paymentMethod} · ${formatNumber(loan.valueCapital ?? 0)} · {loan.initialDate} → {loan.endDate}
+								{loan.paymentMethod} · ${formatNumber(loan.valueCapital ?? 0)} · {String(loan.initialDate).slice(0, 10)} → {String(loan.endDate).slice(0, 10)}
 							</Text>
 							<Text
 								style={{ fontSize: 12, display: 'block', marginTop: 4 }}
