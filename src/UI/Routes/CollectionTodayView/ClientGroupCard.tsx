@@ -1,6 +1,7 @@
 import { FC, useEffect, useState } from 'react';
 import { App, Button, Card, Space, Tag, theme, Typography } from 'antd';
 import {
+	ControlOutlined,
 	DownOutlined,
 	EnvironmentOutlined,
 	PhoneOutlined,
@@ -23,6 +24,9 @@ import {
 	isPaid,
 } from './groupCollections';
 import { QuotaCard } from './QuotaCard';
+import { PriorityBadge } from '@/UI/Routes/ClientsView/priority/PriorityChip';
+import { PriorityDrawer } from '@/UI/Routes/ClientsView/priority/PriorityDrawer';
+import { useCanManagePriority } from '@/UI/Routes/ClientsView/priority/usePriorityAccess';
 import './collectionToday.css';
 
 const { Text } = Typography;
@@ -37,6 +41,8 @@ export const ClientGroupCard: FC<ClientGroupCardProps> = ({ items, selectedDate 
 	const { notification, modal } = App.useApp();
 	const queryClient = useQueryClient();
 	const [payAllLoading, setPayAllLoading] = useState(false);
+	const canManagePriority = useCanManagePriority();
+	const [priorityOpen, setPriorityOpen] = useState(false);
 
 	const first = items[0];
 	const order = Math.min(...items.map(i => i.order));
@@ -87,7 +93,7 @@ export const ClientGroupCard: FC<ClientGroupCardProps> = ({ items, selectedDate 
 	};
 
 	const confirmPayAll = () => {
-		modal.confirm({
+		void modal.confirm({
 			title: 'Confirmar cobro total',
 			content: `Se aplicará el saldo completo (${formatMoneyCOP(groupBalance)}) en ${unpaidOpen.length} cuota(s).`,
 			okText: 'Confirmar',
@@ -117,8 +123,9 @@ export const ClientGroupCard: FC<ClientGroupCardProps> = ({ items, selectedDate 
 				<span className="collection-today-client-toggle-icon" aria-hidden>
 					{expanded ? <DownOutlined /> : <RightOutlined />}
 				</span>
+				<PriorityBadge order={order} size={26} />
 				<Text strong className="collection-today-client-name" ellipsis>
-					{order}. {first.clientFullName}
+					{first.clientFullName}
 				</Text>
 				{!expanded && first.clientBeak > 0 && (
 					<Tag color="success" className="collection-today-tag" aria-label="Saldo a favor del cliente">
@@ -126,79 +133,91 @@ export const ClientGroupCard: FC<ClientGroupCardProps> = ({ items, selectedDate 
 					</Tag>
 				)}
 				{(expanded || hasPending) && (
-				<Space size={2} wrap className="collection-today-client-header-badges">
-					{badges.pendingCount > 0 && (
-						<Tag color="warning" className="collection-today-tag">{badges.pendingCount} pend.</Tag>
-					)}
-					{badges.moraCount > 0 && (
-						<Tag color="error" className="collection-today-tag">{badges.moraCount} mora</Tag>
-					)}
-					{badges.paidCount > 0 && expanded && (
-						<Tag color="success" className="collection-today-tag">{badges.paidCount} pag.</Tag>
-					)}
-				</Space>
+					<Space size={2} wrap className="collection-today-client-header-badges">
+						{badges.pendingCount > 0 && (
+							<Tag color="warning" className="collection-today-tag">{badges.pendingCount} pend.</Tag>
+						)}
+						{badges.moraCount > 0 && (
+							<Tag color="error" className="collection-today-tag">{badges.moraCount} mora</Tag>
+						)}
+						{badges.paidCount > 0 && expanded && (
+							<Tag color="success" className="collection-today-tag">{badges.paidCount} pag.</Tag>
+						)}
+					</Space>
 				)}
 			</button>
 
 			{expanded && (
-			<div className="collection-today-client-body">
-			{/* Dos filas compactas: [CC | teléfono] y [dirección | saldo a favor]; sin filas sueltas con espacio en blanco. */}
-			<div className="collection-today-client-meta">
-				<span>
-					<Text type="secondary">CC {first.idDocument}</Text>
-				</span>
-				{first.clientMobile ? (
-					<span style={{ justifyContent: 'flex-end' }}>
-						<PhoneOutlined aria-label="Teléfono" />
-						<a href={`tel:${first.clientMobile.replace(/\s/g, '')}`}>
-							{first.clientMobile}
-						</a>
-					</span>
-				) : <span />}
-				{first.clientAddress && (
-					<span className={first.clientBeak > 0 ? undefined : 'meta-full'}>
-						<EnvironmentOutlined aria-label="Dirección" />
-						<Text type="secondary" ellipsis>{first.clientAddress}</Text>
-					</span>
-				)}
-				{first.clientBeak > 0 && (
-					<span className={first.clientAddress ? undefined : 'meta-full'} style={{ justifyContent: 'flex-end' }}>
-						<WalletOutlined aria-hidden />
-						<Text type="success" strong>A favor {formatMoneyCOP(first.clientBeak)}</Text>
-					</span>
-				)}
-			</div>
+				<div className="collection-today-client-body">
+					{/* Dos filas compactas: [CC | teléfono] y [dirección | saldo a favor]; sin filas sueltas con espacio en blanco. */}
+					<div className="collection-today-client-meta">
+						<span>
+							<Text type="secondary">CC {first.idDocument}</Text>
+						</span>
+						{first.clientMobile ? (
+							<span style={{ justifyContent: 'flex-end' }}>
+								<PhoneOutlined aria-label="Teléfono" />
+								<a href={`tel:${first.clientMobile.replace(/\s/g, '')}`}>
+									{first.clientMobile}
+								</a>
+							</span>
+						) : <span />}
+						{first.clientAddress && (
+							<span className={first.clientBeak > 0 ? undefined : 'meta-full'}>
+								<EnvironmentOutlined aria-label="Dirección" />
+								<Text type="secondary" ellipsis>{first.clientAddress}</Text>
+							</span>
+						)}
+						{first.clientBeak > 0 && (
+							<span className={first.clientAddress ? undefined : 'meta-full'} style={{ justifyContent: 'flex-end' }}>
+								<WalletOutlined aria-hidden />
+								<Text type="success" strong>A favor {formatMoneyCOP(first.clientBeak)}</Text>
+							</span>
+						)}
+					</div>
 
-			{unpaidOpen.length > 0 && (
-				<Button
-					type="primary"
-					size="small"
-					icon={<WalletOutlined />}
-					block
-					className="collection-today-pay-all"
-					loading={payAllLoading}
-					disabled={payAllDisabled}
-					onClick={confirmPayAll}
-				>
+					{canManagePriority && (
+						<Button size="small" icon={<ControlOutlined />} onClick={() => setPriorityOpen(true)} style={{ marginBottom: 8 }}>
+					Cambiar prioridad
+						</Button>
+					)}
+
+					{unpaidOpen.length > 0 && (
+						<Button
+							type="primary"
+							size="small"
+							icon={<WalletOutlined />}
+							block
+							className="collection-today-pay-all"
+							loading={payAllLoading}
+							disabled={payAllDisabled}
+							onClick={confirmPayAll}
+						>
 					Todo · {formatMoneyCOP(groupBalance)}
-				</Button>
-			)}
+						</Button>
+					)}
 
-			<div className="collection-today-quotas-grid">
-				{items.map(item => (
-					<QuotaCard
-						key={item.id}
-						item={item}
-						selectedDate={selectedDate}
-					/>
-				))}
-			</div>
+					<div className="collection-today-quotas-grid">
+						{items.map(item => (
+							<QuotaCard
+								key={item.id}
+								item={item}
+								selectedDate={selectedDate}
+							/>
+						))}
+					</div>
 
-			<Text type="secondary" className="collection-today-footer">
-				{getGroupFooterText(items)}
-			</Text>
-			</div>
+					<Text type="secondary" className="collection-today-footer">
+						{getGroupFooterText(items)}
+					</Text>
+				</div>
 			)}
+			<PriorityDrawer
+				open={priorityOpen}
+				canManage={canManagePriority}
+				client={{ id: first.clientId, fullName: first.clientFullName, idDocument: first.idDocument, currentMobile: first.clientMobile ?? '' }}
+				onClose={() => setPriorityOpen(false)}
+			/>
 		</Card>
 	);
 };

@@ -9,6 +9,8 @@ import useUserStore from '@/infrastructure/context/User/UserDataStore';
 import useLoading from '@/infrastructure/hooks/useLoading';
 import { getClient, useMutationType } from '@/infrastructure/querys/Client';
 import { handleError } from '@/infrastructure/utils/handleError';
+import { ClientRoutesSection } from './priority/ClientRoutesSection';
+import { useCanManagePriority } from './priority/usePriorityAccess';
 import ActionsButton from '@/UI/Components/AcctionButtons';
 import { ClientCreditSummary } from '@components/ClientCreditSummary';
 import InputDate from '@/UI/Components/Fields/InputDate';
@@ -41,6 +43,7 @@ const FormClient: FC<{ readonly?: boolean }> = ({ readonly = false }) => {
 	const [exit, setExit] = useState<boolean>(false);
 
 	const isCreate = !id;
+	const canManagePriority = useCanManagePriority();
 
 	const isDev = typeUser == TypeUser.dev;
 
@@ -244,6 +247,8 @@ const FormClient: FC<{ readonly?: boolean }> = ({ readonly = false }) => {
 					))}
 				</Row>
 			</Form>
+
+			{id && client && <ClientRoutesSection client={client} canManage={canManagePriority} readonly={readonly} />}
 
 			{id && (
 				<>

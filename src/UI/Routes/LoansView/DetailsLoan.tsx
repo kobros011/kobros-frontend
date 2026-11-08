@@ -16,6 +16,7 @@ import { StepHeader } from './components/StepHeader';
 import { computeLoanDerived } from './Hooks/useChangeDataLoan';
 import { LoanWizardShell } from './components/LoanWizardShell';
 import { FichaField } from './components/FichaField';
+import { LoanPriorityCard } from '@/UI/Routes/ClientsView/priority/LoanPriorityCard';
 import { ExceptionStatusType } from 'antd/es/result';
 import { AxiosError } from 'axios';
 
@@ -95,6 +96,15 @@ const DetailsLoanView: FC = () => {
 					<FichaField label="Dirección">{loan.currentAddress}</FichaField>
 					<FichaField label="Celular">{loan.currentMobile}</FichaField>
 					<FichaField label="Ruta del cliente">{loan.routeName}</FichaField>
+					<LoanPriorityCard
+						clientId={loan.clientId}
+						routeId={loan.routeId}
+						routeName={loan.routeName}
+						fullName={loan.fullName}
+						idDocument={loan.idDocument}
+						currentMobile={loan.currentMobile}
+						order={loan.order}
+					/>
 				</>
 			),
 		},

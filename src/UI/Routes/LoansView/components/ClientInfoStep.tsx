@@ -4,7 +4,7 @@ import { LoanFull } from '@/domain/Loan';
 import { FormInstance, Form, Button, Typography, Select, Spin, Input } from 'antd';
 import { FC, useState } from 'react';
 import { RightOutlined } from '@ant-design/icons';
-import { FieldOrderTable } from '@/UI/Components/Fields/MultiFieldsFormItem';
+import { PrioritySelector } from '@/UI/Routes/ClientsView/priority/PrioritySelector';
 import { SelectClient } from '@/UI/Components/Fields/SelectClient';
 import { ClientEditDrawer } from './ClientEditDrawer';
 import { FichaField } from './FichaField';
@@ -185,12 +185,9 @@ export const ClientInfoStep: FC<ClientInfoStepProps> = ({
 					)}
 
 					{clientId && (
-						<FieldOrderTable
-							label="Nueva prioridad"
-							clientId={clientId}
-							routeId={routeId}
-							name="newOrder"
-						/>
+						<Form.Item name="newOrder" style={{ marginBottom: 12 }}>
+							<PrioritySelector clientId={clientId} routeId={routeId} />
+						</Form.Item>
 					)}
 
 					<div className="loan-wizard-cta-row">
