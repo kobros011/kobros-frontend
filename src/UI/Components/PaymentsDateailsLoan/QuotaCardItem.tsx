@@ -51,7 +51,6 @@ export const QuotaCardItem: FC<{ item: PaymentHistoryItemDto }> = ({ item }) => 
 				<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, fontSize: 12 }}>
 					<span className="kb-mono" style={{ color: 'var(--kb-ok)' }}>
 						Pagó {formatCOP(item.applied)} · {formatDate(item.payment_date)}
-						{item.excess > 0 && <> · +{formatCOP(item.excess)} a favor</>}
 					</span>
 					{item.collected_by_name && (
 						<span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: 'var(--kb-muted)' }}>
@@ -59,6 +58,14 @@ export const QuotaCardItem: FC<{ item: PaymentHistoryItemDto }> = ({ item }) => 
 							{item.collected_by_name}
 						</span>
 					)}
+				</div>
+			)}
+
+			{item.excess > 0 && (
+				<div className="kb-mono" style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, gap: 8 }}>
+					<span>Base {formatCOP(item.value)}</span>
+					<span style={{ color: 'var(--kb-ok)' }}>Abono +{formatCOP(item.excess)}</span>
+					<strong style={{ color: 'var(--kb-ok)' }}>Total {formatCOP(item.applied)}</strong>
 				</div>
 			)}
 

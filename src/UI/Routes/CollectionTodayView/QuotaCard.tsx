@@ -36,6 +36,8 @@ export const QuotaCard: FC<QuotaCardProps> = ({ item, selectedDate }) => {
 	const remaining = getRemainingAmount(item);
 	const fixed = getQuotaFixed(item);
 	const applied = item.applied ?? 0;
+	// Pagó más que la cuota: se muestra Base (cuota), Abono (lo de más) y Total (lo recibido).
+	const extra = Math.max(applied - fixed, 0);
 	const overdueDays = getOverdueDays(item, selectedDate);
 	const partial = isPartial(item);
 
@@ -140,12 +142,27 @@ export const QuotaCard: FC<QuotaCardProps> = ({ item, selectedDate }) => {
 					{statusTag}
 				</span>
 				<span className="collection-today-inline-pair">
-					<Text type="secondary">Valor:</Text>
+					<Text type="secondary">{extra > 0 ? 'Base:' : 'Valor:'}</Text>
 					<Text strong className="collection-today-quota-amount" style={{ color: token.colorPrimary }}>
-						{formatMoneyCOP(item.value)}
+						{formatMoneyCOP(extra > 0 ? fixed : item.value)}
 					</Text>
 				</span>
 			</div>
+
+			{extra > 0 && (
+				<div className="collection-today-quota-detail-row">
+					<span className="collection-today-inline-pair">
+						<Text type="secondary">Abono:</Text>
+						<Text strong style={{ color: token.colorSuccess }}>+{formatMoneyCOP(extra)}</Text>
+					</span>
+					<span className="collection-today-inline-pair">
+						<Text type="secondary">Total:</Text>
+						<Text strong className="collection-today-quota-amount" style={{ color: token.colorSuccess }}>
+							{formatMoneyCOP(applied)}
+						</Text>
+					</span>
+				</div>
+			)}
 
 			{partial && !paid && (
 				<Text type="secondary" className="collection-today-quota-falta" style={{ color: token.colorWarning }}>
