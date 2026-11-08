@@ -1,33 +1,51 @@
 # 03 · Cartera y mora
 
-**Roles:** Super, Admin, Socio
-**Objetivo:** Ver cuánto hay por cobrar y qué créditos están atrasados.
-**Datos demo:** Créditos con y sin mora en COP y USD.
-**Salida:** `pdf/03-cartera.pdf` · capturas en `img/cartera/` (móvil 375×812)
+> Subtítulo: Guía paso a paso — Módulo de Cartera y mora
+> Roles: Superusuario, administrador y socio
+> Cómo crear este PDF: abre cada URL en vista móvil (390x844), deja la pantalla como indica «Preparar», toma la captura con el nombre indicado y ejecuta `python docs/manual/scripts/build_pdfs.py 03`.
 
-## Cómo crear este PDF
+## Introducción
 
-1. Cargar el dataset demo (`kobros-backend/scripts/seed_manual_demo.py --yes`) e iniciar sesión con un usuario con el rol indicado.
-2. Abrir cada URL de la lista en vista móvil (375×812), dejar la pantalla en el estado de *Preparar* y tomar la captura con el nombre indicado.
-3. Revisar que no haya datos reales, que se vean los montos con su moneda y que la lista no esté saturada.
-4. Generar el PDF: `python docs/manual/scripts/build_pdfs.py` (una página por paso: título, captura a ancho completo y explicación).
+Cartera muestra cuánto hay por cobrar y qué créditos están atrasados. Cuando la marca usa más de una moneda, los totales se muestran por separado, nunca sumados.
 
-## Pasos y capturas
+## Pasos
 
-### 01 · Cartera activa
-- **URL:** `/srv1/home/cartera`
-- **Preparar:** Abrir Cartera; mostrar los totales y la tabla.
-- **Archivo:** `img/cartera/01-cartera.png`
-- **Explicación:** Arriba, el total en cartera y el número de créditos, un renglón por moneda. Debajo, la tabla con valor del crédito, pagado, saldo y fecha de vencimiento. Con varias monedas aparece el selector Todas · COP · USD.
+### 1 · Ver la cartera activa
+> URL: `/srv1/home/cartera`
+> Preparar: Abrir Cartera desde la barra inferior.
 
-### 02 · Cartera en mora
-- **URL:** `/srv1/home/cartera/mora`
-- **Preparar:** Pulsar la pestaña 'Cartera en mora'.
-- **Archivo:** `img/cartera/02-mora.png`
-- **Explicación:** Solo los créditos con cuotas vencidas: saldo en mora y días de atraso. Desde la acción de cada fila se abre el crédito para cobrar.
+Arriba aparece el total en cartera y el número de créditos, con un renglón por moneda.
 
-## Criterios de calidad
+- Debajo está la lista de créditos con valor, pagado, saldo y fecha de vencimiento.
+- Con varias monedas aparece el selector **Todas · COP · USD** para ver una sola.
+- **Más filtros** acota por ruta.
 
-- Texto en español claro, dirigido a quien usa la app (sin términos técnicos).
-- Una idea por captura; resaltar el elemento clave en la explicación.
-- Montos siempre con moneda y formato de la marca.
+![Cartera activa con totales por moneda](img/cartera/01-cartera.png)
+
+### 2 · Ver la cartera en mora
+> URL: `/srv1/home/cartera/mora`
+> Preparar: Pulsar la pestaña 'Cartera en mora'.
+
+Solo muestra los créditos con cuotas vencidas, con su saldo en mora y los días de atraso.
+
+- Desde cada fila se abre el crédito para registrar el cobro.
+
+![Cartera en mora](img/cartera/02-mora.png)
+
+### 3 · Cambiar la vista y elegir columnas
+> URL: `/srv1/home/cartera`
+> Preparar: Alternar entre los iconos de tabla y lista sobre el listado.
+
+Cada lista se puede ver como tabla o como tarjetas. Usa los dos iconos que están sobre la lista para cambiar de vista.
+
+- Icono de cuadrícula: vista de **tabla**, con una fila por registro y desplazamiento lateral si hay muchas columnas.
+- Icono de lista: vista de **tarjetas**, pensada para el celular, con los datos apilados.
+- En tabla, el botón **Columnas** abre un panel donde marcas qué columnas mostrar y arrastras para reordenarlas; en tarjetas, el botón **Tarjeta** hace lo mismo con los datos de cada tarjeta.
+- Usa **Mostrar todo** u **Ocultar todo** para cambiar todas de una vez. La vista y las columnas que elijas se recuerdan en este dispositivo.
+
+![Vista de tabla de cartera](img/vistas/cartera-tabla.jpg)
+![Vista de tarjetas de cartera](img/vistas/cartera-tarjetas.jpg)
+
+## Notas importantes
+
+- El total de cada moneda se calcula por separado.

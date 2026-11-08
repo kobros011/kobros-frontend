@@ -1,6 +1,6 @@
-# Manual de usuario Kobros
+# Manual de usuario
 
-Un PDF por módulo, con capturas móviles y la explicación de cómo funciona. Cada módulo tiene una **guía** (`guias/NN-modulo.md`) que dice qué capturas tomar y qué explicar; el PDF se genera a partir de esa guía.
+Un PDF por módulo con capturas móviles y la explicación paso a paso. Cada módulo tiene una **guía** (`guias/NN-modulo.md`) con el contenido y las instrucciones para crear su PDF; el PDF se genera a partir de esa guía.
 
 | # | Módulo | Guía | PDF |
 |---|--------|------|-----|
@@ -14,10 +14,16 @@ Un PDF por módulo, con capturas móviles y la explicación de cómo funciona. C
 | 08 | Reportes | [guias/08-reportes.md](guias/08-reportes.md) | [pdf/08-reportes.pdf](pdf/08-reportes.pdf) |
 | 09 | Configuración | [guias/09-configuracion.md](guias/09-configuracion.md) | [pdf/09-configuracion.pdf](pdf/09-configuracion.pdf) |
 | 10 | Usuarios | [guias/10-usuarios.md](guias/10-usuarios.md) | [pdf/10-usuarios.pdf](pdf/10-usuarios.pdf) |
-| 11 | Marcas | [guias/11-marcas.md](guias/11-marcas.md) | [pdf/11-marcas.pdf](pdf/11-marcas.pdf) |
+
+## Formato de cada guía
+
+- `# NN · Módulo` y líneas `> Subtítulo`, `> Roles`, `> Cómo crear este PDF` (solo para quien arma el PDF).
+- `## Introducción`: párrafo inicial.
+- `## Pasos`: cada `### N · Título` lleva `> URL`, `> Preparar`, texto, viñetas e imágenes `![pie](ruta)`.
+- `## Notas importantes`: viñetas finales.
 
 ## Cómo regenerar
 
 1. `docker compose exec -T api python scripts/seed_manual_demo.py --yes` (backend; **borra** los datos de prueba de la marca NORTE01 y crea el dataset demo).
-2. Tomar las capturas descritas en cada guía (móvil 375×812) en `img/<modulo>/`.
+2. Tomar las capturas descritas en cada guía (móvil 390x844) en `img/`.
 3. `python docs/manual/scripts/build_pdfs.py` genera `pdf/NN-modulo.pdf`.

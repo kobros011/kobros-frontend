@@ -1,45 +1,55 @@
 # 08 · Reportes
 
-**Roles:** Admin, Super, Socio
-**Objetivo:** Analizar cartera, recaudo, mora y utilidad por ruta, cobrador y período.
-**Datos demo:** Datos demo del día; una ruta en USD para ver los bloques por moneda.
-**Salida:** `pdf/08-reportes.pdf` · capturas en `img/reportes/` (móvil 375×812)
+> Subtítulo: Guía paso a paso — Módulo de Reportes
+> Roles: Superusuario, administrador y socio
+> Cómo crear este PDF: abre cada URL en vista móvil (390x844), deja la pantalla como indica «Preparar», toma la captura con el nombre indicado y ejecuta `python docs/manual/scripts/build_pdfs.py 08`.
 
-## Cómo crear este PDF
+## Introducción
 
-1. Cargar el dataset demo (`kobros-backend/scripts/seed_manual_demo.py --yes`) e iniciar sesión con un usuario con el rol indicado.
-2. Abrir cada URL de la lista en vista móvil (375×812), dejar la pantalla en el estado de *Preparar* y tomar la captura con el nombre indicado.
-3. Revisar que no haya datos reales, que se vean los montos con su moneda y que la lista no esté saturada.
-4. Generar el PDF: `python docs/manual/scripts/build_pdfs.py` (una página por paso: título, captura a ancho completo y explicación).
+Reportes ayuda a analizar la cartera, el recaudo, la mora y la utilidad por ruta, recaudador y período. Cuando la marca usa más de una moneda, hay un bloque por cada una.
 
-## Pasos y capturas
+## Pasos
 
-### 01 · Resumen operativo
-- **URL:** `/srv1/home/reportes/resumen`
-- **Preparar:** Abrir Reportes > Resumen.
-- **Archivo:** `img/reportes/01-resumen.png`
-- **Explicación:** KPIs de cartera, mora, clientes y efectividad, cobro diario y composición por riesgo. Con más de una moneda hay un bloque 'Valores en COP' y otro 'Valores en USD' (o elige una con el selector).
+### 1 · Leer el resumen operativo
+> URL: `/srv1/home/reportes/resumen`
+> Preparar: Abrir Reportes > Resumen.
 
-### 02 · Un bloque por moneda
-- **URL:** `/srv1/home/reportes/resumen`
-- **Preparar:** Desplazar hasta 'Valores en USD'.
-- **Archivo:** `img/reportes/02-bloques.png`
-- **Explicación:** Cuando la marca usa más de una moneda, el resumen muestra un bloque por moneda con sus propias cifras; nunca se suman monedas distintas. Con el selector Todas · COP · USD se deja un solo bloque.
+Muestra los indicadores de cartera activa, cartera en mora, base de clientes y efectividad de cobro, además del cobro diario y la composición por riesgo.
 
-### 03 · Reporte semanal
-- **URL:** `/srv1/home/reportes/semanal`
-- **Preparar:** Abrir la pestaña Semanal.
-- **Archivo:** `img/reportes/03-semanal.png`
-- **Explicación:** Recaudo, gastos y utilidad de la semana, con gráfica diaria y detalle por día.
+- Filtra por **ruta** y por **recaudador**; el botón de actualizar recarga los datos.
 
-### 04 · Reporte anual
-- **URL:** `/srv1/home/reportes/anual`
-- **Preparar:** Abrir la pestaña Anual.
-- **Archivo:** `img/reportes/04-anual.png`
-- **Explicación:** Lo mismo por mes del año, con margen de utilidad.
+![Resumen operativo](img/reportes/01-resumen.png)
 
-## Criterios de calidad
+### 2 · Ver un bloque por moneda
+> URL: `/srv1/home/reportes/resumen`
+> Preparar: Bajar hasta 'Valores en USD'.
 
-- Texto en español claro, dirigido a quien usa la app (sin términos técnicos).
-- Una idea por captura; resaltar el elemento clave en la explicación.
-- Montos siempre con moneda y formato de la marca.
+Con más de una moneda el resumen muestra un bloque por moneda con sus propias cifras; nunca se suman monedas distintas.
+
+- El selector **Todas · COP · USD** deja un solo bloque.
+
+![Bloque de valores en dólares](img/reportes/02-bloques.png)
+
+### 3 · Consultar el reporte semanal
+> URL: `/srv1/home/reportes/semanal`
+> Preparar: Abrir la pestaña Semanal.
+
+Recaudo, gastos y utilidad de la semana, con una gráfica por día y el detalle.
+
+- Cambia la semana con el selector de fecha.
+
+![Reporte semanal](img/reportes/03-semanal.png)
+
+### 4 · Consultar el reporte anual
+> URL: `/srv1/home/reportes/anual`
+> Preparar: Abrir la pestaña Anual.
+
+Lo mismo por mes del año, con el margen de utilidad.
+
+- Cambia el año con el selector.
+
+![Reporte anual](img/reportes/04-anual.png)
+
+## Notas importantes
+
+- Las cifras de cada bloque corresponden a una sola moneda.

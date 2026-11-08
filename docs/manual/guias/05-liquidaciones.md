@@ -1,45 +1,60 @@
 # 05 · Liquidaciones
 
-**Roles:** Admin, Super
-**Objetivo:** Cerrar la caja del día de cada ruta y cobrador y confirmar los arqueos.
-**Datos demo:** Un cierre confirmado (Ruta Norte) y uno pendiente con faltante (Ruta Dólares).
-**Salida:** `pdf/05-liquidaciones.pdf` · capturas en `img/liquidaciones/` (móvil 375×812)
+> Subtítulo: Guía paso a paso — Módulo de Liquidaciones
+> Roles: Superusuario y administrador
+> Cómo crear este PDF: abre cada URL en vista móvil (390x844), deja la pantalla como indica «Preparar», toma la captura con el nombre indicado y ejecuta `python docs/manual/scripts/build_pdfs.py 05`.
 
-## Cómo crear este PDF
+## Introducción
 
-1. Cargar el dataset demo (`kobros-backend/scripts/seed_manual_demo.py --yes`) e iniciar sesión con un usuario con el rol indicado.
-2. Abrir cada URL de la lista en vista móvil (375×812), dejar la pantalla en el estado de *Preparar* y tomar la captura con el nombre indicado.
-3. Revisar que no haya datos reales, que se vean los montos con su moneda y que la lista no esté saturada.
-4. Generar el PDF: `python docs/manual/scripts/build_pdfs.py` (una página por paso: título, captura a ancho completo y explicación).
+Liquidaciones sirve para cerrar la caja del día de cada ruta y cobrador, y para confirmar los arqueos. El sistema calcula solo el recaudo, los gastos y los créditos nuevos.
 
-## Pasos y capturas
+## Pasos
 
-### 01 · Cierre del día
-- **URL:** `/srv1/home/liquidaciones`
-- **Preparar:** Elegir 'Ruta Centro'.
-- **Archivo:** `img/liquidaciones/01-cierre.png`
-- **Explicación:** Con la ruta elegida el sistema calcula solo el recaudo, los gastos y los créditos nuevos del día y la meta de cobranza.
+### 1 · Abrir el cierre del día
+> URL: `/srv1/home/liquidaciones`
+> Preparar: Elegir la Ruta Centro.
 
-### 02 · Cuadre de caja
-- **URL:** `/srv1/home/liquidaciones`
-- **Preparar:** Desplazar hasta 'Datos de cierre' y digitar base 2.500.000 y efectivo 120.000.
-- **Archivo:** `img/liquidaciones/02-cuadre.png`
-- **Explicación:** Efectivo esperado = base + recaudo − gastos − créditos nuevos. Al digitar el efectivo contado se muestra la diferencia (faltante o sobrante); si hay diferencia la nota es obligatoria. En USD se aceptan centavos.
+Con la ruta elegida se muestran el recaudo del día, los créditos nuevos entregados y la meta de cobranza.
 
-### 03 · Por confirmar
-- **URL:** `/srv1/home/liquidaciones?tab=pendientes`
-- **Preparar:** Abrir la pestaña 'Por confirmar'.
-- **Archivo:** `img/liquidaciones/03-por-confirmar.png`
-- **Explicación:** Lista los cierres que esperan la confirmación del administrador. Confirmar deja el cierre en firme; reabrir permite recalcularlo si hubo cobros nuevos.
+- Puedes elegir el cobrador, o dejar la consolidada de toda la ruta.
 
-### 04 · Historial de cierres
-- **URL:** `/srv1/home/liquidaciones?tab=historial`
-- **Preparar:** Abrir 'Historial de cierres'.
-- **Archivo:** `img/liquidaciones/04-historial.png`
-- **Explicación:** Registro de arqueos por ruta, cobrador y fecha, con selector de moneda cuando la marca tiene varias y un total por moneda.
+![Cierre del día de la ruta](img/liquidaciones/01-cierre.png)
 
-## Criterios de calidad
+### 2 · Cuadrar la caja
+> URL: `/srv1/home/liquidaciones`
+> Preparar: Bajar hasta 'Datos de cierre' y escribir base 2.500.000 y efectivo 120.000.
 
-- Texto en español claro, dirigido a quien usa la app (sin términos técnicos).
-- Una idea por captura; resaltar el elemento clave en la explicación.
-- Montos siempre con moneda y formato de la marca.
+Efectivo esperado = base + recaudo - gastos - créditos nuevos.
+
+- Al escribir el efectivo contado se muestra la diferencia: cuadrado, faltante o sobrante.
+- Si hay diferencia, la nota es obligatoria.
+- En monedas con decimales, como el dólar, se aceptan centavos.
+- Pulsa **Cerrar caja del día** y confirma.
+
+![Cuadre operativo con diferencia en cero](img/liquidaciones/02-cuadre.png)
+
+### 3 · Confirmar los cierres pendientes
+> URL: `/srv1/home/liquidaciones?tab=pendientes`
+> Preparar: Abrir la pestaña 'Por confirmar'.
+
+Lista los cierres que esperan la confirmación del administrador.
+
+- Confirmar deja el cierre en firme.
+- Reabrir permite recalcularlo si hubo cobros nuevos.
+
+![Cierres por confirmar](img/liquidaciones/03-por-confirmar.png)
+
+### 4 · Consultar el historial
+> URL: `/srv1/home/liquidaciones?tab=historial`
+> Preparar: Abrir 'Historial de cierres'.
+
+Registro de los arqueos por ruta, cobrador y fecha.
+
+- Con varias monedas hay un selector **Todas · COP · USD** y un total por moneda.
+
+![Historial de cierres](img/liquidaciones/04-historial.png)
+
+## Notas importantes
+
+- Un cierre incluye solo los cobros y gastos que aún no se habían liquidado.
+- Si hay cobros nuevos después del cierre, queda marcado como desactualizado y se puede reabrir.

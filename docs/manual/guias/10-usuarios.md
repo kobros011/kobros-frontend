@@ -1,33 +1,49 @@
 # 10 · Usuarios
 
-**Roles:** Admin, Super
-**Objetivo:** Crear los usuarios de la marca y asignarles rol.
-**Datos demo:** Usuarios de Marca Norte (admin, cobradores).
-**Salida:** `pdf/10-usuarios.pdf` · capturas en `img/usuarios/` (móvil 375×812)
+> Subtítulo: Guía paso a paso — Módulo de Usuarios
+> Roles: Superusuario y administrador
+> Cómo crear este PDF: abre cada URL en vista móvil (390x844), deja la pantalla como indica «Preparar», toma la captura con el nombre indicado y ejecuta `python docs/manual/scripts/build_pdfs.py 10`.
 
-## Cómo crear este PDF
+## Introducción
 
-1. Cargar el dataset demo (`kobros-backend/scripts/seed_manual_demo.py --yes`) e iniciar sesión con un usuario con el rol indicado.
-2. Abrir cada URL de la lista en vista móvil (375×812), dejar la pantalla en el estado de *Preparar* y tomar la captura con el nombre indicado.
-3. Revisar que no haya datos reales, que se vean los montos con su moneda y que la lista no esté saturada.
-4. Generar el PDF: `python docs/manual/scripts/build_pdfs.py` (una página por paso: título, captura a ancho completo y explicación).
+Usuarios permite crear las cuentas de la marca y asignarles un rol. Cada rol ve solo los módulos que le corresponden.
 
-## Pasos y capturas
+## Pasos
 
-### 01 · Lista de usuarios
-- **URL:** `/srv1/home/usuarios`
-- **Preparar:** Abrir el módulo.
-- **Archivo:** `img/usuarios/01-lista.png`
-- **Explicación:** Muestra nombre, usuario, rol (admin, socio, cobrador) y si está activo.
+### 1 · Ver la lista de usuarios
+> URL: `/srv1/home/usuarios`
+> Preparar: Abrir Usuarios desde el menú.
 
-### 02 · Crear un usuario
-- **URL:** `/srv1/home/usuarios/crear`
-- **Preparar:** Pulsar crear usuario.
-- **Archivo:** `img/usuarios/02-nuevo.png`
-- **Explicación:** Se digitan datos, usuario, rol y, para socios y cobradores, las rutas a las que tendrán acceso. Cada rol ve solo los módulos que le corresponden.
+Muestra el nombre, el tipo de usuario (administrador, socio o recaudador) y si está activo.
 
-## Criterios de calidad
+- Las pestañas separan los usuarios activos de los inactivos.
 
-- Texto en español claro, dirigido a quien usa la app (sin términos técnicos).
-- Una idea por captura; resaltar el elemento clave en la explicación.
-- Montos siempre con moneda y formato de la marca.
+![Lista de usuarios](img/usuarios/01-lista.png)
+
+### 2 · Crear un usuario
+> URL: `/srv1/home/usuarios/crear`
+> Preparar: Pulsar 'Nuevo Usuario'.
+
+Se digitan los datos personales, el documento y la fecha de vinculación.
+
+- Más abajo se elige el tipo de usuario y, para socios y recaudadores, las rutas a las que tendrán acceso.
+
+![Formulario Crear usuario](img/usuarios/02-nuevo.png)
+
+### 3 · Cambiar la vista y elegir columnas
+> URL: `/srv1/home/usuarios`
+> Preparar: Alternar entre los iconos de tabla y lista sobre el listado.
+
+Cada lista se puede ver como tabla o como tarjetas. Usa los dos iconos que están sobre la lista para cambiar de vista.
+
+- Icono de cuadrícula: vista de **tabla**, con una fila por registro y desplazamiento lateral si hay muchas columnas.
+- Icono de lista: vista de **tarjetas**, pensada para el celular, con los datos apilados.
+- En tabla, el botón **Columnas** abre un panel donde marcas qué columnas mostrar y arrastras para reordenarlas; en tarjetas, el botón **Tarjeta** hace lo mismo con los datos de cada tarjeta.
+- Usa **Mostrar todo** u **Ocultar todo** para cambiar todas de una vez. La vista y las columnas que elijas se recuerdan en este dispositivo.
+
+![Vista de tabla de usuarios](img/vistas/usuarios-tabla.jpg)
+![Vista de tarjetas de usuarios](img/vistas/usuarios-tarjetas.jpg)
+
+## Notas importantes
+
+- Un recaudador solo ve las rutas que tiene asignadas.

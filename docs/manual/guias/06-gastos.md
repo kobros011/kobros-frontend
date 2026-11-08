@@ -1,33 +1,50 @@
 # 06 · Gastos
 
-**Roles:** Admin, Cobrador, Super
-**Objetivo:** Registrar los gastos de la ruta (combustible, transporte) para que descuenten en el cierre.
-**Datos demo:** 2 gastos demo (Gasolina moto en COP, Transporte en USD).
-**Salida:** `pdf/06-gastos.pdf` · capturas en `img/gastos/` (móvil 375×812)
+> Subtítulo: Guía paso a paso — Módulo de Gastos
+> Roles: Superusuario, administrador y recaudador
+> Cómo crear este PDF: abre cada URL en vista móvil (390x844), deja la pantalla como indica «Preparar», toma la captura con el nombre indicado y ejecuta `python docs/manual/scripts/build_pdfs.py 06`.
 
-## Cómo crear este PDF
+## Introducción
 
-1. Cargar el dataset demo (`kobros-backend/scripts/seed_manual_demo.py --yes`) e iniciar sesión con un usuario con el rol indicado.
-2. Abrir cada URL de la lista en vista móvil (375×812), dejar la pantalla en el estado de *Preparar* y tomar la captura con el nombre indicado.
-3. Revisar que no haya datos reales, que se vean los montos con su moneda y que la lista no esté saturada.
-4. Generar el PDF: `python docs/manual/scripts/build_pdfs.py` (una página por paso: título, captura a ancho completo y explicación).
+Gastos registra el dinero que se gasta en la operación de la ruta (combustible, transporte). Los gastos del día descuentan automáticamente en el cierre de caja.
 
-## Pasos y capturas
+## Pasos
 
-### 01 · Lista de gastos
-- **URL:** `/srv1/home/gastos`
-- **Preparar:** Abrir el módulo.
-- **Archivo:** `img/gastos/01-lista.png`
-- **Explicación:** Cada gasto muestra concepto, nombre, fecha, ruta y valor con su moneda.
+### 1 · Ver la lista de gastos
+> URL: `/srv1/home/gastos`
+> Preparar: Abrir Gastos desde el menú.
 
-### 02 · Registrar un gasto
-- **URL:** `/srv1/home/gastos/crear`
-- **Preparar:** Pulsar crear gasto; mostrar el formulario.
-- **Archivo:** `img/gastos/02-nuevo.png`
-- **Explicación:** Se elige ruta, concepto, fecha y valor. Los gastos del día entran automáticamente en el cierre de caja de esa ruta.
+Cada gasto muestra su concepto, nombre, fecha, ruta y valor con la moneda.
 
-## Criterios de calidad
+- **Conceptos** administra las categorías de gasto.
 
-- Texto en español claro, dirigido a quien usa la app (sin términos técnicos).
-- Una idea por captura; resaltar el elemento clave en la explicación.
-- Montos siempre con moneda y formato de la marca.
+![Lista de gastos](img/gastos/01-lista.png)
+
+### 2 · Registrar un gasto
+> URL: `/srv1/home/gastos/crear`
+> Preparar: Pulsar 'Registrar'.
+
+Se elige la fecha, la ruta, el valor, el nombre y el concepto del gasto.
+
+- La moneda del valor es la de la ruta elegida.
+- **Registrar** guarda y deja el formulario abierto; **Registrar y salir** guarda y vuelve a la lista.
+
+![Formulario Registrar gasto](img/gastos/02-nuevo.png)
+
+### 3 · Cambiar la vista y elegir columnas
+> URL: `/srv1/home/gastos`
+> Preparar: Alternar entre los iconos de tabla y lista sobre el listado.
+
+Cada lista se puede ver como tabla o como tarjetas. Usa los dos iconos que están sobre la lista para cambiar de vista.
+
+- Icono de cuadrícula: vista de **tabla**, con una fila por registro y desplazamiento lateral si hay muchas columnas.
+- Icono de lista: vista de **tarjetas**, pensada para el celular, con los datos apilados.
+- En tabla, el botón **Columnas** abre un panel donde marcas qué columnas mostrar y arrastras para reordenarlas; en tarjetas, el botón **Tarjeta** hace lo mismo con los datos de cada tarjeta.
+- Usa **Mostrar todo** u **Ocultar todo** para cambiar todas de una vez. La vista y las columnas que elijas se recuerdan en este dispositivo.
+
+![Vista de tabla de gastos](img/vistas/gastos-tabla.jpg)
+![Vista de tarjetas de gastos](img/vistas/gastos-tarjetas.jpg)
+
+## Notas importantes
+
+- Un gasto registrado no se vuelve a contar cuando ya entró en un cierre.
