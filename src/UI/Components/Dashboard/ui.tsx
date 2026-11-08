@@ -20,6 +20,7 @@ export const DashboardShell: FC<{ children: ReactNode }> = ({ children }) => {
 		'--kb-ok': token.colorSuccess,
 		'--kb-warn': token.colorWarning,
 		'--kb-danger': token.colorError,
+		'--kb-info': token.colorInfo,
 		'--kb-text': token.colorText,
 		'--kb-muted': token.colorTextTertiary,
 		'--kb-card-bg': darkMode

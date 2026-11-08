@@ -352,6 +352,15 @@ Pantallas: `UI/Routes/ReportsView/` — `Dashboard` (Resumen, compuesto por `Res
 - El «Valor pagado hoy» se aplica a la cuota 1 con la misma regla de un abono: menor → mora parcial, igual → pagada, mayor → el excedente pasa al **saldo a favor** del cliente (`client.beak`, se acumula y no se pisa). Solo si la cuota 1 vence hoy o antes; si no, el servidor responde 400 con el motivo.
 - Crear el crédito invalida préstamos, clientes, pagos, Cobro del día y reportes. El saldo a favor se ve en Clientes (columna y etiqueta en tarjeta), en el asistente de crédito, en Cobro del día (etiqueta «A favor $X» en el encabezado de cada cliente) y como «+ $X a favor» en las cuotas del historial.
 
+### 6.11 Liquidaciones (cierre de caja)
+
+`UI/Routes/LiquidationsView/`, sobre el kit Dashboard: `index` (pestaña en la URL `?tab=cierre|historial|pendientes`), `LiquidationsBanner`, `ClosingTab` (+ `ClosingFilters`, `SummaryCards`, `ClosingForm`), `HistoryTab` (`HistoryTable` | `HistoryCards` con `ViewSwitcher`, vista recordada en `TableViewStore`), `PendingTab`/`PendingCard` (solo admin), `LiquidationDrawer` (lateral en escritorio, hoja inferior en móvil), `LiquidationDetail` y `LiquidationActions`.
+
+- **Todo lo calcula el servidor** (`/liquidations/preview`): recaudo por fecha de cobro y por cobrador, gastos, créditos nuevos (con su lista), meta y efectivo esperado = base + recaudo − gastos − créditos nuevos. Quien cierra solo digita **base entregada**, **efectivo entregado** y **nota** (obligatoria si hay diferencia). El front solo muestra el cuadre en vivo con las mismas cifras.
+- Estados con icono + texto: Pendiente de confirmación · Confirmada · Reabierta · **Desactualizada** (hay cobros, gastos o créditos posteriores al cierre; no se puede confirmar hasta que un admin lo **reabra**). Diferencia: Cuadrado (verde) · Faltante (rojo) · Sobrante (naranja).
+- Permisos: cobrador (05) cierra solo su caja en sus rutas; admin (01–03) confirma, reabre y cierra a nombre de un cobrador; socio (04) solo consulta. Cierre confirmado no se edita ni elimina.
+- Cancelar siempre `danger`; botones `small`; dinero con signo delante (`−$47.014.667`, helper `signedCOP`).
+
 ## 7. Reglas y buenas prácticas UI/UX
 
 ### 7.1 Mobile-first (breakpoint 768px)

@@ -103,8 +103,9 @@ export const getClientHistory = (clientId?: string) => {
 const DASHBOARD = 'dashboard';
 const DASHBOARD_STALE_MS = 30 * 1000;
 
-export const getDashboardFilters = () => {
+export const getDashboardFilters = (enabled = true) => {
 	const queryInfo = useQuery({
+		enabled,
 		queryKey: [queryKeyReports.base, DASHBOARD, 'filters'],
 		staleTime: DASHBOARD_STALE_MS,
 		queryFn: () => repository.getDashboardFilters(),

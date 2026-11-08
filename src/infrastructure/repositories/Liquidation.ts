@@ -1,30 +1,45 @@
 import axios from 'axios';
-import { LiquidationDto, LiquidationCreateDto } from '../dto/LiquidationDto';
-import { LiquidationModel } from '@/domain/Liquidation';
-import { ImplementationBase } from './base';
+import { PaginationParams } from '@/domain/Pagination';
+import { mapPage, toPageQuery } from '../utils/pagination';
+import {
+	LiquidationCreateDto,
+	LiquidationDetailDto,
+	LiquidationDto,
+	LiquidationListFilters,
+	LiquidationPageDto,
+	LiquidationPreviewDto,
+	LiquidationPreviewParams,
+} from '../dto/LiquidationDto';
 
-export class ImplementationLiquidationRepository extends ImplementationBase {
-	protected readonly baseUrl: string = '/liquidations/';
+const BASE = '/liquidations';
 
-	async getList() {
-		const response = await axios.get<LiquidationDto[]>(this.baseUrl);
-		return { ...response, liquidations: response?.data?.map(item => LiquidationModel.ToDomain(item)) };
-	}
+export const repository = {
+	async preview(params: LiquidationPreviewParams) {
+		return (await axios.get<LiquidationPreviewDto>(`${BASE}/preview`, { params })).data;
+	},
 
-	async getById(id: string) {
-		const response = await axios.get<LiquidationDto>(this.buildUrl({ id }));
-		return { ...response, liquidation: LiquidationModel.ToDomain(response.data) };
-	}
+	async getPage(filters: LiquidationListFilters, pagination: PaginationParams) {
+		const response = await axios.get<LiquidationPageDto>(`${BASE}/`, { params: { ...filters, ...toPageQuery(pagination) } });
+		return { ...mapPage(response.data, item => item), summary: response.data.summary };
+	},
+
+	async getDetail(id: string) {
+		return (await axios.get<LiquidationDetailDto>(`${BASE}/${id}`)).data;
+	},
 
 	async create(data: LiquidationCreateDto) {
-		const response = await axios.post<LiquidationDto>(this.baseUrl, data);
-		return { ...response, liquidation: LiquidationModel.ToDomain(response.data) };
-	}
+		return (await axios.post<LiquidationDto>(`${BASE}/`, data)).data;
+	},
 
 	async confirm(id: string) {
-		const response = await axios.post<LiquidationDto>(this.buildUrl({ id, method: 'confirm' }));
-		return { ...response, liquidation: LiquidationModel.ToDomain(response.data) };
-	}
-}
+		return (await axios.post<LiquidationDto>(`${BASE}/${id}/confirm`)).data;
+	},
 
-export const repository = new ImplementationLiquidationRepository();
+	async reopen(id: string) {
+		return (await axios.post<LiquidationDto>(`${BASE}/${id}/reopen`)).data;
+	},
+
+	async remove(id: string) {
+		await axios.delete(`${BASE}/${id}`);
+	},
+};
