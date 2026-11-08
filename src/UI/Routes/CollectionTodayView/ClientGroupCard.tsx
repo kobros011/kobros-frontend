@@ -120,7 +120,7 @@ export const ClientGroupCard: FC<ClientGroupCardProps> = ({ items, selectedDate 
 				<Text strong className="collection-today-client-name" ellipsis>
 					{order}. {first.clientFullName}
 				</Text>
-				{first.clientBeak > 0 && (
+				{!expanded && first.clientBeak > 0 && (
 					<Tag color="success" className="collection-today-tag" aria-label="Saldo a favor del cliente">
 						A favor {formatMoneyCOP(first.clientBeak)}
 					</Tag>
@@ -142,29 +142,29 @@ export const ClientGroupCard: FC<ClientGroupCardProps> = ({ items, selectedDate 
 
 			{expanded && (
 			<div className="collection-today-client-body">
+			{/* Dos filas compactas: [CC | teléfono] y [dirección | saldo a favor]; sin filas sueltas con espacio en blanco. */}
 			<div className="collection-today-client-meta">
 				<span>
 					<Text type="secondary">CC {first.idDocument}</Text>
 				</span>
-				{first.clientBeak > 0 && (
-					<span className="meta-full">
-						<WalletOutlined aria-hidden />
-						<Text type="success" strong>Saldo a favor: {formatMoneyCOP(first.clientBeak)}</Text>
-					</span>
-				)}
-
-				{first.clientMobile && (
+				{first.clientMobile ? (
 					<span style={{ justifyContent: 'flex-end' }}>
 						<PhoneOutlined aria-label="Teléfono" />
 						<a href={`tel:${first.clientMobile.replace(/\s/g, '')}`}>
 							{first.clientMobile}
 						</a>
 					</span>
-				)}
+				) : <span />}
 				{first.clientAddress && (
-					<span className="meta-full">
+					<span className={first.clientBeak > 0 ? undefined : 'meta-full'}>
 						<EnvironmentOutlined aria-label="Dirección" />
 						<Text type="secondary" ellipsis>{first.clientAddress}</Text>
+					</span>
+				)}
+				{first.clientBeak > 0 && (
+					<span className={first.clientAddress ? undefined : 'meta-full'} style={{ justifyContent: 'flex-end' }}>
+						<WalletOutlined aria-hidden />
+						<Text type="success" strong>A favor {formatMoneyCOP(first.clientBeak)}</Text>
 					</span>
 				)}
 			</div>

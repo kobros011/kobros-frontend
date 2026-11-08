@@ -164,7 +164,8 @@
 
 .collection-today-client-meta {
 	display: grid;
-	grid-template-columns: 1fr auto;
+	grid-template-columns: minmax(0, 1fr) auto;
+	align-items: center;
 	gap: 2px 8px;
 	margin-top: 4px;
 	font-size: 11px;
