@@ -28,3 +28,6 @@ package-lock.json
 
 .env
 .env.development
+
+# Impeccable hook cache
+.impeccable/hook.cache.json

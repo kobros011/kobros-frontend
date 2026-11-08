@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "src/UI/Components/PaymentsDateailsLoan/QuotaCardItem.tsx"
+        ],
+        "createdAt": "2026-11-08T00:31:54.661Z",
+        "reason": "Left accent encodes quota status and comes from the Stitch mockup the user supplied and asked to replicate; assistant triage, not a user-typed confirmation"
+      }
+    ]
+  }
+}
