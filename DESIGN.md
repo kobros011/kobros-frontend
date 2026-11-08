@@ -338,6 +338,14 @@ Componentes reutilizables en `src/UI/Components/Dashboard/` (estilos en `dashboa
 
 Pantallas: `UI/Routes/ReportsView/` — `Dashboard` (Resumen, compuesto por `Resumen/*Card`), `WeeklyReport` y `AnnualReport` (ambas sobre `PeriodReport`). La tabla de mora crítica pagina y busca en el servidor (5 por página, búsqueda con debounce de 300 ms). El botón «Alerta a recaudadores» del mock no se porta hasta que exista el módulo de recordatorios.
 
+### 6.9 Historial de cuotas del crédito
+
+`UI/Components/PaymentsDateailsLoan/` (dentro de `DashboardShell`, usa el kit Dashboard): `PaymentsHistory` (contenedor), `HistorySummary` (chips + progreso), `HistoryFilters` (Todas / En mora / Pagadas / Pendientes + `ViewSwitcher`), `QuotaCardItem` (vista tarjetas, por defecto en móvil), `HistoryTable` (vista tabla con fila de totales del plan completo, por defecto en escritorio) y `QuotaPayInline` (abono inline).
+
+- Datos de `GET /payments/history` (paginado en servidor): estado, saldo, días de mora, `can_pay` y quién recaudó los calcula el backend; el front solo pinta.
+- **Abonar** aparece únicamente si `can_pay` (la cuota vence hoy o está en mora). Pagadas y futuras no lo muestran; el backend rechaza con 400 abonar cuotas futuras o ya pagadas.
+- `usePayPayment` invalida pagos, Cobro del día, créditos y reportes. `payments.collected_by` guarda quién abonó (pagos anteriores muestran «—»).
+
 ## 7. Reglas y buenas prácticas UI/UX
 
 ### 7.1 Mobile-first (breakpoint 768px)

@@ -23,4 +23,3 @@ export interface PaymentDto extends BaseDto {
 	client_full_name: string
 }
 
-export interface PaymentBasicDto extends Pick<PaymentDto, 'id' | 'pay_date' | 'payment_date' | 'quota_number' | 'value' | 'credit_value' | 'status' | 'loan_id' | 'active' | 'created_at' | 'updated_at'> {}

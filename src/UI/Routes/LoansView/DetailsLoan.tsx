@@ -2,7 +2,7 @@ import { Button, Card, Collapse, CollapseProps, Flex, Result, Tag } from 'antd';
 import { FC } from 'react';
 import { getLoanMoreInfo } from '@/infrastructure/querys/Loan';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { CardContentPayments } from '@/UI/Components/PaymentsDateailsLoan/CardContent';
+import { PaymentsHistory } from '@/UI/Components/PaymentsDateailsLoan/PaymentsHistory';
 import LoadingComponent from '@/UI/Components/LoadingComponent';
 import useUserModeStore from '@/infrastructure/context/User/UserModeStore';
 import routePaths from '@/constants/routePaths';
@@ -159,7 +159,7 @@ const DetailsLoanView: FC = () => {
 			label: <StepHeader n={3} title="Historial de Pagos" done active />,
 			children: (
 				<div className="loan-wizard-loan-card" style={{ padding: 0, border: 'none' }}>
-					<CardContentPayments loanId={id ?? ''} />
+					<PaymentsHistory loanId={id ?? ''} />
 				</div>
 			),
 		},

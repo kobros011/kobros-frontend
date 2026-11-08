@@ -1,5 +1,7 @@
-import { queryKeyPayments, queryKeyDefault } from '@/constants/queryKeys';
-import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query';
+import { queryKeyPayments, queryKeyDefault, queryKeyCollection, queryKeyLoans, queryKeyReports } from '@/constants/queryKeys';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { PaginationParams } from '@/domain/Pagination';
+import { PaymentHistoryStatus } from '../dto/PaymentHistoryDto';
 import { repository } from '../repositories/Payment';
 import { Filters } from '@/domain/Filters';
 
@@ -20,20 +22,15 @@ export const getPayment = (payment_id?: string) => {
 	};
 };
 
-export const getListPaymentsBasic = (loanId?: string) => {
+export const getPaymentHistory = (loanId: string | undefined, status: PaymentHistoryStatus | undefined, pagination: PaginationParams) => {
 	const queryInfo = useQuery({
-		queryKey: [queryKeyPayments.base, queryKeyDefault.list, loanId],
+		queryKey: [queryKeyPayments.base, 'history', loanId, status, pagination],
 		enabled: !!loanId,
 		placeholderData: keepPreviousData,
-		queryFn: () => {
-			return repository.getListPaymentsBasic(loanId);
-		},
+		queryFn: () => repository.getPaymentHistory(loanId as string, status, pagination),
 	});
 
-	return {
-		...queryInfo,
-		payments: queryInfo.data?.payments,
-	};
+	return { ...queryInfo, history: queryInfo.data };
 };
 
 export const getListPayments = (filters: Partial<Filters>, isSearching: boolean) => {
@@ -53,9 +50,16 @@ export const getListPayments = (filters: Partial<Filters>, isSearching: boolean)
 };
 
 export const usePayPayment = () => {
+	const queryClient = useQueryClient();
 	const mutation = useMutation({
 		mutationFn: (data: { paymentId: string, value: number }) => {
 			return repository.payPayment(data.paymentId, data.value);
+		},
+		// Un abono mueve el historial, Cobro del día, el crédito (cuotas/mora) y los reportes.
+		onSuccess: () => {
+			for (const key of [queryKeyPayments.base, queryKeyCollection.base, queryKeyLoans.base, queryKeyReports.base]) {
+				void queryClient.invalidateQueries({ queryKey: [key] });
+			}
 		},
 	});
 

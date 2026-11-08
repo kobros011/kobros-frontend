@@ -1,8 +1,11 @@
 import axios from 'axios';
 import { ImplementationBase } from './base';
 import { PaymentModel } from '@/domain/Payment';
-import { PaymentBasicDto, PaymentDto } from '../dto/PaymentDto';
+import { PaymentDto } from '../dto/PaymentDto';
 import { Filters, FiltersModel } from '@/domain/Filters';
+import { PaginationParams } from '@/domain/Pagination';
+import { PaymentHistoryPageDto, PaymentHistoryStatus } from '../dto/PaymentHistoryDto';
+import { toPageQuery } from '../utils/pagination';
 
 export class ImplementationPaymentRepository extends ImplementationBase {
 	protected readonly baseUrl: string = '/payments/';
@@ -16,12 +19,11 @@ export class ImplementationPaymentRepository extends ImplementationBase {
 		};
 	}
 
-	async getListPaymentsBasic(loanId?: string) {
-		const response = await axios.get<PaymentBasicDto[]>(this.baseUrl, { params: { loan_id: loanId } });
-		return {
-			...response,
-			payments: response?.data?.map(payment => PaymentModel.ToDomainBasic(payment)),
-		};
+	async getPaymentHistory(loanId: string, status: PaymentHistoryStatus | undefined, pagination: PaginationParams) {
+		const response = await axios.get<PaymentHistoryPageDto>(`${this.baseUrl}history`, {
+			params: { loan_id: loanId, status, ...toPageQuery(pagination) },
+		});
+		return response.data;
 	}
 
 	async getListPayments(filters: Partial<Filters>) {

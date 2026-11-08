@@ -1,4 +1,4 @@
-import { PaymentBasicDto, PaymentDto } from '@/infrastructure/dto/PaymentDto';
+import { PaymentDto } from '@/infrastructure/dto/PaymentDto';
 import { BaseDomain } from './BaseDomain';
 import { PaymentStatus } from '@/constants/types';
 
@@ -25,7 +25,6 @@ export interface Payment extends BaseDomain {
 	clientFullName: string
 }
 
-export interface PaymentBasic extends Pick<Payment, 'id' | 'payDate' | 'paymentDate' | 'quotaNumber' | 'value' | 'creditValue' | 'status' | 'loanId' | 'active' | 'createdAt' | 'updatedAt'> {}
 
 /** API usa minúsculas (pagado); el front enum usa mayúsculas (PAGADO). */
 export function normalizePaymentStatus(status: string): PaymentStatus {
@@ -68,22 +67,6 @@ export class PaymentModel {
 			active: DTO.active,
 			createdAt: DTO.created_at,
 			updatedAt: DTO.updated_at,
-		};
-	}
-
-	static ToDomainBasic(DTO: PaymentBasicDto): PaymentBasic {
-		return {
-			active: DTO.active,
-			createdAt: DTO.created_at,
-			updatedAt: DTO.updated_at,
-			id: DTO.id,
-			creditValue: DTO.credit_value,
-			loanId: DTO.loan_id,
-			payDate: DTO.pay_date,
-			paymentDate: DTO.payment_date,
-			quotaNumber: DTO.quota_number,
-			status: normalizePaymentStatus(DTO.status),
-			value: DTO.value,
 		};
 	}
 }
