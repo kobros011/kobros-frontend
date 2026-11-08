@@ -3,7 +3,7 @@ import { BuildColumns, CustomColumn } from '@/infrastructure/utils/BuildColumns'
 import { OnClickActions, useRowActions } from '@/UI/Components/RowActions';
 import { PriorityBadge, RouteChips } from './priority/PriorityChip';
 
-export const getColumns = (actions: OnClickActions<Client>, routeId?: string) => {
+export const getColumns = (actions: OnClickActions<Client>, routeId?: string, selectedIds: ReadonlySet<string> = new Set()) => {
 
 	const { columnActions } = useRowActions<Client>(actions);
 
@@ -16,7 +16,7 @@ export const getColumns = (actions: OnClickActions<Client>, routeId?: string) =>
 			width: 80,
 			render: (_value: unknown, record: Client) => {
 				const route = record.routes?.find(item => item.routeId === routeId);
-				return route ? <PriorityBadge order={route.order} size={30} /> : '—';
+				return route ? <PriorityBadge order={route.order} size={30} state={selectedIds.has(record.id) ? 'moved' : 'default'} /> : '—';
 			},
 		}] : []),
 		{
@@ -30,7 +30,7 @@ export const getColumns = (actions: OnClickActions<Client>, routeId?: string) =>
 			title: 'Rutas y prioridad',
 			dataIndex: 'routes',
 			width: 260,
-			render: (_value: unknown, record: Client) => <RouteChips routes={record.routes} />,
+			render: (_value: unknown, record: Client) => <RouteChips routes={record.routes} highlight={selectedIds.has(record.id)} />,
 		},
 		{
 			key: 'idDocument',

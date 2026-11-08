@@ -59,7 +59,7 @@ export const TableClients: FC<TableClientsProps> = ({ isSearching, actions, type
 		<CustomTable<Client>
 			isLoading={isFetching || isLoading || isRefetching}
 			dataSource={clients}
-			columns={getColumns(actions, routeId)}
+			columns={getColumns(actions, routeId, new Set(selection?.clients.map(client => client.id)))}
 			selection={selection ? {
 				keys: selection.clients.map(client => client.id),
 				onToggle: (record, checked) => selection.onChange(checked ? [...selection.clients.filter(client => client.id !== record.id), record] : selection.clients.filter(client => client.id !== record.id)),
