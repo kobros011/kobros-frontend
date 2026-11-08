@@ -27,7 +27,7 @@ export const renderTypedValue = (
 ): ReactNode => {
 
 	if (type == 'money') {
-		return <>{formatRouteMoney(Number(value ?? 0), routeId, { digits: 'brand' })}</>;
+		return <>{formatRouteMoney(Number(value ?? 0), routeId)}</>;
 	}
 
 	if (type == 'number') {

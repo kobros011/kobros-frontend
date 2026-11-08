@@ -85,7 +85,7 @@ export const TableClients: FC<TableClientsProps> = ({ isSearching, actions, type
 						)}
 						{client.beak > 0 && (
 							<Tag color="success" style={{ borderRadius: 999, margin: 0 }}>
-								Saldo a favor {formatRouteMoney(client.beak, client.routeId, { digits: 'brand' })}
+								Saldo a favor {formatRouteMoney(client.beak, client.routeId)}
 							</Tag>
 						)}
 					</>

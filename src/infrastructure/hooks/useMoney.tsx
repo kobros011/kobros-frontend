@@ -44,3 +44,10 @@ export const useRouteMoney = () => {
 		[version, primary],
 	);
 };
+
+/** Código, símbolo y decimales de la moneda del contexto: para los campos donde se digita dinero (sin decimales en COP, con centavos en USD). */
+export const useCurrencyInfo = () => {
+	const currency = useCurrency();
+	const info = useCurrencyStore(state => (currency ? state.catalog[currency] : undefined));
+	return { code: currency, symbol: info?.symbol ?? '', decimals: info?.decimals ?? 0 };
+};

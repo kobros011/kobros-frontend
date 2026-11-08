@@ -73,7 +73,7 @@ const DetailsLoanView: FC = () => {
 		);
 	}
 
-	const money = (value: unknown) => routeMoney(Number(value ?? 0), loan.routeId, { digits: 'brand' });
+	const money = (value: unknown) => routeMoney(Number(value ?? 0), loan.routeId);
 	const isFixedDate = loan.paymentMethod === PaymentMethod.fixedDate;
 	const term = computeLoanDerived({
 		agreedQuotas: loan.agreedQuotas,

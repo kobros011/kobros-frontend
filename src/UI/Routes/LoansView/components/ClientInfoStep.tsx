@@ -127,7 +127,7 @@ export const ClientInfoStep: FC<ClientInfoStepProps> = ({
 					</FichaField>
 					{(client?.beak ?? 0) > 0 && (
 						<FichaField label="Saldo a favor">
-							{formatRouteMoney(client?.beak ?? 0, routeId, { digits: 'brand' })}
+							{formatRouteMoney(client?.beak ?? 0, routeId)}
 						</FichaField>
 					)}
 

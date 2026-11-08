@@ -40,7 +40,7 @@ export const getPortfolioColumns = () => {
 			title: 'Saldo',
 			dataIndex: 'balance',
 			width: 120,
-			render: (value: number, record) => <Tag color='blue'>{formatRouteMoney(value, record.route_id, { digits: 'brand' })}</Tag>,
+			render: (value: number, record) => <Tag color='blue'>{formatRouteMoney(value, record.route_id)}</Tag>,
 		},
 		{ key: 'end_date', title: 'Vence', dataIndex: 'end_date', width: 100, typeRender: 'date' },
 		{ key: 'payment_method', title: 'Método', dataIndex: 'payment_method', width: 120 },
@@ -63,7 +63,7 @@ export const getDelinquencyColumns = () => {
 			title: 'Saldo en mora',
 			dataIndex: 'balance',
 			width: 130,
-			render: (value: number, record) => <Tag color='red'>{formatRouteMoney(value, record.route_id, { digits: 'brand' })}</Tag>,
+			render: (value: number, record) => <Tag color='red'>{formatRouteMoney(value, record.route_id)}</Tag>,
 		},
 		{
 			key: 'days_overdue',

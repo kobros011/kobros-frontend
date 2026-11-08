@@ -19,7 +19,7 @@ import { DashboardShell, KpiCard } from '@/UI/Components/Dashboard/ui';
 import useUserModeStore from '@/infrastructure/context/User/UserModeStore';
 import useTableViewStore from '@/infrastructure/context/TableViewStore';
 import MovementHistory from './MovementHistory';
-import { useMoney } from '@/infrastructure/hooks/useMoney';
+import { useCurrency, useMoney } from '@/infrastructure/hooks/useMoney';
 
 const { Text } = Typography;
 
@@ -33,6 +33,7 @@ interface MovementFormValues {
 
 const RouteCash: FC<{ routeId: string, readonly?: boolean }> = ({ routeId, readonly = false }) => {
 	const money = useMoney();
+	const currencyCode = useCurrency();
 	const { notification } = App.useApp();
 	const [form] = Form.useForm<MovementFormValues>();
 	const [modalType, setModalType] = useState<RouteMovementType | null>(null);
@@ -149,7 +150,7 @@ const RouteCash: FC<{ routeId: string, readonly?: boolean }> = ({ routeId, reado
 				{modalType === 'RETIRO' && <Text type="secondary">Saldo disponible: <strong>{money(saldo)}</strong></Text>}
 				<Form form={form} layout="vertical" onFinish={onSubmit} style={{ marginTop: 12 }}>
 					<Form.Item label="Monto" name="value" rules={[ ruleRequired ]}>
-						<InputNumber thousandsSeparator placeholder="Monto en COP" />
+						<InputNumber thousandsSeparator placeholder={`Monto en ${currencyCode ?? 'la moneda de la ruta'}`} />
 					</Form.Item>
 					<Form.Item label="Motivo" name="concept" rules={[ ruleRequired ]}>
 						<Input.TextArea rows={2} maxLength={120} placeholder={modalType === 'INGRESO' ? 'Ej: aporte de capital' : 'Ej: retiro de utilidades'} />

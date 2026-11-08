@@ -43,7 +43,7 @@ export const QuotaPayInline: FC<{ item: PaymentHistoryItemDto; compact?: boolean
 				value={amount?.toString()}
 				onChange={value => setAmount(value ? Number(value) : undefined)}
 				thousandsSeparator
-				placeholder={`Saldo ${money(item.balance, { code: false, digits: 'brand' })}`}
+				placeholder={`Saldo ${money(item.balance, { code: false })}`}
 				style={{ width: '100%' }}
 			/>
 			<Button size="small" onClick={() => setAmount(item.balance)} disabled={payMutation.isPending} aria-label="Usar el saldo completo">

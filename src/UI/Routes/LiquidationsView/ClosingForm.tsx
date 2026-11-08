@@ -14,7 +14,7 @@ import { handleError } from '@/infrastructure/utils/handleError';
 import { LiquidationPreviewDto } from '@/infrastructure/dto/LiquidationDto';
 
 import { getDifferenceView } from './statusMeta';
-import { useMoney } from '@/infrastructure/hooks/useMoney';
+import { useCurrencyInfo, useMoney } from '@/infrastructure/hooks/useMoney';
 
 interface ClosingFormProps {
 	preview: LiquidationPreviewDto;
@@ -27,6 +27,7 @@ const toNumber = (value?: string) => (value === undefined || value === '' ? null
 /** Datos que digita quien cierra + cuadre en vivo (esperado = base + recaudo − gastos − créditos nuevos). */
 export const ClosingForm: FC<ClosingFormProps> = ({ preview, collectorId }) => {
 	const money = useMoney();
+	const { symbol, decimals } = useCurrencyInfo();
 	const { notification } = App.useApp();
 	const create = useCreateLiquidation();
 	const [base, setBase] = useState<string | undefined>();
@@ -77,12 +78,12 @@ export const ClosingForm: FC<ClosingFormProps> = ({ preview, collectorId }) => {
 				<div className="lq-fields">
 					<label className="lq-field">
 						<span className="kb-section-sub">Base entregada <Pill tone="neutral">Sugerido</Pill></span>
-						<InputNumber aria-label="Base entregada" thousandsSeparator precision={0} size="small" value={base} onChange={value => setBase(value as string)} prefix="$" />
+						<InputNumber aria-label="Base entregada" thousandsSeparator precision={decimals} size="small" value={base} onChange={value => setBase(value as string)} prefix={symbol} />
 						<span className="kb-section-sub">Último cierre: {money(preview.suggested_base)}</span>
 					</label>
 					<label className="lq-field">
 						<span className="kb-section-sub">Efectivo entregado</span>
-						<InputNumber aria-label="Efectivo entregado" thousandsSeparator precision={0} size="small" value={cash} onChange={value => setCash(value as string)} prefix="$" />
+						<InputNumber aria-label="Efectivo entregado" thousandsSeparator precision={decimals} size="small" value={cash} onChange={value => setCash(value as string)} prefix={symbol} />
 						<span className="kb-section-sub">Cuenta billete por billete</span>
 					</label>
 				</div>

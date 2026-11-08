@@ -117,13 +117,13 @@ export const ClientCreditSummaryView: FC<{ loans: LoanFullRead[] }> = ({ loans }
 								<Tag color={active ? 'warning' : 'success'}>{active ? 'Activo' : 'Cancelado'}</Tag>
 							</div>
 							<Text type="secondary" style={{ fontSize: 12, display: 'block' }}>
-								{loan.paymentMethod} · {routeMoney(Number(loan.valueCapital ?? 0), loan.routeId, { digits: 'brand' })} · {String(loan.initialDate).slice(0, 10)} → {String(loan.endDate).slice(0, 10)}
+								{loan.paymentMethod} · {routeMoney(Number(loan.valueCapital ?? 0), loan.routeId)} · {String(loan.initialDate).slice(0, 10)} → {String(loan.endDate).slice(0, 10)}
 							</Text>
 							<Text
 								style={{ fontSize: 12, display: 'block', marginTop: 4 }}
 								type={mora > 0 ? 'danger' : 'secondary'}
 							>
-								{mora > 0 ? `Mora: ${routeMoney(mora, loan.routeId, { digits: 'brand' })}` : 'Sin mora'}
+								{mora > 0 ? `Mora: ${routeMoney(mora, loan.routeId)}` : 'Sin mora'}
 							</Text>
 							<div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginTop: 8 }}>
 								<Text style={{ fontSize: 12, color: token.colorSuccess }}>
@@ -156,7 +156,7 @@ export const ClientCreditSummaryView: FC<{ loans: LoanFullRead[] }> = ({ loans }
 						<Statistic
 							title="Total en mora"
 							value={totalDefault}
-							formatter={(v) => money(v as number, { digits: 'brand' })}
+							formatter={(v) => money(v as number)}
 							valueStyle={{ color: token.colorError, fontSize: 22 }}
 						/>
 					</div>
@@ -182,7 +182,7 @@ export const ClientCreditSummaryView: FC<{ loans: LoanFullRead[] }> = ({ loans }
 				</Text>
 				<Statistic
 					value={viableAmount}
-					formatter={(v) => money(v as number, { digits: 'brand' })}
+					formatter={(v) => money(v as number)}
 					valueStyle={{ color: token.colorPrimary, fontSize: 28, fontWeight: 700 }}
 				/>
 				<Text type="secondary" style={{ fontSize: 11 }}>

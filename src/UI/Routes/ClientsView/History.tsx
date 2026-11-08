@@ -8,7 +8,7 @@ import { formatRouteMoney } from '@/infrastructure/utils/money';
 const { Title } = Typography;
 
 // El historial no trae la ruta de cada pago: se muestra con la moneda principal de la marca.
-const formatMoney = (val: number) => formatRouteMoney(val, undefined, { digits: 'brand' });
+const formatMoney = (val: number) => formatRouteMoney(val, undefined);
 
 const statusColor: Record<string, string> = {
 	pagado: 'green',

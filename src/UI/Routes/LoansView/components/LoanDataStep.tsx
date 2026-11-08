@@ -55,7 +55,7 @@ export const LoanDataStep: FC<LoanDataStepProps> = ({
 
 	const dateFirstQuota = Form.useWatch('dateFirstQuota', form);
 	const valuePayment = Form.useWatch('valuePayment', form);
-	const initialPaymentEffect = describeInitialPayment(parseFormNumber(valueQuotaFixed), parseFormNumber(valuePayment), value => money(value, { digits: 'brand' }));
+	const initialPaymentEffect = describeInitialPayment(parseFormNumber(valueQuotaFixed), parseFormNumber(valuePayment), value => money(value));
 
 	const derived = useMemo(
 		() =>
@@ -78,7 +78,7 @@ export const LoanDataStep: FC<LoanDataStepProps> = ({
 		Boolean(paymentMethod);
 
 	const moneySummary = (amount: number) =>
-		creditInputsReady ? money(amount, { digits: 'brand' }) : '—';
+		creditInputsReady ? money(amount) : '—';
 
 	return (
 		<>
