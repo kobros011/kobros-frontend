@@ -146,6 +146,12 @@ export const ClientGroupCard: FC<ClientGroupCardProps> = ({ items, selectedDate 
 				<span>
 					<Text type="secondary">CC {first.idDocument}</Text>
 				</span>
+				{first.clientBeak > 0 && (
+					<span className="meta-full">
+						<WalletOutlined aria-hidden />
+						<Text type="success" strong>Saldo a favor: {formatMoneyCOP(first.clientBeak)}</Text>
+					</span>
+				)}
 
 				{first.clientMobile && (
 					<span style={{ justifyContent: 'flex-end' }}>
