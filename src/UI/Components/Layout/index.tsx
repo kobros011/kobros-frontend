@@ -3,12 +3,11 @@ import { getMe } from '@/infrastructure/querys/User';
 import { useEffect, useState } from 'react';
 import LoadingComponent from '../LoadingComponent';
 import ErrorView from '@components/ErrorView';
-import { Layout, App as Apps, Flex, theme, Image, Button } from 'antd';
+import { Layout, App as Apps, Flex, theme, Button } from 'antd';
 import { Outlet } from 'react-router-dom';
 import './layout.css';
 import { ModulesMenu } from '../ModulesMenu';
-import Icon from '@assets/icon.png';
-import Logo from '@assets/logo-transparent.png';
+import BrandLogo from '../BrandLogo';
 import { DropdownUser } from './DropdonwUser';
 import useUserModeStore from '@/infrastructure/context/User/UserModeStore';
 import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
@@ -16,8 +15,18 @@ import useBrandStore from '@/infrastructure/context/BrandsStore';
 import { TypeUser } from '@/constants/types';
 import { normalizeTypeUser } from '@/infrastructure/utils/defaultHomeRoute';
 import useRouteStore from '@/infrastructure/context/RoutesStore';
+import useAppSettingsStore from '@/infrastructure/context/AppSettingsStore';
+import { getSettings } from '@/infrastructure/querys/Settings';
+import { DEFAULT_APP_NAME } from '@/domain/Settings';
 
 const { Header, Sider, Content } = Layout;
+
+// Todo elemento con `position: fixed` necesita un `zIndex` explícito. Sin uno, el navegador
+// no garantiza que quede por encima del contenido normal: al hacer scroll, el Content (que
+// no está posicionado) puede pintarse encima del Header/Sider "fijos" y taparlos o mezclarse
+// con ellos. El menú inferior móvil (`.menu` en layout.css) ya hace esto bien con z-index: 1000;
+// Header y Sider deben quedar por debajo de eso pero por encima del Content.
+const FIXED_CHROME_Z_INDEX = 10;
 
 const App: React.FC = () => {
 	const { getBrand } = useBrandStore(state => state);
@@ -28,6 +37,21 @@ const App: React.FC = () => {
 	const { token: { colorBgContainer, colorBorder } } = theme.useToken();
 
 	const { user, isLoading, isError, isFetching } = getMe();
+	const { settings, isError: isSettingsError } = getSettings(undefined, !!user);
+	const applySettings = useAppSettingsStore(state => state.apply);
+	const markSettingsLoaded = useAppSettingsStore(state => state.markLoaded);
+	const brandLogo = useAppSettingsStore(state => ({
+		logoFullUrl: state.logoFullUrl,
+		logoFullWidth: state.logoFullWidth,
+		logoFullHeight: state.logoFullHeight,
+		logoFullTone: state.logoFullTone,
+		logoMarkUrl: state.logoMarkUrl,
+		logoMarkWidth: state.logoMarkWidth,
+		logoMarkHeight: state.logoMarkHeight,
+		logoMarkTone: state.logoMarkTone,
+		appName: state.appName,
+		loaded: state.loaded,
+	}));
 
 	const [collapsed, setCollapsed] = useState(false);
 
@@ -37,6 +61,24 @@ const App: React.FC = () => {
 		mediaQuery.addEventListener('change', handleChange);
 		return () => mediaQuery.removeEventListener('change', handleChange);
 	}, []);
+
+	useEffect(() => {
+		if (settings) applySettings(settings);
+		else if (isSettingsError) markSettingsLoaded();
+	}, [settings, isSettingsError]);
+
+	useEffect(() => {
+		document.title = brandLogo.appName || DEFAULT_APP_NAME;
+	}, [brandLogo.appName]);
+
+	useEffect(() => {
+		const favicon = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
+		if (!favicon) return;
+		const defaultHref = favicon.getAttribute('data-default-href') ?? favicon.href;
+		favicon.setAttribute('data-default-href', defaultHref);
+		// El favicon es pequeño y cuadrado: prioriza el logo de "mark" (ícono) sobre el horizontal.
+		favicon.href = brandLogo.logoMarkUrl ?? brandLogo.logoFullUrl ?? defaultHref;
+	}, [brandLogo.logoMarkUrl, brandLogo.logoFullUrl]);
 
 	useEffect(() => {
 		if (!user) return;
@@ -68,6 +110,7 @@ const App: React.FC = () => {
 						right: 0,
 						height: '60px',
 						maxHeight: '60px',
+						zIndex: FIXED_CHROME_Z_INDEX,
 						background: colorBgContainer,
 						borderBottom: '2px solid' + colorBorder,
 						display: 'flex',
@@ -81,7 +124,7 @@ const App: React.FC = () => {
 							</Button>
 						}
 						{isMobile &&
-							<Image src={Logo} preview={false} width={120} />
+							<BrandLogo key={`${brandLogo.logoFullUrl ?? 'default'}`} variant="full" height={36} {...brandLogo} />
 						}
 
 						<DropdownUser />
@@ -96,6 +139,7 @@ const App: React.FC = () => {
 							top: 0,
 							height: '100vh',
 							maxWidth: collapsed ? '190px' : '75px',
+							zIndex: FIXED_CHROME_Z_INDEX,
 							background: colorBgContainer,
 							borderRight: '2px solid' + colorBorder,
 						}}
@@ -103,9 +147,9 @@ const App: React.FC = () => {
 					>
 						<Flex justify="center" align="center" style={{ height: '60px' }}>
 							{collapsed ? (
-								<Image src={Logo} preview={false} width={120} />
+								<BrandLogo key={`${brandLogo.logoFullUrl ?? 'default'}`} variant="full" height={36} {...brandLogo} />
 							) : (
-								<Image src={Icon} preview={false} width={40} />
+								<BrandLogo key={`${brandLogo.logoMarkUrl ?? 'default'}-${brandLogo.logoFullUrl ?? 'default'}`} variant="mark" height={40} {...brandLogo} />
 							)}
 						</Flex>
 						<div>

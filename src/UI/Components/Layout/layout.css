@@ -1,3 +1,6 @@
+/* Todo `position: fixed` en el Layout necesita un z-index explícito (ver también
+   FIXED_CHROME_Z_INDEX en Layout/index.tsx): sin uno, el contenido con scroll puede
+   pintarse por encima de este menú o mezclarse con él en vez de quedar debajo. */
 .menu {
     position: fixed;
     bottom: 0;
