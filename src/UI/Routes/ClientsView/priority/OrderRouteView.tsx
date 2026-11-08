@@ -2,6 +2,7 @@ import { FC, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, App, Button, Empty, Input, Result, Select, Skeleton } from 'antd';
 import { ArrowLeftOutlined, CloseOutlined, SaveOutlined, SearchOutlined } from '@ant-design/icons';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import routePaths from '@/constants/routePaths';
 import { DashboardShell } from '@/UI/Components/Dashboard/ui';
 import { useRoutes } from '@/infrastructure/hooks/useRoutes';
 import { getRouteClients, useReorderRoute } from '@/infrastructure/querys/ClientRoute';
@@ -21,7 +22,7 @@ function arrayMove<T>(list: T[], from: number, to: number): T[] {
 /** "Reordenar secuencia de visita": arrastrar, ▲ ▼ o "Mover a #"; los cambios son locales hasta pulsar "Guardar orden". */
 const OrderRouteView: FC = () => {
 	const navigate = useNavigate();
-	const { notification } = App.useApp();
+	const { notification, modal } = App.useApp();
 	const canManage = useCanManagePriority();
 	const { routes } = useRoutes();
 	const [params, setParams] = useSearchParams();
@@ -44,6 +45,33 @@ const OrderRouteView: FC = () => {
 	const [search, setSearch] = useState('');
 	const [found, setFound] = useState<string>();
 	const listRef = useRef<HTMLDivElement>(null);
+
+	// Con cambios sin guardar avisa antes de salir; sin cambios vuelve directo al listado (no por el historial de rutas elegidas).
+	const goToClients = () => void navigate(`/${routePaths.DEFAULT_HOME}/${routePaths.CLIENTS}`);
+	const leave = () => {
+		if (changes === 0) {
+			goToClients();
+			return;
+		}
+		void modal.confirm({
+			title: '¿Salir sin guardar?',
+			content: `Tienes ${changes} ${changes === 1 ? 'cambio' : 'cambios'} sin guardar. Si sales ahora se perderán.`,
+			okText: 'Salir sin guardar',
+			cancelText: 'Seguir editando',
+			okButtonProps: { danger: true, size: 'small' },
+			cancelButtonProps: { size: 'small' },
+			centered: true,
+			onOk: goToClients,
+		});
+	};
+
+	// Cerrar o recargar la pestaña con cambios pendientes también pide confirmación.
+	useEffect(() => {
+		if (changes === 0) return;
+		const warn = (event: BeforeUnloadEvent) => { event.preventDefault(); };
+		window.addEventListener('beforeunload', warn);
+		return () => window.removeEventListener('beforeunload', warn);
+	}, [changes]);
 
 	const moveTo = (id: string, to: number) => setOrder(current => arrayMove(current, current.indexOf(id), to - 1));
 	const clearDrag = () => { setDragId(undefined); setOverIndex(undefined); };
@@ -75,7 +103,7 @@ const OrderRouteView: FC = () => {
 	};
 
 	if (!canManage) {
-		return <Result status="403" title="Solo administración" subTitle="Los cobradores y socios pueden ver la prioridad, pero no cambiarla." extra={<Button onClick={() => void navigate(-1)}>Volver</Button>} />;
+		return <Result status="403" title="Solo administración" subTitle="Los cobradores y socios pueden ver la prioridad, pero no cambiarla." extra={<Button onClick={goToClients}>Volver</Button>} />;
 	}
 
 	const routeName = routeClients[0]?.routeName ?? routes.find(route => route.id === routeId)?.name;
@@ -84,7 +112,7 @@ const OrderRouteView: FC = () => {
 		<DashboardShell>
 			<header className="kb-card" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: 12 }}>
 				<div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
-					<Button aria-label="Volver a Clientes" icon={<ArrowLeftOutlined />} onClick={() => void navigate(-1)} style={{ width: 40, height: 40 }} />
+					<Button aria-label="Volver a Clientes" icon={<ArrowLeftOutlined />} onClick={leave} style={{ width: 40, height: 40 }} />
 					<div style={{ minWidth: 0 }}>
 						<h1 className="kb-section-title" style={{ margin: 0 }}>Reordenar secuencia de visita {routeName && <span className="kb-mono" style={{ color: 'var(--kb-primary)' }}>· {routeName}</span>}</h1>
 						<div className="kb-section-sub">Arrastra los clientes, usa ▲ ▼ o “#” para definir el recorrido del cobrador.</div>
@@ -102,7 +130,7 @@ const OrderRouteView: FC = () => {
 					{routes.length > 1 && (
 						<Select
 							size="small" showSearch optionFilterProp="label" style={{ minWidth: 220 }} placeholder="Elige o busca una ruta" aria-label="Ruta a ordenar" value={routeId}
-							onChange={value => { setParams({ ruta: value }); setSearch(''); }}
+							onChange={value => { setParams({ ruta: value }, { replace: true }); setSearch(''); }}
 							options={routes.map(route => ({ value: route.id, label: route.name }))}
 						/>
 					)}
