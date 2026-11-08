@@ -75,7 +75,7 @@ const FormRoute: FC<{ readonly?: boolean, bare?: boolean }> = ({ readonly = fals
 			},
 			onError: (error) => {
 				stopLoading();
-				notification.error({ message: error?.message ?? `Ocurrió un error al ${isCreate ? 'creada' : 'actualizar'} la ruta` });
+				notification.error({ message: handleError(error, `Ocurrió un error al ${isCreate ? 'creada' : 'actualizar'} la ruta`) });
 			},
 		});
 	};
@@ -102,6 +102,7 @@ const FormRoute: FC<{ readonly?: boolean, bare?: boolean }> = ({ readonly = fals
 			<Form
 				form={form}
 				layout="vertical"
+				key={route ? `${route.id}-${route.updatedAt}` : 'new'}
 				initialValues={route ? route : {}}
 				disabled={isRefetching || isLoading || readonly}
 				onFinish={onFinish}

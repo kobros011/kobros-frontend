@@ -74,7 +74,7 @@ const FormClient: FC<{ readonly?: boolean }> = ({ readonly = false }) => {
 			},
 			onError: (error) => {
 				stopLoading();
-				notification.error({ message: error?.message ?? `Ocurrió un error al ${isCreate ? 'crear' : 'actualizar'} el cliente` });
+				notification.error({ message: handleError(error, `Ocurrió un error al ${isCreate ? 'crear' : 'actualizar'} el cliente`) });
 			},
 		});
 	};
@@ -102,6 +102,7 @@ const FormClient: FC<{ readonly?: boolean }> = ({ readonly = false }) => {
 			<Form
 				form={form}
 				layout="vertical"
+				key={client ? `${client.id}-${client.updatedAt}` : 'new'}
 				initialValues={client ? client : {}}
 				disabled={isRefetching || isLoading || readonly}
 				onFinish={onFinish}

@@ -62,7 +62,7 @@ const FormBrand: FC<{ readonly?: boolean }> = ({ readonly = false }) => {
 			},
 			onError: (error) => {
 				stopLoading();
-				notification.error({ message: error?.message ?? `Ocurrió un error al ${isCreate ? 'crear' : 'actualizar'} la marca` });
+				notification.error({ message: handleError(error, `Ocurrió un error al ${isCreate ? 'crear' : 'actualizar'} la marca`) });
 			},
 		});
 	};
@@ -90,6 +90,7 @@ const FormBrand: FC<{ readonly?: boolean }> = ({ readonly = false }) => {
 			<Form
 				form={form}
 				layout="vertical"
+				key={brand ? `${brand.id}-${brand.updatedAt}` : 'new'}
 				initialValues={brand ? brand : {}}
 				disabled={isRefetching || isLoading || readonly}
 				onFinish={onFinish}

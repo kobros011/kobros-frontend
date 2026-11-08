@@ -101,6 +101,7 @@ const FormExpenses: FC<{ readonly?: boolean }> = ({ readonly: readonlyProp }) =>
 				form={form}
 				onFinish={onFinish}
 				disabled={readonly || isLoading || isRefetching}
+				key={expense ? `${expense.id}-${expense.updatedAt}` : 'new'}
 				initialValues={expense}
 			>
 				<Row gutter={10}>

@@ -10,7 +10,6 @@ export const getExpense = (expense_id?: string) => {
 	const queryInfo = useQuery({
 		queryKey: [queryKeyExpenses.base, queryKeyDefault.get, expense_id],
 		enabled: !!expense_id,
-		placeholderData: keepPreviousData,
 		queryFn: () => {
 			if (!expense_id) return;
 			return repository.getExpense(expense_id);

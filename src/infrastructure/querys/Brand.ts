@@ -10,7 +10,6 @@ export const getBrand = (brand_id?: string) => {
 	const queryInfo = useQuery({
 		queryKey: [queryKeyBrands.base, queryKeyDefault.get, brand_id],
 		enabled: !!brand_id,
-		placeholderData: keepPreviousData,
 		queryFn: () => {
 			if (!brand_id) return;
 			return repository.getBrand(brand_id);

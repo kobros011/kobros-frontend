@@ -66,6 +66,7 @@ export const ClientEditDrawer: FC<ClientEditDrawerProps> = ({ clientId, open, on
 				<Form
 					form={form}
 					layout="vertical"
+					key={client ? `${client.id}-${client.updatedAt}` : 'new'}
 					initialValues={client}
 					disabled={isLoading || isLoadingClient}
 					onFinish={onFinish}

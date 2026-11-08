@@ -65,6 +65,7 @@ export const ConceptExpenseCreate: FC<ConceptExpenseCreateProps> = ({ isCreating
 			layout="vertical"
 			form={form}
 			onFinish={onFinish}
+			key={expenseConcept?.id ?? 'new'}
 			initialValues={expenseConcept}
 		>
 			<Row gutter={8} justify={'center'} align={'middle'}>

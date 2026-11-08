@@ -77,7 +77,6 @@ export const getUser = (user_id?: string) => {
 	const queryInfo = useQuery({
 		queryKey: [queryKeyUsers.base, queryKeyDefault.get, user_id],
 		enabled: !!user_id,
-		placeholderData: keepPreviousData,
 		queryFn: () => {
 			if (!user_id) return;
 

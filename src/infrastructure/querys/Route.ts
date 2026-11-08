@@ -10,7 +10,6 @@ export const getRoute = (route_id?: string) => {
 	const queryInfo = useQuery({
 		queryKey: [queryKeyRoutes.base, queryKeyDefault.get, route_id],
 		enabled: !!route_id,
-		placeholderData: keepPreviousData,
 		queryFn: () => {
 			if (!route_id) return;
 			return repository.getRoute(route_id);

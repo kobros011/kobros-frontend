@@ -1,5 +1,5 @@
 import { queryKeyExpensesConcepts, queryKeyDefault } from '@/constants/queryKeys';
-import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { TypeAction } from '@/constants/types';
 import { repository } from '../repositories/ExpenseConcept';
 import { ExpensesConcepts } from '@/domain/ExpensesConcepts';
@@ -8,7 +8,6 @@ export const getExpenseConcept = (expenseConcept_id?: string) => {
 	const queryInfo = useQuery({
 		queryKey: [queryKeyExpensesConcepts.base, queryKeyDefault.get, expenseConcept_id],
 		enabled: !!expenseConcept_id,
-		placeholderData: keepPreviousData,
 		queryFn: () => {
 			if (!expenseConcept_id) return;
 			return repository.getExpenseConcept(expenseConcept_id);

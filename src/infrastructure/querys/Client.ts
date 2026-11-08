@@ -10,7 +10,6 @@ export const getClient = (client_id?: string) => {
 	const queryInfo = useQuery({
 		queryKey: [queryKeyClients.base, queryKeyDefault.get, client_id],
 		enabled: !!client_id,
-		placeholderData: keepPreviousData,
 		queryFn: () => {
 			if (!client_id) return;
 			return repository.getClient(client_id);

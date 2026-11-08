@@ -107,7 +107,7 @@ const FormUser: FC<{ readonly?: boolean }> = ({ readonly = false }) => {
 			},
 			onError: (error) => {
 				stopLoading();
-				notification.error({ message: error?.message ?? `Ocurrió un error al ${isCreate ? 'crear' : 'actualizar'} el usuario` });
+				notification.error({ message: handleError(error, `Ocurrió un error al ${isCreate ? 'crear' : 'actualizar'} el usuario`) });
 			},
 		});
 	};
@@ -135,6 +135,7 @@ const FormUser: FC<{ readonly?: boolean }> = ({ readonly = false }) => {
 			<Form
 				form={form}
 				layout="vertical"
+				key={user ? `${user.id}-${user.updatedAt}` : 'new'}
 				initialValues={user}
 				disabled={isRefetching || isLoading || readonly || changingPassword}
 				onFinish={onFinish}
