@@ -8,6 +8,14 @@ export interface IRecord {
 	active?: boolean;
 }
 
+/** Paginación controlada por el servidor, compartida por la vista de tabla y la de tarjetas. */
+export interface ServerPagination {
+	page: number;
+	pageSize: number;
+	total: number;
+	onChange: (page: number, pageSize: number) => void;
+}
+
 export interface PropsTables<
 	RecordType extends IRecord = IRecord,
 > extends Pick<TableProps<RecordType>, 'columns' | 'dataSource' | 'loading' | 'sticky' | 'rowClassName' | 'onRow'> {
@@ -23,4 +31,6 @@ export interface PropsTables<
 	onRowClick?: (record: RecordType) => void
 	/** Píldora del pie de la tarjeta en vista de lista (ej. conteo de créditos). Solo se pasa cuando el módulo tiene un dato real que mostrar. */
 	cardFooterBadge?: (record: RecordType) => ReactNode
+	/** Paginación del servidor. Sin ella la tabla no pagina y la vista de tarjetas pagina en el cliente. */
+	pagination?: ServerPagination
 }

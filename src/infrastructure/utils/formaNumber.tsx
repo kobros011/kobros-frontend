@@ -1,3 +1,5 @@
+import useAppSettingsStore from '@/infrastructure/context/AppSettingsStore';
+
 export const parseFormNumber = (value: string | number | null | undefined): number => {
 	if (value === null || value === undefined || value === '') return 0;
 	if (typeof value === 'number') return Number.isFinite(value) ? value : 0;
@@ -8,7 +10,8 @@ export const parseFormNumber = (value: string | number | null | undefined): numb
 };
 
 export const formatNumber = (value: string | number | null | undefined, precision?: number): string => {
-	const precisionCurrency = precision ?? 2;
+	const { numberFormatStyle, numberDecimals } = useAppSettingsStore.getState();
+	const precisionCurrency = precision ?? numberDecimals;
 	const finalValue = value || 0;
 
 	const add = parseFormNumber(finalValue).toFixed(2);
@@ -25,5 +28,8 @@ export const formatNumber = (value: string | number | null | undefined, precisio
 	intPart = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 	
 	const result = precisionCurrency > 0 ? intPart + (decimalPart ? `.${decimalPart.slice(0, precisionCurrency)}` : '') : intPart;
+	if (numberFormatStyle === 'dot-thousands') {
+		return result.replace(/[,.]/g, char => (char === ',' ? '.' : ','));
+	}
 	return result;
 };

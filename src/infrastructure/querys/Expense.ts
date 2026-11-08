@@ -4,6 +4,7 @@ import { TypeAction } from '@/constants/types';
 import { repository } from '../repositories/Expense';
 import { Expense } from '@/domain/Expenses';
 import { Filters } from '@/domain/Filters';
+import { PaginationParams } from '@/domain/Pagination';
 
 export const getExpense = (expense_id?: string) => {
 	const queryInfo = useQuery({
@@ -36,6 +37,31 @@ export const getListExpenses = (filters: Partial<Filters>, isSearching: boolean)
 		...queryInfo,
 		expenses: queryInfo.data?.expenses,
 	};
+};
+
+export const getPageExpenses = (filters: Partial<Filters>, pagination: PaginationParams, isSearching: boolean) => {
+	const queryInfo = useQuery({
+		queryKey: [queryKeyExpenses.base, queryKeyDefault.list, 'page', filters, pagination],
+		enabled: isSearching,
+		placeholderData: keepPreviousData,
+		queryFn: () => repository.getPage(filters, pagination),
+	});
+
+	return {
+		...queryInfo,
+		expenses: queryInfo.data?.page.items,
+		total: queryInfo.data?.page.total ?? 0,
+	};
+};
+
+export const deleteExpense = () => {
+	const mutation = useMutation({
+		mutationFn: (expense_id: string) => {
+			return repository.delete(expense_id);
+		},
+	});
+
+	return mutation;
 };
 
 export const createExpense = () => {

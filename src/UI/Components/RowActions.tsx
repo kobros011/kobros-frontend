@@ -10,6 +10,10 @@ export interface OnClickActions<T> {
 	edit: (record: T) => void
 	delete: (record: T) => void
 	inactiveTab?: boolean
+	/** Por defecto true. En false se oculta el botón de editar. */
+	canEdit?: boolean
+	/** Por defecto true. En false se oculta la acción de desactivar/activar. */
+	canDelete?: boolean
 	moreActions?: [{ label: string, key: number | string, action: (record: T) => void, icon: ReactNode }]
 }
 
@@ -38,12 +42,12 @@ export const useRowActions = <T extends object>(actions: OnClickActions<T>, widt
 
 	const getMoreItems = (record: T) => {
 		return [
-			{
+			...(actions.canDelete === false ? [] : [{
 				key: 'toggle',
 				icon: actions.inactiveTab ? <CheckCircleOutlined /> : <CloseCircleOutlined />,
 				label: actions.inactiveTab ? 'Activar' : 'Desactivar',
 				onClick: () => actions.delete(record),
-			},
+			}]),
 			...(actions?.moreActions?.map((item) => ({
 				key: item.key,
 				label:item.label,
@@ -65,14 +69,14 @@ export const useRowActions = <T extends object>(actions: OnClickActions<T>, widt
 					onClick={() => actions.see(record)}
 					ghost
 				/>
-				{!actions.inactiveTab && (
+				{!actions.inactiveTab && actions.canEdit !== false && (
 					<IconActionButton
 						title="Editar"
 						icon={<EditOutlined />}
 						onClick={() => actions.edit(record)}
 					/>
 				)}
-				{((actions.moreActions?.length ?? 0) === 0) && (
+				{((actions.moreActions?.length ?? 0) === 0) && actions.canDelete !== false && (
 					<IconActionButton
 						title={toggleTitle}
 						icon={toggleIcon}

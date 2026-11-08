@@ -22,10 +22,11 @@ interface MovementHistoryProps {
 	onViewModeChange: (mode: ViewMode) => void;
 	onIngresar: () => void;
 	onRetirar: () => void;
+	readonly?: boolean;
 }
 
 const MovementHistory: FC<MovementHistoryProps> = ({
-	movements, total, page, pageSize, onPageChange, isLoading, isMobile, viewMode, onViewModeChange, onIngresar, onRetirar,
+	movements, total, page, pageSize, onPageChange, isLoading, isMobile, viewMode, onViewModeChange, onIngresar, onRetirar, readonly = false,
 }) => {
 	const columns: ColumnsType<RouteMovement> = [
 		{
@@ -74,14 +75,16 @@ const MovementHistory: FC<MovementHistoryProps> = ({
 				<ViewSwitcher value={viewMode} onChange={onViewModeChange} size={isMobile ? 'small' : 'middle'} />
 			</Flex>
 
-			<Flex gap={8} wrap="wrap" style={{ marginBottom: 14 }}>
-				<Button type="primary" size={buttonSize} icon={<ArrowUpOutlined />} onClick={onIngresar} style={isMobile ? { flex: 1 } : undefined}>
-					Ingresar dinero
-				</Button>
-				<Button danger size={buttonSize} icon={<ArrowDownOutlined />} onClick={onRetirar} style={isMobile ? { flex: 1 } : undefined}>
-					Retirar dinero
-				</Button>
-			</Flex>
+			{!readonly && (
+				<Flex gap={8} wrap="wrap" style={{ marginBottom: 14 }}>
+					<Button type="primary" size={buttonSize} icon={<ArrowUpOutlined />} onClick={onIngresar} style={isMobile ? { flex: 1 } : undefined}>
+						Ingresar dinero
+					</Button>
+					<Button danger size={buttonSize} icon={<ArrowDownOutlined />} onClick={onRetirar} style={isMobile ? { flex: 1 } : undefined}>
+						Retirar dinero
+					</Button>
+				</Flex>
+			)}
 
 			{viewMode === 'list' ? (
 				<MovementList

@@ -10,7 +10,8 @@ import { Avatar, Card, Col, Divider, Empty, Flex, Pagination, Row, Skeleton, Tag
 import { CSSProperties, KeyboardEvent, ReactNode, useState } from 'react';
 import { FieldDef } from './fieldCatalog';
 import { FieldPref } from '@/infrastructure/context/TableViewStore';
-import { IRecord } from './types';
+import { IRecord, ServerPagination } from './types';
+import { PAGE_SIZE_OPTIONS } from '@/domain/Pagination';
 
 const { Text, Title } = Typography;
 
@@ -25,6 +26,9 @@ interface CardListViewProps<T extends IRecord> {
 	onCardClick?: (record: T) => void;
 	/** Píldora del pie de tarjeta (ej. conteo de créditos del cliente). Solo se muestra si el módulo tiene un dato real que mostrar. */
 	footerBadge?: (record: T) => ReactNode;
+	/** Paginación del servidor: `dataSource` ya es la página actual. Sin ella se pagina en el cliente. */
+	pagination?: ServerPagination;
+	isMobile?: boolean;
 }
 
 const AVATAR_COLORS = ['#7C5CFC', '#17A673', '#D68910', '#2E86DE', '#C2185B', '#0097A7'];
@@ -125,7 +129,7 @@ function InfoBlock({ label, icon, primary, secondary }: { label: string; icon: R
  * bloques de información agrupados de a 2 (con botón de llamar en los campos de teléfono)
  * y pie con fecha + píldora opcional específica del módulo.
  */
-export function CardListView<T extends IRecord>({ dataSource, fields, prefs, titleField, isLoading, renderActions, onCardClick, footerBadge }: CardListViewProps<T>) {
+export function CardListView<T extends IRecord>({ dataSource, fields, prefs, titleField, isLoading, renderActions, onCardClick, footerBadge, pagination, isMobile }: CardListViewProps<T>) {
 	const [page, setPage] = useState(1);
 	const [hoveredId, setHoveredId] = useState<string | null>(null);
 	const { token } = theme.useToken();
@@ -140,7 +144,7 @@ export function CardListView<T extends IRecord>({ dataSource, fields, prefs, tit
 		return <Empty style={{ marginTop: 48 }} description="No hay datos" />;
 	}
 
-	const pageRecords = dataSource.length > PAGE_SIZE ? dataSource.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE) : dataSource;
+	const pageRecords = !pagination && dataSource.length > PAGE_SIZE ? dataSource.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE) : dataSource;
 
 	return (
 		// overflowX oculta el pequeño desborde horizontal que genera el margen negativo
@@ -293,7 +297,21 @@ export function CardListView<T extends IRecord>({ dataSource, fields, prefs, tit
 				})}
 			</Row>
 
-			{dataSource.length > PAGE_SIZE && (
+			{pagination ? (
+				pagination.total > PAGE_SIZE_OPTIONS[0] && (
+					<Flex justify="center">
+						<Pagination
+							current={pagination.page}
+							pageSize={pagination.pageSize}
+							total={pagination.total}
+							onChange={pagination.onChange}
+							showSizeChanger={!isMobile}
+							pageSizeOptions={PAGE_SIZE_OPTIONS}
+							simple={isMobile}
+						/>
+					</Flex>
+				)
+			) : dataSource.length > PAGE_SIZE && (
 				<Flex justify="center">
 					<Pagination current={page} pageSize={PAGE_SIZE} total={dataSource.length} onChange={setPage} showSizeChanger={false} />
 				</Flex>

@@ -3,6 +3,9 @@ import { ImplementationBase } from './base';
 import { Route, RouteModel } from '@/domain/Route';
 import { RouteDto } from '../dto/RouteDto';
 import { Filters, FiltersModel } from '@/domain/Filters';
+import { PaginationParams } from '@/domain/Pagination';
+import { PageDto } from '../dto/PageDto';
+import { mapPage, toPageQuery } from '../utils/pagination';
 
 export class ImplementationRouteRepository extends ImplementationBase {
 	protected readonly baseUrl: string = '/routes/';
@@ -23,6 +26,14 @@ export class ImplementationRouteRepository extends ImplementationBase {
 			...response,
 			data: response?.data?.map(route => RouteModel.ToDomain(route)),
 		};
+	}
+
+	async getPage(filters: Partial<Filters>, pagination: PaginationParams) {
+		const response = await axios.get<PageDto<RouteDto>>(this.baseUrl, {
+			params: { ...FiltersModel.toDto(filters), ...toPageQuery(pagination) },
+		});
+
+		return { ...response, page: mapPage(response.data, dto => RouteModel.ToDomain(dto)) };
 	}
 
 	async create(data: Partial<Route>) {

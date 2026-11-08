@@ -40,6 +40,7 @@ export const getColumns = (actions: OnClickActions<Brand>) => {
 			dataIndex: 'createdAt',
 			width: 120,
 			typeRender: 'date',
+			defaultVisible: false,
 		},
 		{
 			key: 'updatedAt',
@@ -47,6 +48,7 @@ export const getColumns = (actions: OnClickActions<Brand>) => {
 			dataIndex: 'updatedAt',
 			width: 120,
 			typeRender: 'date',
+			defaultVisible: false,
 		},
 		columnActions,
 	];

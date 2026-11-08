@@ -3,6 +3,9 @@ import { ExpenseDto } from '../dto/ExpensesDto';
 import { ImplementationBase } from './base';
 import { Expense, ExpenseModel } from '@/domain/Expenses';
 import { Filters, FiltersModel } from '@/domain/Filters';
+import { PaginationParams } from '@/domain/Pagination';
+import { PageDto } from '../dto/PageDto';
+import { mapPage, toPageQuery } from '../utils/pagination';
 
 export class ImplementationExpenseRepository extends ImplementationBase {
 	protected readonly baseUrl: string = '/expenses/';
@@ -22,6 +25,18 @@ export class ImplementationExpenseRepository extends ImplementationBase {
 			...response,
 			expenses: response?.data?.map(payment => ExpenseModel.ToDomain(payment)),
 		};
+	}
+
+	async getPage(filters: Partial<Filters>, pagination: PaginationParams) {
+		const response = await axios.get<PageDto<ExpenseDto>>(this.baseUrl, {
+			params: { ...FiltersModel.toDto(filters), ...toPageQuery(pagination) },
+		});
+
+		return { ...response, page: mapPage(response.data, dto => ExpenseModel.ToDomain(dto)) };
+	}
+
+	async delete(expense_id: string) {
+		return axios.put(this.buildUrl({ id: expense_id, method: 'toggle' }));
 	}
 
 	async create(data: Partial<Expense>) {

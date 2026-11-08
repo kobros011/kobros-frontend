@@ -8,7 +8,7 @@ import { Color } from 'antd/es/color-picker';
 import { handleError } from '@/infrastructure/utils/handleError';
 import useUserStore from '@/infrastructure/context/User/UserDataStore';
 import { useQueryClient } from '@tanstack/react-query';
-import { queryKeyDefault, queryKeyExpensesConcepts } from '@/constants/queryKeys';
+import { queryKeyDefault, queryKeyExpenses, queryKeyExpensesConcepts } from '@/constants/queryKeys';
 import { useMutationType } from '@/infrastructure/querys/ExpenseConcepts';
 import { ImCancelCircle } from 'react-icons/im';
 import useExpensesConceptsStore from '@/infrastructure/context/ConceptsStore';
@@ -47,6 +47,7 @@ export const ConceptExpenseCreate: FC<ConceptExpenseCreateProps> = ({ isCreating
 				void queryClient.refetchQueries({
 					queryKey: [queryKeyExpensesConcepts.base, queryKeyDefault.list],
 				});
+				void queryClient.invalidateQueries({ queryKey: [queryKeyExpenses.base, queryKeyDefault.list], exact: false });
 				resetStore();
 				setIsCreating?.(false);
 			}, 

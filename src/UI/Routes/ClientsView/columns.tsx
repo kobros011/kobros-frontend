@@ -38,6 +38,7 @@ export const getColumns = (actions: OnClickActions<Client>) => {
 			title: 'Teléfono actual',
 			dataIndex: 'currentPhone',
 			width: 120,
+			defaultVisible: false,
 		},
 		{
 			key: 'currentMobile',
@@ -65,6 +66,7 @@ export const getColumns = (actions: OnClickActions<Client>) => {
 			dataIndex: 'createdAt',
 			width: 120,
 			typeRender: 'date',
+			defaultVisible: false,
 		},
 		{
 			key: 'updatedAt',
@@ -72,6 +74,7 @@ export const getColumns = (actions: OnClickActions<Client>) => {
 			dataIndex: 'updatedAt',
 			width: 120,
 			typeRender: 'date',
+			defaultVisible: false,
 		},
 		columnActions,
 	];

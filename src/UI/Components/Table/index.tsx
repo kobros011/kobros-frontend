@@ -8,10 +8,11 @@ import { DEFAULT_CARD_FIELDS_COUNT, getConfigurableFields, mergeFieldPrefs } fro
 import ViewSwitcher from './ViewSwitcher';
 import FieldSettingsPopover from './FieldSettingsPopover';
 import CardListView from './CardListView';
+import { PAGE_SIZE_OPTIONS } from '@/domain/Pagination';
 
 function CustomTable<
 	RecordType extends IRecord = IRecord,
->({ dataSource, loading, onRow, columns = [], moduleName, titleField, onRowClick, cardFooterBadge, ...props }: PropsTables<RecordType>) {
+>({ dataSource, loading, onRow, columns = [], moduleName, titleField, onRowClick, cardFooterBadge, pagination, ...props }: PropsTables<RecordType>) {
 	const { isMobile } = useUserModeStore(state => state);
 
 	const modulePrefs = useTableViewStore(state => (moduleName ? state.modules[moduleName] : undefined));
@@ -56,7 +57,17 @@ function CustomTable<
 				loading={loadingIndicator}
 				columns={moduleName ? visibleColumns : columns}
 				size="small"
-				pagination={false}
+				pagination={pagination ? {
+					current: pagination.page,
+					pageSize: pagination.pageSize,
+					total: pagination.total,
+					onChange: pagination.onChange,
+					showSizeChanger: !isMobile,
+					pageSizeOptions: PAGE_SIZE_OPTIONS,
+					simple: isMobile,
+					size: 'small',
+					hideOnSinglePage: pagination.total <= PAGE_SIZE_OPTIONS[0],
+				} : false}
 				scroll={{ x: props.scrollX ?? 'max-content', y: props.scrollY ?? (isMobile ? 'calc(100dvh - 200px)' : 'calc(100vh - 260px)') }}
 				rowKey={(record) => record.id ? record.id.toString() : record.name || ''}
 				bordered
@@ -109,6 +120,8 @@ function CustomTable<
 					renderActions={actionsColumn?.render ? record => actionsColumn.render!(record, record, 0) as ReactNode : undefined}
 					onCardClick={onRowClick}
 					footerBadge={cardFooterBadge}
+					pagination={pagination}
+					isMobile={isMobile}
 				/>
 			)}
 		</Flex>

@@ -27,7 +27,7 @@ const useExpensesConceptsStore = create<State>()(
 			set({ isLoading: true });
 			const response = await repository.getListExpensesConcepts();
 			if (response.status != 200) {
-				set({ isLoading: false, isError: true, error: 'Error al cargar los clientes' });
+				set({ isLoading: false, isError: true, error: 'Error al cargar los conceptos' });
 				return;
 			}
 			set({ isLoading: false, expensesConcepts: (response.expensesConcepts ?? initialState.expensesConcepts) });

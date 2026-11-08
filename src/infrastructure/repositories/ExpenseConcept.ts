@@ -15,12 +15,17 @@ export class ImplementationExpenseConceptRepository extends ImplementationBase {
 		};
 	}
 
-	async getListExpensesConcepts() {
-		const response = await axios.get<ExpensesConceptsDto[]>(this.baseUrl);
+	/** Sin `active` el backend devuelve solo los conceptos activos (comportamiento por defecto). */
+	async getListExpensesConcepts(active?: boolean) {
+		const response = await axios.get<ExpensesConceptsDto[]>(this.baseUrl, { params: active === undefined ? undefined : { active } });
 		return {
 			...response,
 			expensesConcepts: response?.data?.map(payment => ExpensesConceptsModel.ToDomain(payment)),
 		};
+	}
+
+	async delete(concept_id: string) {
+		return axios.put(this.buildUrl({ id: concept_id, method: 'toggle' }));
 	}
 
 	async create(data: Partial<ExpensesConcepts>) {

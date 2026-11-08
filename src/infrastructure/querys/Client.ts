@@ -4,6 +4,7 @@ import { repository } from '../repositories/Client';
 import { Client } from '@/domain/Client';
 import { TypeAction } from '@/constants/types';
 import { Filters } from '@/domain/Filters';
+import { PaginationParams } from '@/domain/Pagination';
 
 export const getClient = (client_id?: string) => {
 	const queryInfo = useQuery({
@@ -51,6 +52,21 @@ export const getListClients = (filters: Partial<Filters>, isSearching: boolean) 
 	return {
 		...queryInfo,
 		clients: queryInfo.data?.clients,
+	};
+};
+
+export const getPageClients = (filters: Partial<Filters>, pagination: PaginationParams, isSearching: boolean) => {
+	const queryInfo = useQuery({
+		queryKey: [queryKeyClients.base, queryKeyDefault.list, 'page', filters, pagination],
+		enabled: isSearching,
+		placeholderData: keepPreviousData,
+		queryFn: () => repository.getPage(filters, pagination),
+	});
+
+	return {
+		...queryInfo,
+		clients: queryInfo.data?.page.items,
+		total: queryInfo.data?.page.total ?? 0,
 	};
 };
 

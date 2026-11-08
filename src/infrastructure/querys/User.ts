@@ -4,6 +4,7 @@ import { repository } from '../repositories/User';
 import { User } from '@/domain/User';
 import { TypeAction } from '@/constants/types';
 import { Filters } from '@/domain/Filters';
+import { PaginationParams } from '@/domain/Pagination';
 import axios from 'axios';
 import { useAuth } from '@clerk/clerk-react';
 
@@ -103,6 +104,21 @@ export const getListUsers = (filters: Filters, isSearching: boolean) => {
 	return {
 		...queryInfo,
 		users: queryInfo.data?.data,
+	};
+};
+
+export const getPageUsers = (filters: Partial<Filters>, pagination: PaginationParams, isSearching: boolean) => {
+	const queryInfo = useQuery({
+		queryKey: [queryKeyUsers.base, queryKeyDefault.list, 'page', filters, pagination],
+		enabled: isSearching,
+		placeholderData: keepPreviousData,
+		queryFn: () => repository.getPage(filters, pagination),
+	});
+
+	return {
+		...queryInfo,
+		users: queryInfo.data?.page.items,
+		total: queryInfo.data?.page.total ?? 0,
 	};
 };
 

@@ -3,6 +3,9 @@ import { ImplementationBase } from './base';
 import { Loan, LoanFull, LoanModel } from '@/domain/Loan';
 import { LoanDto, LoanFullReadDTO } from '../dto/LoanDto';
 import { Filters, FiltersModel } from '@/domain/Filters';
+import { PaginationParams } from '@/domain/Pagination';
+import { PageDto } from '../dto/PageDto';
+import { mapPage, toPageQuery } from '../utils/pagination';
 
 export class ImplementationLoanRepository extends ImplementationBase {
 	protected readonly baseUrl: string = '/loans/';
@@ -23,6 +26,14 @@ export class ImplementationLoanRepository extends ImplementationBase {
 			...response,
 			data: response?.data?.map(loan => LoanModel.FullReadToDomain(loan)),
 		};
+	}
+
+	async getPage(filters: Partial<Filters>, pagination: PaginationParams) {
+		const response = await axios.get<PageDto<LoanFullReadDTO>>(this.baseUrl, {
+			params: { ...FiltersModel.toDto(filters), ...toPageQuery(pagination) },
+		});
+
+		return { ...response, page: mapPage(response.data, dto => LoanModel.FullReadToDomain(dto)) };
 	}
 
 	async create(data: Partial<LoanFull>) {

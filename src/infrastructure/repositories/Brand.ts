@@ -3,6 +3,9 @@ import { ImplementationBase } from './base';
 import { Brand, BrandModel } from '@/domain/Brand';
 import { BrandDto } from '../dto/BrandDto';
 import { Filters, FiltersModel } from '@/domain/Filters';
+import { PaginationParams } from '@/domain/Pagination';
+import { PageDto } from '../dto/PageDto';
+import { mapPage, toPageQuery } from '../utils/pagination';
 
 export class ImplementationBrandRepository extends ImplementationBase {
 	protected readonly baseUrl: string = '/brands/';
@@ -22,6 +25,14 @@ export class ImplementationBrandRepository extends ImplementationBase {
 			...response,
 			brands: response?.data?.map(brand => BrandModel.ToDomain(brand)),
 		};
+	}
+
+	async getPage(filters: Partial<Filters>, pagination: PaginationParams) {
+		const response = await axios.get<PageDto<BrandDto>>(this.baseUrl, {
+			params: { ...FiltersModel.toDto(filters), ...toPageQuery(pagination) },
+		});
+
+		return { ...response, page: mapPage(response.data, dto => BrandModel.ToDomain(dto)) };
 	}
 
 	async create(data: Partial<Brand>) {

@@ -2,9 +2,11 @@ import { MODULESNAME } from '@/constants/MODULESNAME';
 import { filtersStore } from '@/infrastructure/context/FiltersStore';
 import CustomTable from '@/UI/Components/Table';
 import { FC, useEffect } from 'react';
+import { Tag } from 'antd';
 import { OnClickActions } from '@/UI/Components/RowActions';
 import { getColumns } from './columns';
-import { getListClients } from '@/infrastructure/querys/Client';
+import { getPageClients } from '@/infrastructure/querys/Client';
+import { usePagination } from '@/infrastructure/hooks/usePagination';
 import { Client } from '@/domain/Client';
 
 interface TableClientsProps {
@@ -21,11 +23,14 @@ export const TableClients: FC<TableClientsProps> = ({ isSearching, actions, type
 	const moduleName = MODULESNAME.clients;
 	const filters = filtersStore(state => state.filtersMap[moduleName]);
 
-	const { clients, isLoading, isRefetching, isFetching } = getListClients(
+	const { page, pageSize, onChange, clampToTotal } = usePagination(JSON.stringify(filters ?? {}));
+
+	const { clients, total, isLoading, isRefetching, isFetching } = getPageClients(
 		{
 			...filters,
 			active: type == 'active' ? true : false,
 		},
+		{ page, pageSize },
 		isSearching,
 	);
 
@@ -34,22 +39,37 @@ export const TableClients: FC<TableClientsProps> = ({ isSearching, actions, type
 			if (type == 'active') {
 				return {
 					inactive: state.inactive,
-					active: clients?.length ?? 0,
+					active: total,
 				};
 			}
 
 			return {
 				active: state.active,
-				inactive: clients?.length ?? 0,
+				inactive: total,
 			};
 		});
-	}, [clients]);
+	}, [total]);
+
+	useEffect(() => clampToTotal(total), [total, clampToTotal]);
 
 	return (
 		<CustomTable<Client>
 			isLoading={isFetching || isLoading || isRefetching}
 			dataSource={clients}
 			columns={getColumns(actions)}
+			moduleName={moduleName}
+			titleField="fullName"
+			onRowClick={actions.see}
+			pagination={{ page, pageSize, total, onChange }}
+			cardFooterBadge={(client) => {
+				const count = client.activeLoansCount ?? 0;
+				if (count === 0) return null;
+				return (
+					<Tag color="blue" style={{ borderRadius: 999, margin: 0 }}>
+						{count} {count === 1 ? 'crédito activo' : 'créditos activos'}
+					</Tag>
+				);
+			}}
 		/>
 	);
 };

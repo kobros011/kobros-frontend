@@ -27,6 +27,7 @@ export interface Client extends BaseDomain {
 	guarantorPhone?: string | null
 	guarantorAddress?: string | null
 	references?: ClientReference[]
+	activeLoansCount?: number
 }
 
 
@@ -66,6 +67,7 @@ export class ClientModel {
 				address: r.address,
 				phone: r.phone,
 			})),
+			activeLoansCount: DTO.active_loans_count ?? 0,
 		};
 	}
 

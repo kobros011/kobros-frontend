@@ -4,6 +4,7 @@ import { repository } from '../repositories/Brand';
 import { Brand } from '@/domain/Brand';
 import { TypeAction } from '@/constants/types';
 import { Filters } from '@/domain/Filters';
+import { PaginationParams } from '@/domain/Pagination';
 
 export const getBrand = (brand_id?: string) => {
 	const queryInfo = useQuery({
@@ -34,6 +35,21 @@ export const getListBrands = (filters: Partial<Filters>, isSearching: boolean) =
 	return {
 		...queryInfo,
 		brands: queryInfo.data?.brands,
+	};
+};
+
+export const getPageBrands = (filters: Partial<Filters>, pagination: PaginationParams, isSearching: boolean) => {
+	const queryInfo = useQuery({
+		queryKey: [queryKeyBrands.base, queryKeyDefault.list, 'page', filters, pagination],
+		enabled: isSearching,
+		placeholderData: keepPreviousData,
+		queryFn: () => repository.getPage(filters, pagination),
+	});
+
+	return {
+		...queryInfo,
+		brands: queryInfo.data?.page.items,
+		total: queryInfo.data?.page.total ?? 0,
 	};
 };
 

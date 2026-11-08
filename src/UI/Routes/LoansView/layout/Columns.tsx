@@ -1,13 +1,9 @@
-import routePaths from '@/constants/routePaths';
 import { LoanFullRead } from '@/domain/Loan';
 import { BuildColumns, CustomColumn } from '@/infrastructure/utils/BuildColumns';
 import { EyeOutlined } from '@ant-design/icons';
 import { Button, Tag, Tooltip } from 'antd';
-import { useNavigate } from 'react-router-dom';
 
-export const getColumns = () => {
-
-	const navigate = useNavigate();
+export const getColumns = (onSee: (record: LoanFullRead) => void) => {
 
 	const columns: CustomColumn<LoanFullRead>[] = [
 		{
@@ -39,6 +35,7 @@ export const getColumns = () => {
 			title: 'C pactadas',
 			dataIndex: 'agreedQuotas',
 			width: 100,
+			defaultVisible: false,
 		},
 		{
 			key: 'pendingQuotas',
@@ -51,6 +48,7 @@ export const getColumns = () => {
 			title: 'C canceladas',
 			dataIndex: 'canceledQuotas',
 			width: 100,
+			defaultVisible: false,
 		},
 		{
 			key: 'valueCapital',
@@ -65,6 +63,7 @@ export const getColumns = () => {
 			dataIndex: 'valueUtilityLoan',
 			typeRender: 'money',
 			width: 130,
+			defaultVisible: false,
 		},
 		{
 			key: 'valueTotalLoan',
@@ -72,6 +71,7 @@ export const getColumns = () => {
 			dataIndex: 'valueTotalLoan',
 			typeRender: 'money',
 			width: 130,
+			defaultVisible: false,
 		},
 		{
 			key: 'initialDate',
@@ -86,29 +86,26 @@ export const getColumns = () => {
 			dataIndex: 'endDate',
 			typeRender: 'date',
 			width: 120,
+			defaultVisible: false,
 		},
 		{
 			key: 'paymentMethod',
 			title: 'Forma de pago',
 			dataIndex: 'paymentMethod',
 			width: 130,
-			render: (paymentMethod: string) => {
-				return <Tag color="blue" >{paymentMethod.toUpperCase()}</Tag>;
+			render: (paymentMethod?: string) => {
+				return <Tag color="blue" >{paymentMethod?.toUpperCase() ?? '--'}</Tag>;
 			},
 		},
-	];
-
-	columns.push(
 		{
-			key: 'action',
+			key: 'actions',
 			title: 'Acciones',
 			width: 80,
-			render: (record: LoanFullRead) => {
-
-				return <Button onClick={() => void navigate(`/${routePaths.DEFAULT_HOME}/${routePaths.LOANS}/${record.id}`, { state: { clientId: record?.clientId, routesIds: [record?.routeId] } })} size='small' type='primary'><Tooltip color='lime' title='Ver'><EyeOutlined /></Tooltip></Button>;
-			},
+			render: (record: LoanFullRead) => (
+				<Button onClick={() => onSee(record)} size='small' type='primary'><Tooltip color='lime' title='Ver'><EyeOutlined /></Tooltip></Button>
+			),
 		},
-	);
+	];
 
 	return BuildColumns(columns);
 };

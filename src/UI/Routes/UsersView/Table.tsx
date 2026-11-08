@@ -4,7 +4,8 @@ import { filtersStore } from '@/infrastructure/context/FiltersStore';
 import CustomTable from '@/UI/Components/Table';
 import { FC, useEffect } from 'react';
 import { OnClickActions } from '@/UI/Components/RowActions';
-import { getListUsers } from '@/infrastructure/querys/User';
+import { getPageUsers } from '@/infrastructure/querys/User';
+import { usePagination } from '@/infrastructure/hooks/usePagination';
 import { getColumns } from './columns';
 
 interface TableUsersProps {
@@ -22,11 +23,15 @@ export const TableUsers: FC<TableUsersProps> = ({ isSearching, actions, type, se
 	const filters = filtersStore(state => state.filtersMap[moduleName]);
 
 
-	const { users, isLoading, isRefetching, isFetching } = getListUsers(
+	const text = filters?.text ?? '';
+	const { page, pageSize, onChange, clampToTotal } = usePagination(text);
+
+	const { users, total, isLoading, isRefetching, isFetching } = getPageUsers(
 		{
-			text: filters?.text ?? '',
+			text,
 			active: type == 'active' ? true : false,
 		},
+		{ page, pageSize },
 		isSearching,
 	);
 
@@ -35,16 +40,18 @@ export const TableUsers: FC<TableUsersProps> = ({ isSearching, actions, type, se
 			if (type == 'active') {
 				return {
 					inactive: state.inactive,
-					active: users?.length ?? 0,
+					active: total,
 				};
 			}
 
 			return {
 				active: state.active,
-				inactive: users?.length ?? 0,
+				inactive: total,
 			};
 		});
-	}, [users]);
+	}, [total]);
+
+	useEffect(() => clampToTotal(total), [total, clampToTotal]);
 
 	return (
 		<CustomTable<User>
@@ -54,6 +61,7 @@ export const TableUsers: FC<TableUsersProps> = ({ isSearching, actions, type, se
 			moduleName={moduleName}
 			titleField="fullName"
 			onRowClick={actions.see}
+			pagination={{ page, pageSize, total, onChange }}
 		/>
 	);
 };

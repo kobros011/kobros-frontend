@@ -17,15 +17,17 @@ export const getExpenseConcept = (expenseConcept_id?: string) => {
 
 	return {
 		...queryInfo,
-		expenseConcept: queryInfo.data?.data,
+		expenseConcept: queryInfo.data?.expense,
 	};
 };
 
-export const getListExpensesConcepts = () => {
+export const getListExpensesConcepts = (active?: boolean) => {
 	const queryInfo = useQuery({
-		queryKey: [queryKeyExpensesConcepts.base, queryKeyDefault.list],
+		queryKey: active === undefined
+			? [queryKeyExpensesConcepts.base, queryKeyDefault.list]
+			: [queryKeyExpensesConcepts.base, queryKeyDefault.list, active],
 		queryFn: () => {
-			return repository.getListExpensesConcepts();
+			return repository.getListExpensesConcepts(active);
 		},
 	});
 
@@ -33,6 +35,16 @@ export const getListExpensesConcepts = () => {
 		...queryInfo,
 		expensesConcepts: queryInfo.data?.expensesConcepts,
 	};
+};
+
+export const deleteExpenseConcept = () => {
+	const mutation = useMutation({
+		mutationFn: (concept_id: string) => {
+			return repository.delete(concept_id);
+		},
+	});
+
+	return mutation;
 };
 
 export const createExpenseConcept = () => {

@@ -4,7 +4,8 @@ import { filtersStore } from '@/infrastructure/context/FiltersStore';
 import CustomTable from '@/UI/Components/Table';
 import { FC, useEffect } from 'react';
 import { OnClickActions } from '@/UI/Components/RowActions';
-import { getListRoutes } from '@/infrastructure/querys/Route';
+import { getPageRoutes } from '@/infrastructure/querys/Route';
+import { usePagination } from '@/infrastructure/hooks/usePagination';
 import { getColumns } from './columns';
 
 interface TableRoutesProps {
@@ -22,11 +23,14 @@ export const TableRoutes: FC<TableRoutesProps> = ({ isSearching, actions, type, 
 	const filters = filtersStore(state => state.filtersMap[moduleName]);
 
 
-	const { routes, isLoading, isRefetching, isFetching } = getListRoutes(
+	const { page, pageSize, onChange, clampToTotal } = usePagination(JSON.stringify(filters ?? {}));
+
+	const { routes, total, isLoading, isRefetching, isFetching } = getPageRoutes(
 		{
 			...filters,
 			active: type == 'active' ? true : false,
 		},
+		{ page, pageSize },
 		isSearching,
 	);
 
@@ -35,16 +39,18 @@ export const TableRoutes: FC<TableRoutesProps> = ({ isSearching, actions, type, 
 			if (type == 'active') {
 				return {
 					inactive: state.inactive,
-					active: routes?.length ?? 0,
+					active: total,
 				};
 			}
 
 			return {
 				active: state.active,
-				inactive: routes?.length ?? 0,
+				inactive: total,
 			};
 		});
-	}, [routes]);
+	}, [total]);
+
+	useEffect(() => clampToTotal(total), [total, clampToTotal]);
 
 	return (
 		<CustomTable<Route>
@@ -54,6 +60,7 @@ export const TableRoutes: FC<TableRoutesProps> = ({ isSearching, actions, type, 
 			moduleName={moduleName}
 			titleField="name"
 			onRowClick={actions.see}
+			pagination={{ page, pageSize, total, onChange }}
 		/>
 	);
 };

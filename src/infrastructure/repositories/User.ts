@@ -3,6 +3,9 @@ import { ImplementationBase } from './base';
 import { User, UserModel } from '@/domain/User';
 import { UserDto } from '../dto/UserDto';
 import { Filters, FiltersModel } from '@/domain/Filters';
+import { PaginationParams } from '@/domain/Pagination';
+import { PageDto } from '../dto/PageDto';
+import { mapPage, toPageQuery } from '../utils/pagination';
 
 export class ImplementationUserRepository extends ImplementationBase {
 	protected readonly baseUrl: string = '/users/';
@@ -31,6 +34,14 @@ export class ImplementationUserRepository extends ImplementationBase {
 			...response,
 			data: response?.data?.map(route => UserModel.ToDomain(route)),
 		};
+	}
+
+	async getPage(filters: Partial<Filters>, pagination: PaginationParams) {
+		const response = await axios.get<PageDto<UserDto>>(this.baseUrl, {
+			params: { ...FiltersModel.toDto(filters), ...toPageQuery(pagination) },
+		});
+
+		return { ...response, page: mapPage(response.data, dto => UserModel.ToDomain(dto)) };
 	}
 
 	async create(data: Partial<User>) {

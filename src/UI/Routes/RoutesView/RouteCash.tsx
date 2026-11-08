@@ -23,7 +23,7 @@ interface MovementFormValues {
 	concept: string;
 }
 
-const RouteCash: FC<{ routeId: string }> = ({ routeId }) => {
+const RouteCash: FC<{ routeId: string, readonly?: boolean }> = ({ routeId, readonly = false }) => {
 	const { notification } = App.useApp();
 	const [form] = Form.useForm<MovementFormValues>();
 	const [modalType, setModalType] = useState<RouteMovementType | null>(null);
@@ -124,6 +124,7 @@ const RouteCash: FC<{ routeId: string }> = ({ routeId }) => {
 				onViewModeChange={mode => setViewMode(MOVEMENTS_MODULE, mode)}
 				onIngresar={() => setModalType('INGRESO')}
 				onRetirar={() => setModalType('RETIRO')}
+				readonly={readonly}
 			/>
 
 			<Modal

@@ -3,6 +3,9 @@ import { ImplementationBase } from './base';
 import { Client, ClientModel } from '@/domain/Client';
 import { ClientDto } from '../dto/ClientDto';
 import { Filters, FiltersModel } from '@/domain/Filters';
+import { PaginationParams } from '@/domain/Pagination';
+import { PageDto } from '../dto/PageDto';
+import { mapPage, toPageQuery } from '../utils/pagination';
 
 export class ImplementationClientRepository extends ImplementationBase {
 	protected readonly baseUrl: string = '/clients/';
@@ -32,6 +35,14 @@ export class ImplementationClientRepository extends ImplementationBase {
 			...response,
 			clients: response?.data?.map(client => ClientModel.ToDomain(client)),
 		};
+	}
+
+	async getPage(filters: Partial<Filters>, pagination: PaginationParams) {
+		const response = await axios.get<PageDto<ClientDto>>(this.baseUrl, {
+			params: { ...FiltersModel.toDto(filters), ...toPageQuery(pagination) },
+		});
+
+		return { ...response, page: mapPage(response.data, dto => ClientModel.ToDomain(dto)) };
 	}
 
 	async create(data: Partial<Client>) {

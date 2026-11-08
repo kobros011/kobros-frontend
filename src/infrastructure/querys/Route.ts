@@ -4,6 +4,7 @@ import { repository } from '../repositories/Route';
 import { Route } from '@/domain/Route';
 import { TypeAction } from '@/constants/types';
 import { Filters } from '@/domain/Filters';
+import { PaginationParams } from '@/domain/Pagination';
 
 export const getRoute = (route_id?: string) => {
 	const queryInfo = useQuery({
@@ -35,6 +36,21 @@ export const getListRoutes = (filters: Partial<Filters>, isSearching: boolean) =
 	return {
 		...queryInfo,
 		routes: queryInfo.data?.data,
+	};
+};
+
+export const getPageRoutes = (filters: Partial<Filters>, pagination: PaginationParams, isSearching: boolean) => {
+	const queryInfo = useQuery({
+		queryKey: [queryKeyRoutes.base, queryKeyDefault.list, 'page', filters, pagination],
+		enabled: isSearching,
+		placeholderData: keepPreviousData,
+		queryFn: () => repository.getPage(filters, pagination),
+	});
+
+	return {
+		...queryInfo,
+		routes: queryInfo.data?.page.items,
+		total: queryInfo.data?.page.total ?? 0,
 	};
 };
 

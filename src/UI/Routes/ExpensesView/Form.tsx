@@ -1,10 +1,11 @@
-import { queryKeyDefault, queryKeyExpenses } from '@/constants/queryKeys';
+import { queryKeyExpenses } from '@/constants/queryKeys';
 import routePaths from '@/constants/routePaths';
 import { Expense } from '@/domain/Expenses';
 import useUserStore from '@/infrastructure/context/User/UserDataStore';
 import useLoading from '@/infrastructure/hooks/useLoading';
 import { getExpense, useMutationType } from '@/infrastructure/querys/Expense';
 import { handleError } from '@/infrastructure/utils/handleError';
+import { getPermission } from '@/infrastructure/utils/Permissions';
 import ActionsButton from '@/UI/Components/AcctionButtons';
 import InputDate from '@/UI/Components/Fields/InputDate';
 import InputNumber from '@/UI/Components/Fields/InputNumber';
@@ -19,11 +20,12 @@ import { Dayjs } from 'dayjs';
 import { FC, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
-const FormExpenses: FC<{ readonly?: boolean }> = ({ readonly }) => {
+const FormExpenses: FC<{ readonly?: boolean }> = ({ readonly: readonlyProp }) => {
 	const { id } = useParams();
 	const [form] = Form.useForm<Partial<Expense>>();
 
-	const { fullName } = useUserStore(state => state.user);
+	const { fullName, typeUser } = useUserStore(state => state.user);
+	const { hasManageExpenses } = getPermission(typeUser);
 
 	const { startLoading, stopLoading, isLoading } = useLoading();
 	const { notification } = App.useApp();
@@ -33,6 +35,8 @@ const FormExpenses: FC<{ readonly?: boolean }> = ({ readonly }) => {
 	const [exit, setExit] = useState<boolean>(false);
 
 	const isCreate = !id;
+	// Quien no gestiona gastos (recaudador) puede registrar, pero no editar uno existente.
+	const readonly = readonlyProp || (!isCreate && !hasManageExpenses);
 
 	const { expense, isLoading: isLoadingExpense, isRefetching, isError, error: errorExpense } = getExpense(id);
 
@@ -44,22 +48,20 @@ const FormExpenses: FC<{ readonly?: boolean }> = ({ readonly }) => {
 			...expense,
 			...values,
 			date: typeof values.date === 'string' ? values.date : (values?.date as unknown as Dayjs).format?.('YYYY-MM-DD'),
-			userGenerated: fullName,
+			...(isCreate ? { userGenerated: fullName } : {}),
 		}, {
 			onSuccess: (response) => {
 				notification.success({ message: `Gasto ${isCreate ? 'creado' : 'actualizado'} exitosamente` });
 				stopLoading();
 
+				void queryClient.invalidateQueries({ queryKey: [queryKeyExpenses.base], exact: false });
+
 				if (isCreate && !exit) {
-					void navigate(`/${routePaths.DEFAULT_HOME}/${routePaths.EXPENSES}/${response?.data?.id}/editar`, { replace: true });
+					const createdPath = `/${routePaths.DEFAULT_HOME}/${routePaths.EXPENSES}/${response?.data?.id}`;
+					void navigate(hasManageExpenses ? `${createdPath}/editar` : createdPath, { replace: true });
 				}
 
 				if (exit) {
-					void queryClient.invalidateQueries({
-						queryKey: [queryKeyExpenses.base, queryKeyDefault.list],
-						exact: false,
-					});
-
 					setExit(false);
 					form.resetFields();
 					void navigate(-1);
@@ -67,7 +69,8 @@ const FormExpenses: FC<{ readonly?: boolean }> = ({ readonly }) => {
 			},
 			onError: (error) => {
 				stopLoading();
-				notification.error({ message: error?.message ?? `Ocurrió un error al ${isCreate ? 'crear' : 'actualizar'} el cliente` });
+				setExit(false);
+				notification.error({ message: handleError(error, `Ocurrió un error al ${isCreate ? 'crear' : 'actualizar'} el gasto`) });
 			},
 		});
 	};

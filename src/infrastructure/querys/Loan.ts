@@ -4,6 +4,7 @@ import { repository } from '../repositories/Loan';
 import { Loan, LoanFull } from '@/domain/Loan';
 import { TypeAction } from '@/constants/types';
 import { Filters } from '@/domain/Filters';
+import { PaginationParams } from '@/domain/Pagination';
 
 export const getLoan = (loan_id?: string) => {
 	const queryInfo = useQuery({
@@ -35,6 +36,21 @@ export const getListLoans = (filters: Partial<Filters>, isSearching: boolean) =>
 	return {
 		...queryInfo,
 		loans: queryInfo.data?.data,
+	};
+};
+
+export const getPageLoans = (filters: Partial<Filters>, pagination: PaginationParams, isSearching: boolean) => {
+	const queryInfo = useQuery({
+		queryKey: [queryKeyLoans.base, queryKeyDefault.list, 'page', filters, pagination],
+		enabled: isSearching,
+		placeholderData: keepPreviousData,
+		queryFn: () => repository.getPage(filters, pagination),
+	});
+
+	return {
+		...queryInfo,
+		loans: queryInfo.data?.page.items,
+		total: queryInfo.data?.page.total ?? 0,
 	};
 };
 
