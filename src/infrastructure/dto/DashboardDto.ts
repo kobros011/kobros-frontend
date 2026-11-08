@@ -21,6 +21,8 @@ export interface DashboardFiltersDto {
 
 export interface DashboardKpisDto {
 	portfolio_total: number
+	portfolio_capital: number
+	portfolio_interest: number
 	portfolio_loans: number
 	delinquency_total: number
 	delinquency_loans: number

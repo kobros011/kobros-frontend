@@ -13,11 +13,17 @@ export const KpiGrid: FC<{ kpis: DashboardKpisDto }> = ({ kpis }) => {
 		<div className="kb-grid-kpi">
 			<KpiCard
 				label="Cartera activa total"
-				subtitle="Capital prestado vigente"
+				subtitle="Total por cobrar (capital + intereses)"
 				icon={<WalletOutlined />}
 				value={formatCOP(kpis.portfolio_total)}
 				unit="COP"
 				pill={<><Pill tone="ok">{kpis.portfolio_loans} créditos</Pill> vigentes</>}
+				footer={(
+					<div style={{ display: 'grid', gap: 2 }}>
+						<span style={{ display: 'flex', justifyContent: 'space-between' }}><span>Capital</span><strong className="kb-mono">{formatCOP(kpis.portfolio_capital)}</strong></span>
+						<span style={{ display: 'flex', justifyContent: 'space-between' }}><span>Intereses</span><strong className="kb-mono">{formatCOP(kpis.portfolio_interest)}</strong></span>
+					</div>
+				)}
 			/>
 			<KpiCard
 				label="Cartera en mora"
