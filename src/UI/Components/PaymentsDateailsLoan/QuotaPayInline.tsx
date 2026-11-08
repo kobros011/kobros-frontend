@@ -3,6 +3,7 @@ import { App, Button, Space } from 'antd';
 import InputNumber from '@/UI/Components/Fields/InputNumber';
 import { usePayPayment } from '@/infrastructure/querys/Payment';
 import { handleError } from '@/infrastructure/utils/handleError';
+import { useMoney } from '@/infrastructure/hooks/useMoney';
 import { PaymentHistoryItemDto } from '@/infrastructure/dto/PaymentHistoryDto';
 
 /**
@@ -13,6 +14,7 @@ export const QuotaPayInline: FC<{ item: PaymentHistoryItemDto; compact?: boolean
 	const { notification } = App.useApp();
 	const [amount, setAmount] = useState<number>();
 	const payMutation = usePayPayment();
+	const money = useMoney();
 
 	if (!item.can_pay) return null;
 
@@ -41,7 +43,7 @@ export const QuotaPayInline: FC<{ item: PaymentHistoryItemDto; compact?: boolean
 				value={amount?.toString()}
 				onChange={value => setAmount(value ? Number(value) : undefined)}
 				thousandsSeparator
-				placeholder={`Saldo ${item.balance.toLocaleString('es-CO')}`}
+				placeholder={`Saldo ${money(item.balance, { code: false, digits: 'brand' })}`}
 				style={{ width: '100%' }}
 			/>
 			<Button size="small" onClick={() => setAmount(item.balance)} disabled={payMutation.isPending} aria-label="Usar el saldo completo">

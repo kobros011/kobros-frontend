@@ -1,3 +1,4 @@
+import { CurrencyProvider } from '@/infrastructure/hooks/useMoney';
 import { Card, Col, DatePicker, Empty, Row, Typography } from 'antd';
 import { FC, useEffect, useMemo, useState } from 'react';
 import { SelectRoute } from '@components/Fields/SelectRoute';
@@ -50,63 +51,65 @@ const CollectionTodayView: FC = () => {
 	}
 
 	return (
-		<CollectionTodayShell>
-			<Card className="collection-today-module-card" style={{ maxHeight: '90vh' }}>
-				<div className="page-header">
-					<Title level={2} style={{ margin: 0 }}>
+		<CurrencyProvider routeId={routeId}>
+			<CollectionTodayShell>
+				<Card className="collection-today-module-card" style={{ maxHeight: '90vh' }}>
+					<div className="page-header">
+						<Title level={2} style={{ margin: 0 }}>
 						Cobro del día
-					</Title>
-				</div>
+						</Title>
+					</div>
 
-				<div className="collection-today-page">
-					<Row gutter={[8, 8]} className="collection-today-filters">
-						<Col xs={24} sm={12} md={8}>
-							<SelectRoute
-								size="small"
-								placeholder="Ruta"
-								value={routeId}
-								onChange={(val) => setRouteId(val)}
-								style={{ width: '100%' }}
-							/>
-						</Col>
-						<Col xs={24} sm={12} md={8}>
-							<DatePicker
-								size="small"
-								value={selectedDate}
-								onChange={(date) => date && setSelectedDate(date)}
-								format="DD/MM/YYYY"
-								style={{ width: '100%' }}
-								allowClear={false}
-							/>
-						</Col>
-					</Row>
-
-					{!routeId && (
-						<Empty description="Selecciona una ruta para ver los cobros" />
-					)}
-
-					{routeId && grouped.length === 0 && !isFetching && (
-						<Empty description="No hay cobros para esta fecha" />
-					)}
-
-					{routeId && collection.length > 0 && (
-						<CollectionTodayKpis kpis={kpis} />
-					)}
-
-					{routeId && grouped.length > 0 && (
-						<div className="collection-today-client-list">
-							{grouped.map((items) => (
-								<ClientGroupCard
-									key={items[0].clientId}
-									items={items}
-									selectedDate={selectedDate}
+					<div className="collection-today-page">
+						<Row gutter={[8, 8]} className="collection-today-filters">
+							<Col xs={24} sm={12} md={8}>
+								<SelectRoute
+									size="small"
+									placeholder="Ruta"
+									value={routeId}
+									onChange={(val) => setRouteId(val)}
+									style={{ width: '100%' }}
 								/>
-							))}
-						</div>
-					)}
-				</div>
-			</Card>
-		</CollectionTodayShell>
+							</Col>
+							<Col xs={24} sm={12} md={8}>
+								<DatePicker
+									size="small"
+									value={selectedDate}
+									onChange={(date) => date && setSelectedDate(date)}
+									format="DD/MM/YYYY"
+									style={{ width: '100%' }}
+									allowClear={false}
+								/>
+							</Col>
+						</Row>
+
+						{!routeId && (
+							<Empty description="Selecciona una ruta para ver los cobros" />
+						)}
+
+						{routeId && grouped.length === 0 && !isFetching && (
+							<Empty description="No hay cobros para esta fecha" />
+						)}
+
+						{routeId && collection.length > 0 && (
+							<CollectionTodayKpis kpis={kpis} />
+						)}
+
+						{routeId && grouped.length > 0 && (
+							<div className="collection-today-client-list">
+								{grouped.map((items) => (
+									<ClientGroupCard
+										key={items[0].clientId}
+										items={items}
+										selectedDate={selectedDate}
+									/>
+								))}
+							</div>
+						)}
+					</div>
+				</Card>
+			</CollectionTodayShell>
+		</CurrencyProvider>
 	);
 };
 

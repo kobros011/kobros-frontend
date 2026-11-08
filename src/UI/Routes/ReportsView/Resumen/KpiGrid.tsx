@@ -1,12 +1,19 @@
 import { FC } from 'react';
+
 import { EnvironmentOutlined, UsergroupAddOutlined, WalletOutlined, WarningOutlined } from '@ant-design/icons';
+
 import { KpiCard, Pill } from '@/UI/Components/Dashboard/ui';
+
 import { RadialGauge, toneByCompliance } from '@/UI/Components/Dashboard/charts';
-import { formatCOP, formatCompactCOP, formatPercent } from '@/UI/Components/Dashboard/format';
+
+import { formatPercent } from '@/UI/Components/Dashboard/format';
 import { DashboardKpisDto } from '@/infrastructure/dto/DashboardDto';
+import { useMoney } from '@/infrastructure/hooks/useMoney';
+
 
 /** Las 5 tarjetas KPI del Resumen; todo el cálculo viene del servidor, aquí solo se formatea. */
 export const KpiGrid: FC<{ kpis: DashboardKpisDto }> = ({ kpis }) => {
+	const money = useMoney();
 	const routesPercent = kpis.routes_total ? Math.round((kpis.routes_with_loans / kpis.routes_total) * 100) : 0;
 
 	return (
@@ -15,13 +22,12 @@ export const KpiGrid: FC<{ kpis: DashboardKpisDto }> = ({ kpis }) => {
 				label="Cartera activa total"
 				subtitle="Total por cobrar (capital + intereses)"
 				icon={<WalletOutlined />}
-				value={formatCOP(kpis.portfolio_total)}
-				unit="COP"
+				value={money(kpis.portfolio_total)}
 				pill={<><Pill tone="ok">{kpis.portfolio_loans} créditos</Pill> vigentes</>}
 				footer={(
 					<div style={{ display: 'grid', gap: 2 }}>
-						<span style={{ display: 'flex', justifyContent: 'space-between' }}><span>Capital</span><strong className="kb-mono">{formatCOP(kpis.portfolio_capital)}</strong></span>
-						<span style={{ display: 'flex', justifyContent: 'space-between' }}><span>Intereses</span><strong className="kb-mono">{formatCOP(kpis.portfolio_interest)}</strong></span>
+						<span style={{ display: 'flex', justifyContent: 'space-between' }}><span>Capital</span><strong className="kb-mono">{money(kpis.portfolio_capital)}</strong></span>
+						<span style={{ display: 'flex', justifyContent: 'space-between' }}><span>Intereses</span><strong className="kb-mono">{money(kpis.portfolio_interest)}</strong></span>
 					</div>
 				)}
 			/>
@@ -31,8 +37,7 @@ export const KpiGrid: FC<{ kpis: DashboardKpisDto }> = ({ kpis }) => {
 				icon={<WarningOutlined />}
 				tone="danger"
 				valueTone="danger"
-				value={formatCOP(kpis.delinquency_total)}
-				unit="COP"
+				value={money(kpis.delinquency_total)}
 				pill={<><Pill tone="danger">{formatPercent(kpis.delinquency_rate)}</Pill> de la cartera total</>}
 			/>
 			<KpiCard
@@ -50,7 +55,7 @@ export const KpiGrid: FC<{ kpis: DashboardKpisDto }> = ({ kpis }) => {
 				value={formatPercent(kpis.effectiveness)}
 				tone="primary"
 				aside={<RadialGauge percent={kpis.effectiveness} tone={toneByCompliance(kpis.effectiveness)} />}
-				footer={<span className="kb-mono">{formatCompactCOP(kpis.total_paid)} / {formatCompactCOP(kpis.total_lent)}</span>}
+				footer={<span className="kb-mono">{money.compact(kpis.total_paid)} / {money.compact(kpis.total_lent)}</span>}
 			/>
 			<KpiCard
 				label="Rutas operativas"

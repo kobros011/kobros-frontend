@@ -16,6 +16,8 @@ import { TypeUser } from '@/constants/types';
 import { normalizeTypeUser } from '@/infrastructure/utils/defaultHomeRoute';
 import useRouteStore from '@/infrastructure/context/RoutesStore';
 import useAppSettingsStore from '@/infrastructure/context/AppSettingsStore';
+import useCurrencyStore from '@/infrastructure/context/CurrencyStore';
+import { useCurrencyBootstrap } from '@/infrastructure/querys/Currency';
 import { getSettings } from '@/infrastructure/querys/Settings';
 import { DEFAULT_APP_NAME } from '@/domain/Settings';
 
@@ -38,6 +40,9 @@ const App: React.FC = () => {
 
 	const { user, isLoading, isError, isFetching } = getMe();
 	const { settings, isError: isSettingsError } = getSettings(undefined, !!user);
+	useCurrencyBootstrap(!!user);
+	const currencyVersion = useCurrencyStore(state => state.version);
+	const brandCurrencies = useAppSettingsStore(state => state.currencies.join(','));
 	const applySettings = useAppSettingsStore(state => state.apply);
 	const markSettingsLoaded = useAppSettingsStore(state => state.markLoaded);
 	const brandLogo = useAppSettingsStore(state => ({
@@ -169,7 +174,7 @@ const App: React.FC = () => {
 						overscrollBehaviorY: 'contain',
 					}}
 				>
-					<Outlet/>
+					<Outlet key={`${currencyVersion}-${brandCurrencies}`}/>
 
 					{isMobile && (
 						<ModulesMenu collapsed={false} mobile />

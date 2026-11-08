@@ -8,6 +8,7 @@ import useUserModeStore from '@/infrastructure/context/User/UserModeStore';
 import routePaths from '@/constants/routePaths';
 import { PaymentMethod } from '@/constants/types';
 import { formatNumber } from '@/infrastructure/utils/formaNumber';
+import { CurrencyProvider, useRouteMoney } from '@/infrastructure/hooks/useMoney';
 import { handleError } from '@/infrastructure/utils/handleError';
 import { spanConfigForm } from '@/constants/getSpan';
 import { Col, Row, Typography } from 'antd';
@@ -43,6 +44,7 @@ const DetailsLoanView: FC = () => {
 	const { state } = useLocation() as { state?: { clientId?: string; routesIds?: string[] } };
 	const isMobile = useUserModeStore(store => store.isMobile);
 	const navigate = useNavigate();
+	const routeMoney = useRouteMoney();
 
 	const { loan, isLoading, isError, error } = getLoanMoreInfo(id);
 
@@ -71,6 +73,7 @@ const DetailsLoanView: FC = () => {
 		);
 	}
 
+	const money = (value: unknown) => routeMoney(Number(value ?? 0), loan.routeId, { digits: 'brand' });
 	const isFixedDate = loan.paymentMethod === PaymentMethod.fixedDate;
 	const term = computeLoanDerived({
 		agreedQuotas: loan.agreedQuotas,
@@ -125,10 +128,10 @@ const DetailsLoanView: FC = () => {
 				<>
 					<Row gutter={[12, 0]}>
 						<Col {...spanConfigForm.large}>
-							<FichaField label="Valor capital">${formatNumber(loan.valueCapital)}</FichaField>
+							<FichaField label="Valor capital">{money(loan.valueCapital)}</FichaField>
 						</Col>
 						<Col {...spanConfigForm.large}>
-							<FichaField label="Valor cuota fija">${formatNumber(loan.valueQuotaFixed)}</FichaField>
+							<FichaField label="Valor cuota fija">{money(loan.valueQuotaFixed)}</FichaField>
 						</Col>
 						<Col {...spanConfigForm.large}>
 							<FichaField label="Cuotas pactadas">{loan.agreedQuotas}</FichaField>
@@ -157,18 +160,18 @@ const DetailsLoanView: FC = () => {
 
 					<div className="loan-wizard-summary-panel" style={{ marginTop: 16 }}>
 						<Text strong style={{ display: 'block', marginBottom: 8 }}>Resumen calculado</Text>
-						<SummaryRow label="Capital prestado" value={`$${formatNumber(loan.valueCapital)}`} />
-						<SummaryRow label="Utilidad" value={`$${formatNumber(loan.valueUtilityLoan)}`} />
-						<SummaryRow label="Total del crédito" value={`$${formatNumber(loan.valueTotalLoan)}`} />
+						<SummaryRow label="Capital prestado" value={money(loan.valueCapital)} />
+						<SummaryRow label="Utilidad" value={money(loan.valueUtilityLoan)} />
+						<SummaryRow label="Total del crédito" value={money(loan.valueTotalLoan)} />
 						<SummaryRow label="Plazo del préstamo" value={term || '—'} />
 						<SummaryRow label="Tasa de interés" value={`${formatNumber(loan.interestRate, 4)}%`} />
 						<SummaryRow label="Cuotas canceladas" value={String(loan.canceledQuotas ?? 0)} />
 						<SummaryRow label="Cuotas pendientes" value={String(loan.pendingQuotas ?? 0)} />
 						{Number(loan.totalDefault ?? 0) > 0 && (
-							<SummaryRow label="Total en mora" value={`$${formatNumber(loan.totalDefault)}`} danger />
+							<SummaryRow label="Total en mora" value={money(loan.totalDefault)} danger />
 						)}
-						<SummaryRow label="Pagado" value={`$${formatNumber(String(loan.paid ?? 0))}`} />
-						<SummaryRow label="Saldo pendiente" value={`$${formatNumber(String(loan.balance ?? 0))}`} bold />
+						<SummaryRow label="Pagado" value={money(loan.paid)} />
+						<SummaryRow label="Saldo pendiente" value={money(loan.balance)} bold />
 					</div>
 				</>
 			),
@@ -178,7 +181,7 @@ const DetailsLoanView: FC = () => {
 			label: <StepHeader n={3} title="Historial de Pagos" done active />,
 			children: (
 				<div className="loan-wizard-loan-card" style={{ padding: 0, border: 'none' }}>
-					<PaymentsHistory loanId={id ?? ''} />
+					<CurrencyProvider routeId={loan.routeId}><PaymentsHistory loanId={id ?? ''} /></CurrencyProvider>
 				</div>
 			),
 		},

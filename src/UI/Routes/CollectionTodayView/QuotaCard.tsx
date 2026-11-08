@@ -1,22 +1,24 @@
 import { CSSProperties, FC, useState } from 'react';
+
 import { App, Button, Card, InputNumber, Progress, Space, Tag, theme, Typography } from 'antd';
+
 import { CheckCircleOutlined, LinkOutlined } from '@ant-design/icons';
+
 import { useNavigate } from 'react-router-dom';
+
 import dayjs, { Dayjs } from 'dayjs';
 import { Collection } from '@/domain/Collection';
+
 import { PaymentStatus } from '@/constants/types';
+
 import routePaths from '@/constants/routePaths';
 import { usePayCollection } from '@/infrastructure/querys/Collection';
+
 import { handleError } from '@/infrastructure/utils/handleError';
-import {
-	formatMoneyCOP,
-	getOverdueDays,
-	getQuotaFixed,
-	getRemainingAmount,
-	isPaid,
-	isPartial,
-} from './groupCollections';
+
+import { getOverdueDays, getQuotaFixed, getRemainingAmount, isPaid, isPartial } from './groupCollections';
 import './collectionToday.css';
+import { useMoney } from '@/infrastructure/hooks/useMoney';
 
 const { Text } = Typography;
 
@@ -26,6 +28,7 @@ interface QuotaCardProps {
 }
 
 export const QuotaCard: FC<QuotaCardProps> = ({ item, selectedDate }) => {
+	const money = useMoney();
 	const { token } = theme.useToken();
 	const { notification } = App.useApp();
 	const navigate = useNavigate();
@@ -144,7 +147,7 @@ export const QuotaCard: FC<QuotaCardProps> = ({ item, selectedDate }) => {
 				<span className="collection-today-inline-pair">
 					<Text type="secondary">{extra > 0 ? 'Base:' : 'Valor:'}</Text>
 					<Text strong className="collection-today-quota-amount" style={{ color: token.colorPrimary }}>
-						{formatMoneyCOP(extra > 0 ? fixed : item.value)}
+						{money(extra > 0 ? fixed : item.value)}
 					</Text>
 				</span>
 			</div>
@@ -153,12 +156,12 @@ export const QuotaCard: FC<QuotaCardProps> = ({ item, selectedDate }) => {
 				<div className="collection-today-quota-detail-row">
 					<span className="collection-today-inline-pair">
 						<Text type="secondary">Abono:</Text>
-						<Text strong style={{ color: token.colorSuccess }}>+{formatMoneyCOP(extra)}</Text>
+						<Text strong style={{ color: token.colorSuccess }}>+{money(extra)}</Text>
 					</span>
 					<span className="collection-today-inline-pair">
 						<Text type="secondary">Total:</Text>
 						<Text strong className="collection-today-quota-amount" style={{ color: token.colorSuccess }}>
-							{formatMoneyCOP(applied)}
+							{money(applied)}
 						</Text>
 					</span>
 				</div>
@@ -166,7 +169,7 @@ export const QuotaCard: FC<QuotaCardProps> = ({ item, selectedDate }) => {
 
 			{partial && !paid && (
 				<Text type="secondary" className="collection-today-quota-falta" style={{ color: token.colorWarning }}>
-					Falta {formatMoneyCOP(remaining)}
+					Falta {money(remaining)}
 				</Text>
 			)}
 
@@ -180,10 +183,10 @@ export const QuotaCard: FC<QuotaCardProps> = ({ item, selectedDate }) => {
 					/>
 					<div className="collection-today-quota-amount-row">
 						<Text type="secondary" style={{ fontSize: 10 }}>
-							Abonado: {formatMoneyCOP(applied)}
+							Abonado: {money(applied)}
 						</Text>
 						<Text type="secondary" style={{ fontSize: 10 }}>
-							Cuota: {formatMoneyCOP(fixed)}
+							Cuota: {money(fixed)}
 						</Text>
 					</div>
 				</div>

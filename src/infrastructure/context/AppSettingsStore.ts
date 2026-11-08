@@ -14,6 +14,8 @@ interface State {
 	logoMarkTone: LogoTone
 	numberFormatStyle: NumberFormatStyle
 	numberDecimals: 0 | 2
+	/** Monedas de la marca (códigos ISO); la primera es la principal. Sin moneda por defecto: vacío hasta que cargan los ajustes. */
+	currencies: string[]
 	/** true una vez que se resolvió (con éxito o error) la configuración de la marca. */
 	loaded: boolean
 	apply: (settings: Settings) => void
@@ -54,6 +56,7 @@ const initialState: Omit<State, 'apply' | 'markLoaded' | 'resetStore'> = {
 	logoMarkTone: null,
 	numberFormatStyle: 'comma-thousands',
 	numberDecimals: 2,
+	currencies: [],
 	loaded: false,
 };
 
@@ -75,6 +78,7 @@ const useAppSettingsStore = create<State>()((set) => ({
 			logoMarkTone: settings.logoMarkTone,
 			numberFormatStyle: settings.numberFormatStyle,
 			numberDecimals: settings.numberDecimals,
+			currencies: settings.currencies,
 			loaded: true,
 		});
 	},

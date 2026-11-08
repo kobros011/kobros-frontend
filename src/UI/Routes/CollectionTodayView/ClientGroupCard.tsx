@@ -1,5 +1,7 @@
 import { FC, useEffect, useState } from 'react';
+
 import { App, Button, Card, Space, Tag, theme, Typography } from 'antd';
+
 import {
 	ControlOutlined,
 	DownOutlined,
@@ -8,26 +10,31 @@ import {
 	RightOutlined,
 	WalletOutlined,
 } from '@ant-design/icons';
+
 import { Dayjs } from 'dayjs';
+
 import dayjs from 'dayjs';
 import { useQueryClient } from '@tanstack/react-query';
+
 import { Collection } from '@/domain/Collection';
+
 import { queryKeyCollection } from '@/constants/queryKeys';
+
 import { repository as paymentRepository } from '@/infrastructure/repositories/Payment';
+
 import { handleError } from '@/infrastructure/utils/handleError';
-import {
-	computeGroupBalance,
-	formatMoneyCOP,
-	getGroupFooterText,
-	getGroupHeaderBadges,
-	getQuotaFixed,
-	isPaid,
-} from './groupCollections';
+
+import { computeGroupBalance, getGroupFooterText, getGroupHeaderBadges, getQuotaFixed, isPaid } from './groupCollections';
 import { QuotaCard } from './QuotaCard';
+
 import { PriorityBadge } from '@/UI/Routes/ClientsView/priority/PriorityChip';
+
 import { PriorityDrawer } from '@/UI/Routes/ClientsView/priority/PriorityDrawer';
+
 import { useCanManagePriority } from '@/UI/Routes/ClientsView/priority/usePriorityAccess';
+
 import './collectionToday.css';
+import { useMoney } from '@/infrastructure/hooks/useMoney';
 
 const { Text } = Typography;
 
@@ -37,6 +44,7 @@ interface ClientGroupCardProps {
 }
 
 export const ClientGroupCard: FC<ClientGroupCardProps> = ({ items, selectedDate }) => {
+	const money = useMoney();
 	const { token } = theme.useToken();
 	const { notification, modal } = App.useApp();
 	const queryClient = useQueryClient();
@@ -95,7 +103,7 @@ export const ClientGroupCard: FC<ClientGroupCardProps> = ({ items, selectedDate 
 	const confirmPayAll = () => {
 		void modal.confirm({
 			title: 'Confirmar cobro total',
-			content: `Se aplicará el saldo completo (${formatMoneyCOP(groupBalance)}) en ${unpaidOpen.length} cuota(s).`,
+			content: `Se aplicará el saldo completo (${money(groupBalance)}) en ${unpaidOpen.length} cuota(s).`,
 			okText: 'Confirmar',
 			cancelText: 'Cancelar',
 			centered: true,
@@ -129,7 +137,7 @@ export const ClientGroupCard: FC<ClientGroupCardProps> = ({ items, selectedDate 
 				</Text>
 				{!expanded && first.clientBeak > 0 && (
 					<Tag color="success" className="collection-today-tag" aria-label="Saldo a favor del cliente">
-						A favor {formatMoneyCOP(first.clientBeak)}
+						A favor {money(first.clientBeak)}
 					</Tag>
 				)}
 				{(expanded || hasPending) && (
@@ -171,7 +179,7 @@ export const ClientGroupCard: FC<ClientGroupCardProps> = ({ items, selectedDate 
 						{first.clientBeak > 0 && (
 							<span className={first.clientAddress ? undefined : 'meta-full'} style={{ justifyContent: 'flex-end' }}>
 								<WalletOutlined aria-hidden />
-								<Text type="success" strong>A favor {formatMoneyCOP(first.clientBeak)}</Text>
+								<Text type="success" strong>A favor {money(first.clientBeak)}</Text>
 							</span>
 						)}
 					</div>
@@ -193,7 +201,7 @@ export const ClientGroupCard: FC<ClientGroupCardProps> = ({ items, selectedDate 
 							disabled={payAllDisabled}
 							onClick={confirmPayAll}
 						>
-					Todo · {formatMoneyCOP(groupBalance)}
+					Todo · {money(groupBalance)}
 						</Button>
 					)}
 

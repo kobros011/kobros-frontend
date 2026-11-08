@@ -5,6 +5,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { queryKeyReports } from '@/constants/queryKeys';
 import { DashCard, IconBox, Pill } from './ui';
 import { DashboardFiltersState } from './useDashboardFilters';
+import { CurrencyTabs } from '@/UI/Components/CurrencyTabs';
 
 interface DashboardFiltersProps {
 	title: string;
@@ -71,6 +72,7 @@ export const DashboardFilters: FC<DashboardFiltersProps> = ({ title, subtitle, i
 							]}
 						/>
 					</div>
+					{!filters.routeId && <CurrencyTabs value={filters.currency} onChange={filters.setCurrency} />}
 					{extra}
 					<Tooltip title="Actualizar datos">
 						<Button

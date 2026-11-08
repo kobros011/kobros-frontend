@@ -77,9 +77,8 @@ const endDateConfig = (
 };
 
 /** Qué pasará con la cuota 1 al registrar el "valor pagado hoy" (misma regla del servidor). */
-export const describeInitialPayment = (quota: number, payment: number): string | undefined => {
+export const describeInitialPayment = (quota: number, payment: number, money: (value: number) => string): string | undefined => {
 	if (!(payment > 0) || !(quota > 0)) return undefined;
-	const money = (value: number) => `$${Math.round(value).toLocaleString('es-CO')}`;
 	if (payment < quota) return `Cuota 1 parcial · faltan ${money(quota - payment)}`;
 	if (payment > quota) return `Cuota 1 pagada · saldo a favor ${money(payment - quota)}`;
 	return 'Cuota 1 pagada completa';

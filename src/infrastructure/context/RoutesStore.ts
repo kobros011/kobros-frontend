@@ -23,6 +23,7 @@ const initialState: Omit<State, 'getRoute' | 'getRoutes' | 'resetStore' > = {
 		openingDate: '',
 		brandId: '',
 		loansNumber: 1,
+		currency: '',
 		active: false,
 		createdAt: '',
 		updatedAt: '',

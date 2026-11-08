@@ -9,6 +9,8 @@ export interface Route extends BaseDomain {
 	brandId: string
 	allowedUsersIds: string[]
 	loansNumber: number
+	/** Moneda de la ruta (código ISO); una de las monedas de la marca. */
+	currency: string
 }
 
 export class RouteModel {
@@ -28,6 +30,7 @@ export class RouteModel {
 			brandId: DTO.brand_id,
 			allowedUsersIds: DTO.allowed_users_ids ?? [],
 			loansNumber: DTO.loans_number,
+			currency: DTO.currency,
 			active: DTO.active,
 			updatedAt: DTO.updated_at,
 			createdAt: DTO.created_at,
@@ -42,6 +45,8 @@ export class RouteModel {
 			opening_date: domain.openingDate,
 			brand_id: domain.brandId,
 			allowed_users_ids: domain.allowedUsersIds ?? [],
+			// Solo se envía si se eligió: sin valor el servidor usa la única moneda de la marca (o la actual al editar).
+			...(domain.currency ? { currency: domain.currency } : {}),
 			...(domain.id ? { id: domain.id } : {}),
 		};
 	} 

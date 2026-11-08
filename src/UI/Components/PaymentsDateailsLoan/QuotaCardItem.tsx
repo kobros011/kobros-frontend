@@ -1,13 +1,21 @@
 import { FC } from 'react';
+
 import { Pill } from '@/UI/Components/Dashboard/ui';
+
 import { RankBar } from '@/UI/Components/Dashboard/charts';
-import { formatCOP, getInitials } from '@/UI/Components/Dashboard/format';
+
+import { getInitials } from '@/UI/Components/Dashboard/format';
 import { PaymentHistoryItemDto } from '@/infrastructure/dto/PaymentHistoryDto';
+
 import { QuotaPayInline } from './QuotaPayInline';
+
 import { formatDate, getDelayText, getStatusView } from './statusMeta';
+import { useMoney } from '@/infrastructure/hooks/useMoney';
+
 
 /** Tarjeta de una cuota: estado, fecha límite, montos, quién recaudó y (si aplica) el abono inline. */
 export const QuotaCardItem: FC<{ item: PaymentHistoryItemDto }> = ({ item }) => {
+	const money = useMoney();
 	const view = getStatusView(item);
 	const delay = getDelayText(item);
 	const partial = item.applied > 0 && item.balance > 0;
@@ -33,15 +41,15 @@ export const QuotaCardItem: FC<{ item: PaymentHistoryItemDto }> = ({ item }) => 
 				</div>
 				<div style={{ textAlign: 'right' }}>
 					<div className="kb-section-sub">{partial ? 'Saldo restante' : 'Valor cuota'}</div>
-					<strong className="kb-mono" style={{ fontSize: 16 }}>{formatCOP(partial ? item.balance : item.value)}</strong>
+					<strong className="kb-mono" style={{ fontSize: 16 }}>{money(partial ? item.balance : item.value)}</strong>
 				</div>
 			</div>
 
 			{partial && (
 				<div>
 					<div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
-						<span className="kb-mono" style={{ color: 'var(--kb-ok)' }}>Abonado {formatCOP(item.applied)}</span>
-						<span className="kb-mono" style={{ color: 'var(--kb-muted)' }}>de {formatCOP(item.value)}</span>
+						<span className="kb-mono" style={{ color: 'var(--kb-ok)' }}>Abonado {money(item.applied)}</span>
+						<span className="kb-mono" style={{ color: 'var(--kb-muted)' }}>de {money(item.value)}</span>
 					</div>
 					<RankBar percent={coveredPercent} tone="warn" />
 				</div>
@@ -50,7 +58,7 @@ export const QuotaCardItem: FC<{ item: PaymentHistoryItemDto }> = ({ item }) => 
 			{item.status === 'pagado' && (
 				<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, fontSize: 12 }}>
 					<span className="kb-mono" style={{ color: 'var(--kb-ok)' }}>
-						Pagó {formatCOP(item.applied)} · {formatDate(item.payment_date)}
+						Pagó {money(item.applied)} · {formatDate(item.payment_date)}
 					</span>
 					{item.collected_by_name && (
 						<span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: 'var(--kb-muted)' }}>
@@ -63,9 +71,9 @@ export const QuotaCardItem: FC<{ item: PaymentHistoryItemDto }> = ({ item }) => 
 
 			{item.excess > 0 && (
 				<div className="kb-mono" style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, gap: 8 }}>
-					<span>Base {formatCOP(item.value)}</span>
-					<span style={{ color: 'var(--kb-ok)' }}>Abono +{formatCOP(item.excess)}</span>
-					<strong style={{ color: 'var(--kb-ok)' }}>Total {formatCOP(item.applied)}</strong>
+					<span>Base {money(item.value)}</span>
+					<span style={{ color: 'var(--kb-ok)' }}>Abono +{money(item.excess)}</span>
+					<strong style={{ color: 'var(--kb-ok)' }}>Total {money(item.applied)}</strong>
 				</div>
 			)}
 

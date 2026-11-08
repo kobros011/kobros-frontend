@@ -1,15 +1,22 @@
 import { FC } from 'react';
+
 import { Button } from 'antd';
+
 import dayjs from 'dayjs';
 import 'dayjs/locale/es';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
+
 import { shortName } from '@/UI/Components/Dashboard/DashboardFilters';
+
 import { Pill } from '@/UI/Components/Dashboard/ui';
-import { formatCOP } from '@/UI/Components/Dashboard/format';
+
 import { LiquidationListItemDto } from '@/infrastructure/dto/LiquidationDto';
+
 import { LiquidationActions } from './LiquidationActions';
-import { getDifferenceView, signedCOP } from './statusMeta';
+
+import { getDifferenceView } from './statusMeta';
+import { useRouteMoney } from '@/infrastructure/hooks/useMoney';
 
 dayjs.extend(relativeTime);
 
@@ -22,7 +29,9 @@ const Figure: FC<{ label: string; value: string; color?: string }> = ({ label, v
 
 /** Tarjeta de un cierre por confirmar: cifras, diferencia, nota del cobrador y acciones (confirmar o reabrir si está desactualizado). */
 export const PendingCard: FC<{ item: LiquidationListItemDto; onOpen: (id: string) => void }> = ({ item, onOpen }) => {
-	const diff = getDifferenceView(item.difference ?? 0);
+	const routeMoney = useRouteMoney();
+	const money = (value: number) => routeMoney(value, item.route_id);
+	const diff = getDifferenceView(item.difference ?? 0, money);
 	const sent = dayjs(item.created_at);
 
 	return (
@@ -38,21 +47,21 @@ export const PendingCard: FC<{ item: LiquidationListItemDto; onOpen: (id: string
 			</div>
 
 			<div className="lq-figures" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))' }}>
-				<Figure label="Recaudo" value={formatCOP(item.total_value_charged)} />
-				<Figure label="Gastos" value={signedCOP(-item.total_value_expenses)} color="var(--kb-warn)" />
-				<Figure label={`Créditos nuevos (${item.new_loans_count})`} value={signedCOP(-item.value_new_loans)} color="var(--kb-info)" />
-				<Figure label="Esperado" value={formatCOP(item.expected_cash ?? 0)} />
+				<Figure label="Recaudo" value={money(item.total_value_charged)} />
+				<Figure label="Gastos" value={money(-item.total_value_expenses)} color="var(--kb-warn)" />
+				<Figure label={`Créditos nuevos (${item.new_loans_count})`} value={money(-item.value_new_loans)} color="var(--kb-info)" />
+				<Figure label="Esperado" value={money(item.expected_cash ?? 0)} />
 			</div>
 
 			{item.outdated ? (
 				<div className="lq-alert" role="alert">
-					<strong><ExclamationCircleOutlined /> Hay {formatCOP(item.outdated_amount)} cobrados después del envío del informe</strong>
+					<strong><ExclamationCircleOutlined /> Hay {money(item.outdated_amount)} cobrados después del envío del informe</strong>
 					<div className="kb-section-sub">El cobrador registró {item.late_receipts} {item.late_receipts === 1 ? 'recibo adicional' : 'recibos adicionales'} luego de cerrar su caja.</div>
 				</div>
 			) : (
 				<div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'baseline' }}>
 					<span className="kb-section-sub">Efectivo entregado por {item.collector_name ?? 'la ruta'}</span>
-					<strong className="kb-mono" style={{ color: `var(--kb-${diff.tone === 'ok' ? 'ok' : diff.tone})` }}>{formatCOP(item.cash_delivered ?? 0)}</strong>
+					<strong className="kb-mono" style={{ color: `var(--kb-${diff.tone === 'ok' ? 'ok' : diff.tone})` }}>{money(item.cash_delivered ?? 0)}</strong>
 				</div>
 			)}
 

@@ -1,6 +1,6 @@
 import { LoanFullRead } from '@/domain/Loan';
 import { getListLoans } from '@/infrastructure/querys/Loan';
-import { formatNumber } from '@/infrastructure/utils/formaNumber';
+import { useMoney, useRouteMoney } from '@/infrastructure/hooks/useMoney';
 import { CheckCircleOutlined, ClockCircleOutlined } from '@ant-design/icons';
 import {
 	Col,
@@ -91,6 +91,8 @@ const RiskIndicatorTrack: FC<{ riskLevel: RiskLevel }> = ({ riskLevel }) => {
 
 export const ClientCreditSummaryView: FC<{ loans: LoanFullRead[] }> = ({ loans }) => {
 	const { token } = theme.useToken();
+	const routeMoney = useRouteMoney();
+	const money = useMoney();
 
 	const riskLevel = calcRiskLevel(loans);
 	const viableAmount = calcViableAmount(loans, riskLevel);
@@ -115,13 +117,13 @@ export const ClientCreditSummaryView: FC<{ loans: LoanFullRead[] }> = ({ loans }
 								<Tag color={active ? 'warning' : 'success'}>{active ? 'Activo' : 'Cancelado'}</Tag>
 							</div>
 							<Text type="secondary" style={{ fontSize: 12, display: 'block' }}>
-								{loan.paymentMethod} · ${formatNumber(loan.valueCapital ?? 0)} · {String(loan.initialDate).slice(0, 10)} → {String(loan.endDate).slice(0, 10)}
+								{loan.paymentMethod} · {routeMoney(Number(loan.valueCapital ?? 0), loan.routeId, { digits: 'brand' })} · {String(loan.initialDate).slice(0, 10)} → {String(loan.endDate).slice(0, 10)}
 							</Text>
 							<Text
 								style={{ fontSize: 12, display: 'block', marginTop: 4 }}
 								type={mora > 0 ? 'danger' : 'secondary'}
 							>
-								{mora > 0 ? `Mora: $${formatNumber(mora)}` : 'Sin mora'}
+								{mora > 0 ? `Mora: ${routeMoney(mora, loan.routeId, { digits: 'brand' })}` : 'Sin mora'}
 							</Text>
 							<div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginTop: 8 }}>
 								<Text style={{ fontSize: 12, color: token.colorSuccess }}>
@@ -154,8 +156,7 @@ export const ClientCreditSummaryView: FC<{ loans: LoanFullRead[] }> = ({ loans }
 						<Statistic
 							title="Total en mora"
 							value={totalDefault}
-							prefix="$"
-							formatter={(v) => formatNumber(v as number)}
+							formatter={(v) => money(v as number, { digits: 'brand' })}
 							valueStyle={{ color: token.colorError, fontSize: 22 }}
 						/>
 					</div>
@@ -181,9 +182,7 @@ export const ClientCreditSummaryView: FC<{ loans: LoanFullRead[] }> = ({ loans }
 				</Text>
 				<Statistic
 					value={viableAmount}
-					prefix="$"
-					suffix="COP"
-					formatter={(v) => formatNumber(v as number, 0)}
+					formatter={(v) => money(v as number, { digits: 'brand' })}
 					valueStyle={{ color: token.colorPrimary, fontSize: 28, fontWeight: 700 }}
 				/>
 				<Text type="secondary" style={{ fontSize: 11 }}>

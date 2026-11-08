@@ -4,6 +4,7 @@ import { spanConfigForm } from '@/constants/getSpan';
 import { ruleRequired } from '@/constants/rules';
 import { LoanFull } from '@/domain/Loan';
 import { formatNumber, parseFormNumber } from '@/infrastructure/utils/formaNumber';
+import { useCurrency, useMoney } from '@/infrastructure/hooks/useMoney';
 import InputNumber from '@/UI/Components/Fields/InputNumber';
 import { ThunderboltOutlined } from '@ant-design/icons';
 import { Button, Col, Form, FormInstance, Row, Select, Typography } from 'antd';
@@ -43,6 +44,8 @@ export const LoanDataStep: FC<LoanDataStepProps> = ({
 	onSave,
 	isLoading,
 }) => {
+	const money = useMoney();
+	const currency = useCurrency();
 	const paymentMethod = Form.useWatch('paymentMethod', form);
 	const isFixedDate = paymentMethod === PaymentMethod.fixedDate;
 
@@ -52,7 +55,7 @@ export const LoanDataStep: FC<LoanDataStepProps> = ({
 
 	const dateFirstQuota = Form.useWatch('dateFirstQuota', form);
 	const valuePayment = Form.useWatch('valuePayment', form);
-	const initialPaymentEffect = describeInitialPayment(parseFormNumber(valueQuotaFixed), parseFormNumber(valuePayment));
+	const initialPaymentEffect = describeInitialPayment(parseFormNumber(valueQuotaFixed), parseFormNumber(valuePayment), value => money(value, { digits: 'brand' }));
 
 	const derived = useMemo(
 		() =>
@@ -75,19 +78,19 @@ export const LoanDataStep: FC<LoanDataStepProps> = ({
 		Boolean(paymentMethod);
 
 	const moneySummary = (amount: number) =>
-		creditInputsReady ? `$${formatNumber(amount)}` : '—';
+		creditInputsReady ? money(amount, { digits: 'brand' }) : '—';
 
 	return (
 		<>
 			<Row gutter={[12, 4]}>
 				<Col {...spanConfigForm.large}>
 					<Form.Item label="Valor capital" name="valueCapital" rules={[ruleRequired]} className="loan-wizard-field">
-						<InputNumber size="small" thousandsSeparator style={{ width: '100%' }} disabled={disabled} />
+						<InputNumber size="small" thousandsSeparator addonAfter={currency} style={{ width: '100%' }} disabled={disabled} />
 					</Form.Item>
 				</Col>
 				<Col {...spanConfigForm.large}>
 					<Form.Item label="Valor cuota fija" name="valueQuotaFixed" rules={[ruleRequired]} className="loan-wizard-field">
-						<InputNumber size="small" thousandsSeparator style={{ width: '100%' }} disabled={disabled} />
+						<InputNumber size="small" thousandsSeparator addonAfter={currency} style={{ width: '100%' }} disabled={disabled} />
 					</Form.Item>
 				</Col>
 				<Col {...spanConfigForm.large}>
@@ -139,7 +142,7 @@ export const LoanDataStep: FC<LoanDataStepProps> = ({
 			</div>
 
 			<Form.Item label="Valor pagado hoy" name="valuePayment" style={{ marginBottom: 12 }} className="loan-wizard-field">
-				<InputNumber size="small" thousandsSeparator style={{ width: '100%' }} disabled={disabled} />
+				<InputNumber size="small" thousandsSeparator addonAfter={currency} style={{ width: '100%' }} disabled={disabled} />
 			</Form.Item>
 			{initialPaymentEffect && (
 				<Text type="secondary" style={{ display: 'block', fontSize: 12, marginBottom: 12 }}>{initialPaymentEffect}</Text>

@@ -16,5 +16,6 @@ export interface SettingsDto {
 	logo_mark_tone: 'dark' | 'light' | 'mixed' | null
 	number_format_style: 'comma-thousands' | 'dot-thousands'
 	number_decimals: 0 | 2
+	currencies: string[]
 	logo_enabled: boolean
 }

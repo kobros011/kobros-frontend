@@ -211,6 +211,8 @@ const LogoSlotEditor: FC<{
 	);
 };
 
+import { CurrenciesCard } from './CurrenciesCard';
+
 const toForm = (settings?: Settings): SettingsForm => ({
 	brandName: settings?.brandName ?? '',
 	brandCode: settings?.brandCode ?? '',
@@ -220,6 +222,7 @@ const toForm = (settings?: Settings): SettingsForm => ({
 	primaryColor: settings?.primaryColor ?? null,
 	numberFormatStyle: settings?.numberFormatStyle ?? 'comma-thousands',
 	numberDecimals: settings?.numberDecimals ?? 2,
+	currencies: settings?.currencies ?? [],
 });
 
 const SettingsView: FC = () => {
@@ -449,6 +452,10 @@ const SettingsView: FC = () => {
 									)}
 								</Form.Item>
 							</Card>
+						</Col>
+
+						<Col xs={24}>
+							<CurrenciesCard form={form} size={size} />
 						</Col>
 
 						<Col xs={24} lg={12}>

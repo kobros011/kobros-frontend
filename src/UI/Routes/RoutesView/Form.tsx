@@ -12,6 +12,7 @@ import { handleError } from '@/infrastructure/utils/handleError';
 import ActionsButton from '@/UI/Components/AcctionButtons';
 import InputDate from '@/UI/Components/Fields/InputDate';
 import InputNumber from '@/UI/Components/Fields/InputNumber';
+import { RouteCurrencyField } from './RouteCurrencyField';
 import { SelectBrand } from '@/UI/Components/Fields/SelectBrand';
 import { SelectUsers } from '@/UI/Components/Fields/SelectUsers';
 import LoadingComponent from '@/UI/Components/LoadingComponent';
@@ -40,6 +41,7 @@ const FormRoute: FC<{ readonly?: boolean, bare?: boolean }> = ({ readonly = fals
 	const [exit, setExit] = useState<boolean>(false);
 
 	const isCreate = !id;
+	const watchedBrandId = Form.useWatch('brandId', form) ;
 
 	const onFinish = (values: Partial<Route>) => {
 		startLoading();
@@ -126,6 +128,9 @@ const FormRoute: FC<{ readonly?: boolean, bare?: boolean }> = ({ readonly = fals
 						>
 							<Input placeholder="Nombre de la ruta" />
 						</Form.Item>
+					</Col>
+					<Col {...spanConfigForm[isSuperUser ? 'medium' : 'small']}>
+						<RouteCurrencyField brandId={isSuperUser ? watchedBrandId : undefined} disabled={readonly} />
 					</Col>
 					<Col {...spanConfigForm[isSuperUser ? 'medium' : 'small']}>
 						<Form.Item

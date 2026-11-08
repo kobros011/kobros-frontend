@@ -21,6 +21,7 @@ const toDomain = (dto: SettingsDto): Settings => ({
 	logoMarkTone: dto.logo_mark_tone,
 	numberFormatStyle: dto.number_format_style,
 	numberDecimals: dto.number_decimals,
+	currencies: dto.currencies ?? [],
 	logoEnabled: dto.logo_enabled,
 });
 
@@ -44,6 +45,7 @@ export class ImplementationSettingsRepository extends ImplementationBase {
 				primary_color: data.primaryColor,
 				number_format_style: data.numberFormatStyle,
 				number_decimals: data.numberDecimals,
+				currencies: data.currencies,
 			},
 			{ params: brandId ? { brand_id: brandId } : undefined },
 		);

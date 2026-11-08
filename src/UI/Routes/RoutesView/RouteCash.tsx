@@ -1,17 +1,25 @@
 import { FC, useState } from 'react';
+
 import { App, Collapse, Form, Input, Modal, Typography } from 'antd';
+
 import { ArrowDownOutlined, ArrowUpOutlined, WalletOutlined } from '@ant-design/icons';
+
 import { AxiosError } from 'axios';
+
 import { ruleRequired } from '@/constants/rules';
+
 import { getRouteCashSummary, getListRouteMovements, useCreateRouteMovement } from '@/infrastructure/querys/RouteMovement';
+
 import { RouteMovementType } from '@/domain/RouteMovement';
+
 import InputNumber from '@/UI/Components/Fields/InputNumber';
 import LoadingComponent from '@/UI/Components/LoadingComponent';
 import { DashboardShell, KpiCard } from '@/UI/Components/Dashboard/ui';
-import { formatCOP } from '@/UI/Components/Dashboard/format';
+
 import useUserModeStore from '@/infrastructure/context/User/UserModeStore';
 import useTableViewStore from '@/infrastructure/context/TableViewStore';
 import MovementHistory from './MovementHistory';
+import { useMoney } from '@/infrastructure/hooks/useMoney';
 
 const { Text } = Typography;
 
@@ -24,6 +32,7 @@ interface MovementFormValues {
 }
 
 const RouteCash: FC<{ routeId: string, readonly?: boolean }> = ({ routeId, readonly = false }) => {
+	const money = useMoney();
 	const { notification } = App.useApp();
 	const [form] = Form.useForm<MovementFormValues>();
 	const [modalType, setModalType] = useState<RouteMovementType | null>(null);
@@ -80,19 +89,18 @@ const RouteCash: FC<{ routeId: string, readonly?: boolean }> = ({ routeId, reado
 			label="Saldo de caja"
 			subtitle="Disponible para operar"
 			icon={<WalletOutlined />}
-			value={formatCOP(saldo)}
-			unit="COP"
+			value={money(saldo)}
 			valueTone={saldo < 0 ? 'danger' : undefined}
 		/>
 	);
 
 	const otherKpiCards = [
-		<KpiCard key="ingresos" label="Ingresos acumulados" subtitle="Dinero agregado a la ruta" icon={<ArrowUpOutlined />} tone="ok" valueTone="ok" value={formatCOP(summary?.ingresos ?? 0)} unit="COP" />,
-		<KpiCard key="retiros" label="Retiros acumulados" subtitle="Dinero retirado de la ruta" icon={<ArrowDownOutlined />} tone="danger" valueTone="danger" value={formatCOP(summary?.retiros ?? 0)} unit="COP" />,
-		<KpiCard key="inicial" label="Valor inicial" subtitle="Base con la que abrió la ruta" tone="neutral" value={formatCOP(summary?.initialValue ?? 0)} unit="COP" />,
-		<KpiCard key="cobros" label="Cobros" subtitle="Pagos recaudados en la ruta" tone="neutral" value={formatCOP(summary?.cobros ?? 0)} unit="COP" />,
-		<KpiCard key="gastos" label="Gastos" subtitle="Gastos registrados en la ruta" tone="neutral" value={formatCOP(summary?.gastos ?? 0)} unit="COP" />,
-		<KpiCard key="desembolsos" label="Préstamos desembolsados" subtitle="Capital entregado a clientes" tone="neutral" value={formatCOP(summary?.desembolsos ?? 0)} unit="COP" />,
+		<KpiCard key="ingresos" label="Ingresos acumulados" subtitle="Dinero agregado a la ruta" icon={<ArrowUpOutlined />} tone="ok" valueTone="ok" value={money(summary?.ingresos ?? 0)} />,
+		<KpiCard key="retiros" label="Retiros acumulados" subtitle="Dinero retirado de la ruta" icon={<ArrowDownOutlined />} tone="danger" valueTone="danger" value={money(summary?.retiros ?? 0)} />,
+		<KpiCard key="inicial" label="Valor inicial" subtitle="Base con la que abrió la ruta" tone="neutral" value={money(summary?.initialValue ?? 0)} />,
+		<KpiCard key="cobros" label="Cobros" subtitle="Pagos recaudados en la ruta" tone="neutral" value={money(summary?.cobros ?? 0)} />,
+		<KpiCard key="gastos" label="Gastos" subtitle="Gastos registrados en la ruta" tone="neutral" value={money(summary?.gastos ?? 0)} />,
+		<KpiCard key="desembolsos" label="Préstamos desembolsados" subtitle="Capital entregado a clientes" tone="neutral" value={money(summary?.desembolsos ?? 0)} />,
 	];
 
 	return (
@@ -138,7 +146,7 @@ const RouteCash: FC<{ routeId: string, readonly?: boolean }> = ({ routeId, reado
 				destroyOnClose
 				centered
 			>
-				{modalType === 'RETIRO' && <Text type="secondary">Saldo disponible: <strong>{formatCOP(saldo)}</strong></Text>}
+				{modalType === 'RETIRO' && <Text type="secondary">Saldo disponible: <strong>{money(saldo)}</strong></Text>}
 				<Form form={form} layout="vertical" onFinish={onSubmit} style={{ marginTop: 12 }}>
 					<Form.Item label="Monto" name="value" rules={[ ruleRequired ]}>
 						<InputNumber thousandsSeparator placeholder="Monto en COP" />

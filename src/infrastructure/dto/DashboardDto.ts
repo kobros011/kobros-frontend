@@ -116,4 +116,6 @@ export interface PeriodReportDto {
 export interface DashboardParams {
 	route_id?: string
 	collector_id?: string
+	/** Solo cuando se ven rutas de varias monedas: se pide un bloque por moneda. */
+	currency?: string
 }

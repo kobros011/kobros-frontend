@@ -1,13 +1,20 @@
 import { FC, useEffect, useMemo, useState } from 'react';
+
 import { Alert, App, Button, Input, Modal } from 'antd';
+
 import { LockOutlined, ToolOutlined } from '@ant-design/icons';
+
 import InputNumber from '@/UI/Components/Fields/InputNumber';
 import { DashCard, Pill, SectionCard } from '@/UI/Components/Dashboard/ui';
-import { formatCOP } from '@/UI/Components/Dashboard/format';
+
 import { useCreateLiquidation } from '@/infrastructure/querys/Liquidation';
+
 import { handleError } from '@/infrastructure/utils/handleError';
+
 import { LiquidationPreviewDto } from '@/infrastructure/dto/LiquidationDto';
-import { getDifferenceView, signedCOP } from './statusMeta';
+
+import { getDifferenceView } from './statusMeta';
+import { useMoney } from '@/infrastructure/hooks/useMoney';
 
 interface ClosingFormProps {
 	preview: LiquidationPreviewDto;
@@ -19,6 +26,7 @@ const toNumber = (value?: string) => (value === undefined || value === '' ? null
 
 /** Datos que digita quien cierra + cuadre en vivo (esperado = base + recaudo − gastos − créditos nuevos). */
 export const ClosingForm: FC<ClosingFormProps> = ({ preview, collectorId }) => {
+	const money = useMoney();
 	const { notification } = App.useApp();
 	const create = useCreateLiquidation();
 	const [base, setBase] = useState<string | undefined>();
@@ -41,7 +49,7 @@ export const ClosingForm: FC<ClosingFormProps> = ({ preview, collectorId }) => {
 		[baseValue, preview],
 	);
 	const difference = cashValue === null ? null : cashValue - expected;
-	const diffView = difference === null ? null : getDifferenceView(difference);
+	const diffView = difference === null ? null : getDifferenceView(difference, money);
 	const needsNote = difference !== null && Math.abs(difference) >= 0.5 && note.trim().length === 0;
 	const canClose = cashValue !== null && !needsNote;
 
@@ -70,7 +78,7 @@ export const ClosingForm: FC<ClosingFormProps> = ({ preview, collectorId }) => {
 					<label className="lq-field">
 						<span className="kb-section-sub">Base entregada <Pill tone="neutral">Sugerido</Pill></span>
 						<InputNumber aria-label="Base entregada" thousandsSeparator precision={0} size="small" value={base} onChange={value => setBase(value as string)} prefix="$" />
-						<span className="kb-section-sub">Último cierre: {formatCOP(preview.suggested_base)}</span>
+						<span className="kb-section-sub">Último cierre: {money(preview.suggested_base)}</span>
 					</label>
 					<label className="lq-field">
 						<span className="kb-section-sub">Efectivo entregado</span>
@@ -87,14 +95,14 @@ export const ClosingForm: FC<ClosingFormProps> = ({ preview, collectorId }) => {
 			<DashCard className="lq-cuadre">
 				<div className="kb-section-sub">CUADRE OPERATIVO · fórmula automática</div>
 				<div className="kb-section-sub" style={{ marginTop: 6 }}>Efectivo esperado en caja</div>
-				<div><span className="kb-kpi-value">{signedCOP(expected)}</span><span className="kb-kpi-unit">COP</span></div>
+				<div><span className="kb-kpi-value">{money(expected)}</span></div>
 				<div className="kb-section-sub kb-mono" style={{ margin: '4px 0 10px' }}>
-					{formatCOP(baseValue)} (base) + {formatCOP(preview.collected_total)} (recaudo) − {formatCOP(preview.expenses_total)} (gastos) − {formatCOP(preview.new_loans_total)} (nuevos)
+					{money(baseValue)} (base) + {money(preview.collected_total)} (recaudo) − {money(preview.expenses_total)} (gastos) − {money(preview.new_loans_total)} (nuevos)
 				</div>
 				<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
 					<div>
 						<div className="kb-section-sub">Entregado / contado</div>
-						<strong className="kb-mono">{cashValue === null ? '—' : formatCOP(cashValue)}</strong>
+						<strong className="kb-mono">{cashValue === null ? '—' : money(cashValue)}</strong>
 					</div>
 					<div style={{ textAlign: 'right' }}>
 						<div className="kb-section-sub">Diferencia</div>
@@ -134,15 +142,18 @@ const Line: FC<{ label: string; value: string; strong?: boolean }> = ({ label, v
 	</div>
 );
 
-const ClosingSummary: FC<{ preview: LiquidationPreviewDto; base: number; cash: number; expected: number; difference: number }> = ({ preview, base, cash, expected, difference }) => (
-	<div>
-		<Line label="Ruta" value={`${preview.route_name}${preview.collector_name ? ` · ${preview.collector_name}` : ' · consolidado'}`} />
-		<Line label="Base entregada" value={formatCOP(base)} />
-		<Line label={`Recaudo (${preview.receipts_count} recibos)`} value={formatCOP(preview.collected_total)} />
-		<Line label="Gastos" value={`−${formatCOP(preview.expenses_total)}`} />
-		<Line label="Créditos nuevos" value={`−${formatCOP(preview.new_loans_total)}`} />
-		<Line label="Efectivo esperado" value={signedCOP(expected)} strong />
-		<Line label="Efectivo entregado" value={formatCOP(cash)} strong />
-		<Line label="Diferencia" value={getDifferenceView(difference).text} strong />
-	</div>
-);
+const ClosingSummary: FC<{ preview: LiquidationPreviewDto; base: number; cash: number; expected: number; difference: number }> = ({ preview, base, cash, expected, difference }) =>{
+	const money = useMoney();
+	return (
+		<div>
+			<Line label="Ruta" value={`${preview.route_name}${preview.collector_name ? ` · ${preview.collector_name}` : ' · consolidado'}`} />
+			<Line label="Base entregada" value={money(base)} />
+			<Line label={`Recaudo (${preview.receipts_count} recibos)`} value={money(preview.collected_total)} />
+			<Line label="Gastos" value={`−${money(preview.expenses_total)}`} />
+			<Line label="Créditos nuevos" value={`−${money(preview.new_loans_total)}`} />
+			<Line label="Efectivo esperado" value={money(expected)} strong />
+			<Line label="Efectivo entregado" value={money(cash)} strong />
+			<Line label="Diferencia" value={getDifferenceView(difference, money).text} strong />
+		</div>
+	);
+};

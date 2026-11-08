@@ -8,4 +8,5 @@ export interface RouteDto extends BaseDto {
 	brand_id: string
 	allowed_users_ids: string[]
 	loans_number: number
+	currency: string
 }

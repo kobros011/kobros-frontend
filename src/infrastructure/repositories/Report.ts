@@ -17,12 +17,12 @@ interface CarteraParams {
 export class ImplementationReportRepository extends ImplementationBase {
 	protected readonly baseUrl: string = '/reports/';
 
-	async getPortfolio(params?: { route_id?: string; brand_id?: string }) {
+	async getPortfolio(params?: { route_id?: string; brand_id?: string; currency?: string }) {
 		const response = await axios.get<PortfolioItemDto[]>(`${this.baseUrl}portfolio`, { params });
 		return response;
 	}
 
-	async getDelinquency(params?: { route_id?: string; brand_id?: string }) {
+	async getDelinquency(params?: { route_id?: string; brand_id?: string; currency?: string }) {
 		const response = await axios.get<DelinquencyItemDto[]>(`${this.baseUrl}delinquency`, { params });
 		return response;
 	}

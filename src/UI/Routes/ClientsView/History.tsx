@@ -3,11 +3,12 @@ import { Table, Tag, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { getClientHistory } from '@/infrastructure/querys/Report';
 import { PaymentHistoryItemDto } from '@/infrastructure/dto/ReportDto';
+import { formatRouteMoney } from '@/infrastructure/utils/money';
 
 const { Title } = Typography;
 
-const formatMoney = (val: number) =>
-	new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(val);
+// El historial no trae la ruta de cada pago: se muestra con la moneda principal de la marca.
+const formatMoney = (val: number) => formatRouteMoney(val, undefined, { digits: 'brand' });
 
 const statusColor: Record<string, string> = {
 	pagado: 'green',

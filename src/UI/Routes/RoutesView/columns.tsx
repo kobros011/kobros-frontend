@@ -14,11 +14,18 @@ export const getColumns = (actions: OnClickActions<Route>) => {
 			width: 200,
 		},
 		{
+			key: 'currency',
+			title: 'Moneda',
+			dataIndex: 'currency',
+			width: 90,
+		},
+		{
 			key: 'initialValue',
 			title: 'Valor Inicial',
 			dataIndex: 'initialValue',
 			width: 120,
 			typeRender: 'money',
+			routeKey: 'id',
 		},
 		{
 			key: 'initialExpense',
@@ -26,6 +33,7 @@ export const getColumns = (actions: OnClickActions<Route>) => {
 			dataIndex: 'initialExpense',
 			width: 120,
 			typeRender: 'money',
+			routeKey: 'id',
 			defaultVisible: false,
 		},
 		{

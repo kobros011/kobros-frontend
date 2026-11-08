@@ -1,10 +1,15 @@
 import { FC } from 'react';
+
 import { Empty, Flex, Pagination, Skeleton, Typography } from 'antd';
+
 import { ArrowDownOutlined, ArrowUpOutlined } from '@ant-design/icons';
+
 import dayjs from 'dayjs';
 import { RouteMovement } from '@/domain/RouteMovement';
+
 import { IconBox } from '@/UI/Components/Dashboard/ui';
-import { formatCOP } from '@/UI/Components/Dashboard/format';
+import { useMoney } from '@/infrastructure/hooks/useMoney';
+
 
 const { Text } = Typography;
 
@@ -19,6 +24,7 @@ interface MovementListProps {
 }
 
 function MovementRow({ movement }: { movement: RouteMovement }) {
+	const money = useMoney();
 	const isIncome = movement.type === 'INGRESO';
 	return (
 		<Flex
@@ -46,7 +52,7 @@ function MovementRow({ movement }: { movement: RouteMovement }) {
 				className="kb-mono"
 				style={{ color: isIncome ? 'var(--kb-ok)' : 'var(--kb-danger)', fontSize: 13, whiteSpace: 'nowrap', flexShrink: 0 }}
 			>
-				{isIncome ? '+' : '−'}{formatCOP(movement.value)}
+				{isIncome ? '+' : '−'}{money(movement.value)}
 			</Text>
 		</Flex>
 	);

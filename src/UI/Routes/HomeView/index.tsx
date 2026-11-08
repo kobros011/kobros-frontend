@@ -10,11 +10,27 @@ import dayjs from 'dayjs';
 import { PaymentStatus } from '@/constants/types';
 import { Link } from 'react-router-dom';
 import routePaths from '@/constants/routePaths';
+import useAppSettingsStore from '@/infrastructure/context/AppSettingsStore';
+import { formatMoney, getRouteCurrency } from '@/infrastructure/utils/money';
 
 const { Title } = Typography;
 
-const formatMoney = (val: number) =>
-	new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(val);
+/** Suma por moneda de la ruta de cada fila: nunca se suman monedas distintas. */
+const sumByCurrency = <T extends object>(rows: T[], routeOf: (row: T) => string | undefined, valueOf: (row: T) => number): Record<string, number> => {
+	const totals: Record<string, number> = {};
+	rows.forEach(row => {
+		const currency = getRouteCurrency(routeOf(row)) ?? '';
+		totals[currency] = (totals[currency] ?? 0) + valueOf(row);
+	});
+	return totals;
+};
+
+/** Un valor por línea y por moneda ("$1.200 COP" / "US$30 USD"); sin datos, el cero de la moneda principal. */
+const CurrencyLines: FC<{ totals: Record<string, number>; primary?: string }> = ({ totals, primary }) => {
+	const entries = Object.entries(totals);
+	if (entries.length === 0) return <>{formatMoney(0, primary)}</>;
+	return <>{entries.map(([currency, total]) => <div key={currency}>{formatMoney(total, currency || undefined)}</div>)}</>;
+};
 
 const HomeView: FC = () => {
 	const { typeUser } = useUserStore(state => state.user);
@@ -34,15 +50,19 @@ const HomeView: FC = () => {
 	const { items: delinquency, isLoading: loadingDelinquency } = getDelinquencyReport();
 	const { collection, isLoading: loadingCollection } = getListCollection(routeId, today);
 
-	const totalPortfolio = portfolio.reduce((s, i) => s + i.balance, 0);
-	const totalDelinquency = delinquency.reduce((s, i) => s + i.balance, 0);
-	const collectedToday = collection
-		.filter(p => p.status === PaymentStatus.paid)
-		.reduce((s, p) => s + (p.applied ?? 0), 0);
+	const primary = useAppSettingsStore(state => state.currencies[0]);
+	const totalPortfolio = sumByCurrency(portfolio, i => i.route_id, i => i.balance);
+	const totalDelinquency = sumByCurrency(delinquency, i => i.route_id, i => i.balance);
+	const paidToday = collection.filter(p => p.status === PaymentStatus.paid);
+	const collectedToday = sumByCurrency(paidToday, p => p.routeId, p => p.applied ?? 0);
 	const pendingToday = collection.filter(p => p.status !== PaymentStatus.paid).length;
-	const expectedToday = collection.reduce((s, p) => s + p.value, 0);
-	const effectiveness =
-		expectedToday > 0 ? Math.min(100, (collectedToday / expectedToday) * 100) : 0;
+	const expectedToday = sumByCurrency(collection, p => p.routeId, p => p.value);
+	// La efectividad es un cociente: se calcula dentro de cada moneda.
+	const effectiveness = Object.entries(expectedToday).map(([currency, expected]) => ({
+		currency,
+		percent: expected > 0 ? Math.min(100, ((collectedToday[currency] ?? 0) / expected) * 100) : 0,
+	}));
+	const lowestEffectiveness = effectiveness.length ? Math.min(...effectiveness.map(e => e.percent)) : 0;
 
 	const loading = loadingPortfolio || loadingDelinquency || loadingCollection;
 
@@ -71,8 +91,8 @@ const HomeView: FC = () => {
 								<Card>
 									<Statistic
 										title="Cartera total activa"
-										value={totalPortfolio}
-										formatter={v => formatMoney(Number(v))}
+										value={0}
+										formatter={() => <CurrencyLines totals={totalPortfolio} primary={primary} />}
 										valueStyle={{ color: '#1677ff', fontSize: 18 }}
 									/>
 									<Link to={`/${routePaths.DEFAULT_HOME}/${routePaths.PAYMENTS}`} style={{ fontSize: 12 }}>
@@ -84,9 +104,9 @@ const HomeView: FC = () => {
 								<Card>
 									<Statistic
 										title="Total en mora"
-										value={totalDelinquency}
-										formatter={v => formatMoney(Number(v))}
-										valueStyle={{ color: totalDelinquency > 0 ? '#ff4d4f' : '#52c41a', fontSize: 18 }}
+										value={0}
+										formatter={() => <CurrencyLines totals={totalDelinquency} primary={primary} />}
+										valueStyle={{ color: Object.values(totalDelinquency).some(v => v > 0) ? '#ff4d4f' : '#52c41a', fontSize: 18 }}
 									/>
 									<Link to={`/${routePaths.DEFAULT_HOME}/${routePaths.PAYMENTS_DELINQUENCY}`} style={{ fontSize: 12 }}>
 										Ver mora →
@@ -99,8 +119,8 @@ const HomeView: FC = () => {
 						<Card>
 							<Statistic
 								title="Cobrado hoy"
-								value={collectedToday}
-								formatter={v => formatMoney(Number(v))}
+								value={0}
+								formatter={() => <CurrencyLines totals={collectedToday} primary={primary} />}
 								valueStyle={{ color: '#52c41a', fontSize: 18 }}
 							/>
 							{routeId && (
@@ -123,11 +143,12 @@ const HomeView: FC = () => {
 						<Card>
 							<Statistic
 								title="% Efectividad"
-								value={effectiveness}
-								precision={1}
-								suffix="%"
+								value={0}
+								formatter={() => (effectiveness.length > 1
+									? <>{effectiveness.map(e => <div key={e.currency}>{e.percent.toFixed(1)}% {e.currency}</div>)}</>
+									: <>{(effectiveness[0]?.percent ?? 0).toFixed(1)}%</>)}
 								valueStyle={{
-									color: effectiveness >= 80 ? '#52c41a' : effectiveness >= 50 ? '#faad14' : '#ff4d4f',
+									color: lowestEffectiveness >= 80 ? '#52c41a' : lowestEffectiveness >= 50 ? '#faad14' : '#ff4d4f',
 									fontSize: 18,
 								}}
 							/>

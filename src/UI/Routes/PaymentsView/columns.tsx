@@ -3,6 +3,7 @@ import { DelinquencyItemDto, PortfolioItemDto } from '@/infrastructure/dto/Repor
 import { BuildColumns, CustomColumn } from '@/infrastructure/utils/BuildColumns';
 import { HistoryOutlined } from '@ant-design/icons';
 import { Button, Tag } from 'antd';
+import { formatRouteMoney } from '@/infrastructure/utils/money';
 import { PrimaryTooltip } from '@/UI/Components/PrimaryTooltip';
 import { useNavigate } from 'react-router-dom';
 
@@ -39,7 +40,7 @@ export const getPortfolioColumns = () => {
 			title: 'Saldo',
 			dataIndex: 'balance',
 			width: 120,
-			render: (value: number) => <Tag color='blue'>{new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(value)}</Tag>,
+			render: (value: number, record) => <Tag color='blue'>{formatRouteMoney(value, record.route_id, { digits: 'brand' })}</Tag>,
 		},
 		{ key: 'end_date', title: 'Vence', dataIndex: 'end_date', width: 100, typeRender: 'date' },
 		{ key: 'payment_method', title: 'Método', dataIndex: 'payment_method', width: 120 },
@@ -62,7 +63,7 @@ export const getDelinquencyColumns = () => {
 			title: 'Saldo en mora',
 			dataIndex: 'balance',
 			width: 130,
-			render: (value: number) => <Tag color='red'>{new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(value)}</Tag>,
+			render: (value: number, record) => <Tag color='red'>{formatRouteMoney(value, record.route_id, { digits: 'brand' })}</Tag>,
 		},
 		{
 			key: 'days_overdue',

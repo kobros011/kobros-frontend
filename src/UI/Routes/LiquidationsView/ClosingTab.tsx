@@ -1,3 +1,4 @@
+import { CurrencyProvider } from '@/infrastructure/hooks/useMoney';
 import { FC, useState } from 'react';
 import { Alert, Empty, Skeleton } from 'antd';
 import dayjs, { Dayjs } from 'dayjs';
@@ -18,39 +19,41 @@ export const ClosingTab: FC<{ isAdmin: boolean }> = ({ isAdmin }) => {
 	});
 
 	return (
-		<div className="lq-stack">
-			<ClosingFilters
-				routeId={routeId} onRouteChange={setRouteId} date={date} onDateChange={setDate}
-				isAdmin={isAdmin} collectorId={collectorId} onCollectorChange={setCollectorId}
-			/>
+		<CurrencyProvider routeId={routeId}>
+			<div className="lq-stack">
+				<ClosingFilters
+					routeId={routeId} onRouteChange={setRouteId} date={date} onDateChange={setDate}
+					isAdmin={isAdmin} collectorId={collectorId} onCollectorChange={setCollectorId}
+				/>
 
-			{!routeId && <Empty description={isAdmin ? 'Selecciona una ruta para ver o cerrar la caja del día' : 'Selecciona una ruta para ver la caja del día'} />}
-			{routeId && isLoading && !preview && <Skeleton active paragraph={{ rows: 8 }} />}
-			{routeId && isError && (
-				<Alert type="error" showIcon message="No se pudo calcular el cierre" action={<a onClick={() => void refetch()}>Reintentar</a>} />
-			)}
+				{!routeId && <Empty description={isAdmin ? 'Selecciona una ruta para ver o cerrar la caja del día' : 'Selecciona una ruta para ver la caja del día'} />}
+				{routeId && isLoading && !preview && <Skeleton active paragraph={{ rows: 8 }} />}
+				{routeId && isError && (
+					<Alert type="error" showIcon message="No se pudo calcular el cierre" action={<a onClick={() => void refetch()}>Reintentar</a>} />
+				)}
 
-			{preview && preview.existing_liquidation_id && (
-				<LiquidationDetail id={preview.existing_liquidation_id} isAdmin={isAdmin} />
-			)}
+				{preview && preview.existing_liquidation_id && (
+					<LiquidationDetail id={preview.existing_liquidation_id} isAdmin={isAdmin} />
+				)}
 
-			{preview && !preview.existing_liquidation_id && (
-				<div className="lq-grid">
-					<div className="lq-stack">
-						<CollectionCard figures={preview} />
-						<NewLoansCard total={preview.new_loans_total} loans={preview.new_loans} />
-						<div className="lq-pair">
-							<ExpensesCard total={preview.expenses_total} expenses={preview.expenses} />
-							<GoalCard figures={preview} percent={preview.progress_percent} />
+				{preview && !preview.existing_liquidation_id && (
+					<div className="lq-grid">
+						<div className="lq-stack">
+							<CollectionCard figures={preview} />
+							<NewLoansCard total={preview.new_loans_total} loans={preview.new_loans} />
+							<div className="lq-pair">
+								<ExpensesCard total={preview.expenses_total} expenses={preview.expenses} />
+								<GoalCard figures={preview} percent={preview.progress_percent} />
+							</div>
+						</div>
+						<div className="lq-stack">
+							{isAdmin
+								? <ClosingForm preview={preview} collectorId={collectorId} />
+								: <Alert type="info" showIcon message="El cierre de caja lo realiza un administrador" description="Aquí solo consultas el recaudo, los gastos y los créditos del día." />}
 						</div>
 					</div>
-					<div className="lq-stack">
-						{isAdmin
-							? <ClosingForm preview={preview} collectorId={collectorId} />
-							: <Alert type="info" showIcon message="El cierre de caja lo realiza un administrador" description="Aquí solo consultas el recaudo, los gastos y los créditos del día." />}
-					</div>
-				</div>
-			)}
-		</div>
+				)}
+			</div>
+		</CurrencyProvider>
 	);
 };

@@ -1,9 +1,13 @@
 import { FC, useEffect, useState } from 'react';
+
 import { Button, Card, Col, Progress, Row, Statistic, Typography, theme } from 'antd';
+
 import { DownOutlined, UpOutlined } from '@ant-design/icons';
+
 import useUserModeStore from '@/infrastructure/context/User/UserModeStore';
-import { formatMoneyCOP, CollectionKpis } from './groupCollections';
+import { CollectionKpis } from './groupCollections';
 import './collectionToday.css';
+import { useMoney } from '@/infrastructure/hooks/useMoney';
 
 const STORAGE_KEY = 'collection-today-kpis-open';
 
@@ -14,6 +18,7 @@ interface CollectionTodayKpisProps {
 }
 
 export const CollectionTodayKpis: FC<CollectionTodayKpisProps> = ({ kpis }) => {
+	const money = useMoney();
 	const { token } = theme.useToken();
 	const isMobile = useUserModeStore((s) => s.isMobile);
 	const [open, setOpen] = useState(() => localStorage.getItem(STORAGE_KEY) === 'true');
@@ -30,7 +35,7 @@ export const CollectionTodayKpis: FC<CollectionTodayKpisProps> = ({ kpis }) => {
 		<Statistic
 			title={title}
 			value={value}
-			formatter={(val) => formatMoneyCOP(Number(val))}
+			formatter={(val) => money(Number(val))}
 			valueStyle={{ fontSize: statFontSize, color: valueColor, lineHeight: 1.15 }}
 		/>
 	);
@@ -44,11 +49,11 @@ export const CollectionTodayKpis: FC<CollectionTodayKpisProps> = ({ kpis }) => {
 			tabIndex={0}
 			onKeyDown={(e) => e.key === 'Enter' && setOpen(true)}
 		>
-			Pendiente {formatMoneyCOP(kpis.pendingAmount)}
+			Pendiente {money(kpis.pendingAmount)}
 			{' · '}
-			Cobrado {formatMoneyCOP(kpis.totalCollected)}
+			Cobrado {money(kpis.totalCollected)}
 			{' · '}
-			Meta {formatMoneyCOP(kpis.totalExpected)}
+			Meta {money(kpis.totalExpected)}
 		</Text>
 	);
 

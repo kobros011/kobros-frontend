@@ -1,9 +1,9 @@
 import { Collection } from '@/domain/Collection';
-import { PaymentStatus } from '@/constants/types';
-import dayjs, { Dayjs } from 'dayjs';
-import { formatNumber } from '@/infrastructure/utils/formaNumber';
 
-export const formatMoneyCOP = (value: number): string => `$ ${formatNumber(value, 0)}`;
+import { PaymentStatus } from '@/constants/types';
+
+import dayjs, { Dayjs } from 'dayjs';
+
 
 export type QuotaDisplayKind = 'paid' | 'default' | 'partial' | 'pending';
 

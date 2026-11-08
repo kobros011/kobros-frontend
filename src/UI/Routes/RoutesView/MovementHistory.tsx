@@ -1,14 +1,20 @@
 import { FC } from 'react';
+
 import { Button, Empty, Flex, Table } from 'antd';
+
 import type { ColumnsType } from 'antd/es/table';
 import { ArrowDownOutlined, ArrowUpOutlined, HistoryOutlined } from '@ant-design/icons';
+
 import dayjs from 'dayjs';
 import { RouteMovement, RouteMovementType } from '@/domain/RouteMovement';
+
 import { ViewMode } from '@/infrastructure/context/TableViewStore';
+
 import { IconBox, Pill } from '@/UI/Components/Dashboard/ui';
-import { formatCOP } from '@/UI/Components/Dashboard/format';
+
 import ViewSwitcher from '@/UI/Components/Table/ViewSwitcher';
 import MovementList from './MovementList';
+import { useMoney } from '@/infrastructure/hooks/useMoney';
 
 interface MovementHistoryProps {
 	movements: RouteMovement[];
@@ -28,6 +34,7 @@ interface MovementHistoryProps {
 const MovementHistory: FC<MovementHistoryProps> = ({
 	movements, total, page, pageSize, onPageChange, isLoading, isMobile, viewMode, onViewModeChange, onIngresar, onRetirar, readonly = false,
 }) => {
+	const money = useMoney();
 	const columns: ColumnsType<RouteMovement> = [
 		{
 			title: 'Fecha',
@@ -52,7 +59,7 @@ const MovementHistory: FC<MovementHistoryProps> = ({
 			align: 'center',
 			render: (value: number, record) => (
 				<strong className="kb-mono" style={{ color: record.type === 'INGRESO' ? 'var(--kb-ok)' : 'var(--kb-danger)' }}>
-					{record.type === 'INGRESO' ? '+' : '−'}{formatCOP(value)}
+					{record.type === 'INGRESO' ? '+' : '−'}{money(value)}
 				</strong>
 			),
 		},

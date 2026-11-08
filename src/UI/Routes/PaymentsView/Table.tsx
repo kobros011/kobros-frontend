@@ -1,17 +1,13 @@
 import { MODULESNAME } from '@/constants/MODULESNAME';
 import CustomTable from '@/UI/Components/Table';
-import { FC, useEffect } from 'react';
-import { Typography } from 'antd';
+import { FC, useEffect, useState } from 'react';
 import { filtersStore } from '@/infrastructure/context/FiltersStore';
 import { useRoutes } from '@/infrastructure/hooks/useRoutes';
 import { usePagination } from '@/infrastructure/hooks/usePagination';
-import { getPagePortfolio, getPortfolioSummary } from '@/infrastructure/querys/Report';
+import { getPagePortfolio } from '@/infrastructure/querys/Report';
+import { CurrencyTabs, useCurrencyScope } from '@/UI/Components/CurrencyTabs';
+import { PortfolioTotals } from './CarteraTotals';
 import { PortfolioItem, getPortfolioColumns } from './columns';
-
-const { Text } = Typography;
-
-const formatMoney = (val: number) =>
-	new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(val);
 
 export const TablePortfolio: FC = () => {
 	const columns = getPortfolioColumns();
@@ -19,11 +15,13 @@ export const TablePortfolio: FC = () => {
 	const filters = filtersStore(state => state.filtersMap[MODULESNAME.payments]);
 	const routeId = routes.length > 1 ? filters?.routeId : routes?.map(item => item.id)?.[0];
 
-	const { page, pageSize, onChange, clampToTotal } = usePagination(JSON.stringify({ text: filters?.text, routeId }));
+	const [currency, setCurrency] = useState<string>();
+	const scope = useCurrencyScope(currency, routeId);
 
-	const reportFilters = { route_id: routeId, text: filters?.text };
+	const { page, pageSize, onChange, clampToTotal } = usePagination(JSON.stringify({ text: filters?.text, routeId, currency }));
+
+	const reportFilters = { route_id: routeId, text: filters?.text, currency: scope.length === 1 ? scope[0] : undefined };
 	const { items, total, isLoading, isRefetching, isFetching } = getPagePortfolio(reportFilters, { page, pageSize });
-	const { summary } = getPortfolioSummary(reportFilters);
 
 	useEffect(() => clampToTotal(total), [total, clampToTotal]);
 
@@ -31,9 +29,8 @@ export const TablePortfolio: FC = () => {
 
 	return (
 		<>
-			<Text type="secondary" style={{ display: 'block', margin: '16px 0' }}>
-				Total en cartera: <strong>{formatMoney(summary?.total_balance ?? 0)}</strong> — {summary?.count ?? 0} crédito(s)
-			</Text>
+			{!routeId && <CurrencyTabs value={currency} onChange={setCurrency} />}
+			<PortfolioTotals label="Total en cartera" filters={{ route_id: routeId, text: filters?.text }} currencies={scope} />
 			<CustomTable<PortfolioItem>
 				isLoading={isFetching || isLoading || isRefetching}
 				columns={columns}

@@ -1,3 +1,4 @@
+import { CurrencyProvider } from '@/infrastructure/hooks/useMoney';
 import { FC } from 'react';
 import { useNavigate, useParams, useLocation, useSearchParams } from 'react-router-dom';
 import { Card, Tabs } from 'antd';
@@ -49,7 +50,7 @@ const RouteDetail: FC<{ readonly?: boolean }> = ({ readonly = false }) => {
 				onChange={onChange}
 				items={[
 					{ key: 'data', label: 'Datos de la ruta', children: <FormRoute readonly={effectiveReadonly} bare /> },
-					{ key: 'cash', label: 'Caja', children: <RouteCash routeId={id} readonly={effectiveReadonly} /> },
+					{ key: 'cash', label: 'Caja', children: <CurrencyProvider routeId={id}><RouteCash routeId={id} readonly={effectiveReadonly} /></CurrencyProvider> },
 				]}
 			/>
 		</Card>

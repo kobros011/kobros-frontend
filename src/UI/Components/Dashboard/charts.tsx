@@ -1,8 +1,11 @@
 import { FC, ReactNode } from 'react';
+
 import dayjs from 'dayjs';
 import { Area, AreaChart, Bar, CartesianGrid, Cell, ComposedChart, Legend, Line, Pie, PieChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import { formatCOP, formatCompactCOP } from './format';
+
 import { Pill, Tone } from './ui';
+import { useMoney } from '@/infrastructure/hooks/useMoney';
+
 
 export const toneVar = (tone: Tone) => `var(--kb-${tone === 'neutral' ? 'muted' : tone})`;
 
@@ -14,18 +17,20 @@ export const toneByCompliance = (percent: number): Tone => (percent >= 90 ? 'ok'
 export interface DailyPoint { date: string; collected: number; goal: number }
 
 const AreaTooltip: FC<{ active?: boolean; payload?: { payload: DailyPoint }[] }> = ({ active, payload }) => {
+	const money = useMoney();
 	if (!active || !payload?.length) return null;
 	const point = payload[0].payload;
 	return (
 		<div className="kb-card kb-mono" style={{ padding: '8px 12px', fontSize: 12, borderColor: 'var(--kb-primary)' }}>
 			<div style={{ color: 'var(--kb-muted)', marginBottom: 4 }}>{dayjs(point.date).format('DD MMMM YYYY')}</div>
-			<div><strong>Recaudado:</strong> <span style={{ color: 'var(--kb-primary)' }}>{formatCOP(point.collected)} COP</span></div>
-			<div style={{ color: 'var(--kb-muted)' }}>Meta: {formatCOP(point.goal)} COP</div>
+			<div><strong>Recaudado:</strong> <span style={{ color: 'var(--kb-primary)' }}>{money(point.collected)}</span></div>
+			<div style={{ color: 'var(--kb-muted)' }}>Meta: {money(point.goal)}</div>
 		</div>
 	);
 };
 
 export const CollectionAreaChart: FC<{ data: DailyPoint[]; height?: number }> = ({ data, height = 260 }) => {
+	const money = useMoney();
 	const averageGoal = data.length ? data.reduce((sum, point) => sum + point.goal, 0) / data.length : 0;
 	const axisStyle = { fontSize: 11, fill: 'var(--kb-muted)', fontFamily: 'JetBrains Mono, monospace' };
 	const reduceMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -34,7 +39,7 @@ export const CollectionAreaChart: FC<{ data: DailyPoint[]; height?: number }> = 
 		<div role="img" aria-label="Gráfico de cobro diario frente a la meta">
 			<div className="kb-legend" style={{ justifyContent: 'flex-end', marginBottom: 6 }}>
 				<span><span className="kb-dot" style={{ ['--kb-tone' as string]: 'var(--kb-primary)' }} /> Recaudado real</span>
-				<span>- - Meta diaria ({formatCompactCOP(averageGoal)})</span>
+				<span>- - Meta diaria ({money.compact(averageGoal)})</span>
 			</div>
 			<ResponsiveContainer width="100%" height={height}>
 				<AreaChart data={data} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
@@ -46,7 +51,7 @@ export const CollectionAreaChart: FC<{ data: DailyPoint[]; height?: number }> = 
 					</defs>
 					<CartesianGrid stroke="var(--kb-border)" strokeDasharray="3 3" vertical={false} />
 					<XAxis dataKey="date" tickFormatter={(value: string) => dayjs(value).format('DD MMM')} tick={axisStyle} axisLine={false} tickLine={false} minTickGap={24} />
-					<YAxis tickFormatter={formatCompactCOP} tick={axisStyle} axisLine={false} tickLine={false} width={52} />
+					<YAxis tickFormatter={(value: number) => money.compact(value)} tick={axisStyle} axisLine={false} tickLine={false} width={52} />
 					<Tooltip content={<AreaTooltip />} cursor={{ stroke: 'var(--kb-border)' }} />
 					{averageGoal > 0 && <ReferenceLine y={averageGoal} stroke="var(--kb-muted)" strokeDasharray="5 4" />}
 					<Area
@@ -70,6 +75,7 @@ export const CollectionAreaChart: FC<{ data: DailyPoint[]; height?: number }> = 
 export interface DonutSegment { label: string; value: number; tone: Tone }
 
 export const PortfolioDonut: FC<{ segments: DonutSegment[]; centerLabel?: string }> = ({ segments, centerLabel = 'TOTAL CARTERA' }) => {
+	const money = useMoney();
 	const total = segments.reduce((sum, segment) => sum + segment.value, 0);
 	const reduceMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -97,7 +103,7 @@ export const PortfolioDonut: FC<{ segments: DonutSegment[]; centerLabel?: string
 				<div style={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', pointerEvents: 'none', textAlign: 'center' }}>
 					<div>
 						<div className="kb-kpi-label" style={{ fontSize: 10 }}>{centerLabel}</div>
-						<div className="kb-kpi-value" style={{ fontSize: 22 }}>{formatCompactCOP(total)}</div>
+						<div className="kb-kpi-value" style={{ fontSize: 22 }}>{money.compact(total)}</div>
 						<div className="kb-kpi-sub">100%</div>
 					</div>
 				</div>
@@ -107,7 +113,7 @@ export const PortfolioDonut: FC<{ segments: DonutSegment[]; centerLabel?: string
 					<div key={segment.label} className="kb-row" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
 						<span className={`kb-dot kb-tone-${segment.tone}`} />
 						<span style={{ flex: 1, fontSize: 13 }}>{segment.label}</span>
-						<strong className="kb-mono" style={{ fontSize: 12 }}>{formatCompactCOP(segment.value)}</strong>
+						<strong className="kb-mono" style={{ fontSize: 12 }}>{money.compact(segment.value)}</strong>
 						<Pill tone="neutral">{total > 0 ? ((segment.value / total) * 100).toFixed(1) : '0.0'}%</Pill>
 					</div>
 				))}
@@ -173,19 +179,21 @@ export const RadialGauge: FC<{ percent: number; size?: number; tone?: Tone; chil
 export interface PeriodPoint { label: string; collected: number; expenses: number; profit: number }
 
 const PeriodTooltip: FC<{ active?: boolean; payload?: { payload: PeriodPoint }[] }> = ({ active, payload }) => {
+	const money = useMoney();
 	if (!active || !payload?.length) return null;
 	const point = payload[0].payload;
 	return (
 		<div className="kb-card kb-mono" style={{ padding: '8px 12px', fontSize: 12, borderColor: 'var(--kb-primary)' }}>
 			<div style={{ color: 'var(--kb-muted)', marginBottom: 4 }}>{point.label}</div>
-			<div style={{ color: 'var(--kb-primary)' }}>Recaudo: {formatCOP(point.collected)}</div>
-			<div style={{ color: 'var(--kb-warn)' }}>Gastos: {formatCOP(point.expenses)}</div>
-			<div style={{ color: point.profit < 0 ? 'var(--kb-danger)' : 'var(--kb-ok)' }}><strong>Utilidad: {formatCOP(point.profit)}</strong></div>
+			<div style={{ color: 'var(--kb-primary)' }}>Recaudo: {money(point.collected)}</div>
+			<div style={{ color: 'var(--kb-warn)' }}>Gastos: {money(point.expenses)}</div>
+			<div style={{ color: point.profit < 0 ? 'var(--kb-danger)' : 'var(--kb-ok)' }}><strong>Utilidad: {money(point.profit)}</strong></div>
 		</div>
 	);
 };
 
 export const PeriodChart: FC<{ data: PeriodPoint[]; height?: number }> = ({ data, height = 280 }) => {
+	const money = useMoney();
 	const axisStyle = { fontSize: 11, fill: 'var(--kb-muted)', fontFamily: 'JetBrains Mono, monospace' };
 	const reduceMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -195,7 +203,7 @@ export const PeriodChart: FC<{ data: PeriodPoint[]; height?: number }> = ({ data
 				<ComposedChart data={data} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
 					<CartesianGrid stroke="var(--kb-border)" strokeDasharray="3 3" vertical={false} />
 					<XAxis dataKey="label" tick={axisStyle} axisLine={false} tickLine={false} />
-					<YAxis tickFormatter={formatCompactCOP} tick={axisStyle} axisLine={false} tickLine={false} width={56} />
+					<YAxis tickFormatter={(value: number) => money.compact(value)} tick={axisStyle} axisLine={false} tickLine={false} width={56} />
 					<Tooltip content={<PeriodTooltip />} cursor={{ fill: 'var(--kb-border)', opacity: 0.4 }} />
 					<Legend wrapperStyle={{ fontSize: 12, color: 'var(--kb-muted)' }} />
 					<Bar name="Recaudo" dataKey="collected" fill="var(--kb-primary)" radius={[4, 4, 0, 0]} isAnimationActive={!reduceMotion} />

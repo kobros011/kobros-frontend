@@ -1,6 +1,7 @@
 import { ColumnType } from 'antd/es/table';
 import { ReactNode } from 'react';
 import { formatNumber } from './formaNumber';
+import { formatRouteMoney } from './money';
 import dayjs from 'dayjs';
 import TypographyParagraph from './TypographyParagraph';
 import { Button } from 'antd';
@@ -11,6 +12,8 @@ export interface CustomColumn<T> extends ColumnType<T> {
 	typeRender?: 'money' | 'date' | 'number' | 'largeText' | 'boolean'
 	showColumn?: boolean
 	precision?: number
+	/** Propiedad del registro con el id de la ruta, de donde sale la moneda de una columna `money` (por defecto `route_id` / `routeId`). */
+	routeKey?: string
 	/** Si es false, la columna existe y es activable desde "Columnas", pero no viene visible la primera vez que se abre el módulo. */
 	defaultVisible?: boolean
 }
@@ -20,9 +23,14 @@ export const renderTypedValue = (
 	type?: CustomColumn<object>['typeRender'],
 	width?: number,
 	precision?: number,
+	routeId?: string,
 ): ReactNode => {
 
-	if (type == 'money' || type == 'number') {
+	if (type == 'money') {
+		return <>{formatRouteMoney(Number(value ?? 0), routeId, { digits: 'brand' })}</>;
+	}
+
+	if (type == 'number') {
 		return (
 			<>
 				{formatNumber(value?.toString(), precision)}
@@ -50,9 +58,13 @@ export const renderTypedValue = (
 
 export const BuildColumns = <T extends object>(columns: CustomColumn<T>[]): ColumnType<T>[] => {
 
-	return columns?.filter(item => item.showColumn !== false).map(({ typeRender, precision, ...column }) => ({
+	return columns?.filter(item => item.showColumn !== false).map(({ typeRender, precision, routeKey, ...column }) => ({
 		...column,
 		align: 'center',
-		render: column.render && !typeRender ? column.render : (value: unknown ) => renderTypedValue(value, typeRender, typeof column.width === 'number' ? column.width : undefined, precision),
+		render: column.render && !typeRender ? column.render : (value: unknown, record: T) => {
+			const row = record as Record<string, unknown>;
+			const routeId = (row[routeKey ?? 'route_id'] ?? row.routeId) as string | undefined;
+			return renderTypedValue(value, typeRender, typeof column.width === 'number' ? column.width : undefined, precision, routeId);
+		},
 	}));
 };

@@ -1,3 +1,4 @@
+import { formatRouteMoney } from '@/infrastructure/utils/money';
 import { Client } from '@/domain/Client';
 import { Route } from '@/domain/Route';
 import { LoanFull } from '@/domain/Loan';
@@ -126,7 +127,7 @@ export const ClientInfoStep: FC<ClientInfoStepProps> = ({
 					</FichaField>
 					{(client?.beak ?? 0) > 0 && (
 						<FichaField label="Saldo a favor">
-							${Math.round(client?.beak ?? 0).toLocaleString('es-CO')}
+							{formatRouteMoney(client?.beak ?? 0, routeId, { digits: 'brand' })}
 						</FichaField>
 					)}
 

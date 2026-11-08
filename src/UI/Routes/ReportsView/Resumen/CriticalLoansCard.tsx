@@ -1,15 +1,25 @@
 import { FC, useEffect, useState } from 'react';
+
 import { Button, Empty, Input, Table } from 'antd';
+
 import type { ColumnsType } from 'antd/es/table';
 import { ExclamationCircleOutlined, SearchOutlined } from '@ant-design/icons';
+
 import { useNavigate } from 'react-router-dom';
+
 import routePaths from '@/constants/routePaths';
 import { DashCard, Pill, SectionCard } from '@/UI/Components/Dashboard/ui';
-import { formatCOP, getInitials } from '@/UI/Components/Dashboard/format';
+
+import { getInitials } from '@/UI/Components/Dashboard/format';
 import { shortName } from '@/UI/Components/Dashboard/DashboardFilters';
+
 import { getDashboardCritical } from '@/infrastructure/querys/Report';
+
 import { useDebouncedValue } from '@/infrastructure/hooks/useDebouncedValue';
+
 import { CriticalLoanDto, DashboardParams } from '@/infrastructure/dto/DashboardDto';
+import { useMoney } from '@/infrastructure/hooks/useMoney';
+
 
 const PAGE_SIZE = 5;
 
@@ -22,6 +32,7 @@ interface CriticalLoansCardProps {
 
 /** Top de créditos en mora con búsqueda y paginación del servidor (5 por página). */
 export const CriticalLoansCard: FC<CriticalLoansCardProps> = ({ params, criticalDays, criticalClients }) => {
+	const money = useMoney();
 	const navigate = useNavigate();
 	const [search, setSearch] = useState('');
 	const [page, setPage] = useState(1);
@@ -69,7 +80,7 @@ export const CriticalLoansCard: FC<CriticalLoansCardProps> = ({ params, critical
 			key: 'balance',
 			align: 'right',
 			render: (value: number, record) => (
-				<strong className="kb-mono" style={{ color: isCritical(record) ? 'var(--kb-danger)' : 'var(--kb-warn)' }}>{formatCOP(value)}</strong>
+				<strong className="kb-mono" style={{ color: isCritical(record) ? 'var(--kb-danger)' : 'var(--kb-warn)' }}>{money(value)}</strong>
 			),
 		},
 		{

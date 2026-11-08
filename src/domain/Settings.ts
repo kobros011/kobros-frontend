@@ -22,10 +22,12 @@ export interface Settings {
 	logoMarkTone: LogoTone
 	numberFormatStyle: NumberFormatStyle
 	numberDecimals: 0 | 2
+	/** Códigos ISO de las monedas de la marca; la primera es la principal. Vacío = sin configurar. */
+	currencies: string[]
 	logoEnabled: boolean
 }
 
-export type SettingsForm = Pick<Settings, 'brandName' | 'brandCode' | 'contactEmail' | 'contactPhone' | 'appName' | 'primaryColor' | 'numberFormatStyle' | 'numberDecimals'>;
+export type SettingsForm = Pick<Settings, 'brandName' | 'brandCode' | 'contactEmail' | 'contactPhone' | 'appName' | 'primaryColor' | 'numberFormatStyle' | 'numberDecimals' | 'currencies'>;
 
 export const DEFAULT_APP_NAME = 'Kobros';
 
@@ -47,5 +49,6 @@ export const DEFAULT_SETTINGS: Settings = {
 	logoMarkTone: null,
 	numberFormatStyle: 'comma-thousands',
 	numberDecimals: 2,
+	currencies: [],
 	logoEnabled: false,
 };

@@ -8,9 +8,10 @@ interface CarteraFilters {
 	route_id?: string
 	brand_id?: string
 	text?: string
+	currency?: string
 }
 
-export const getPortfolioReport = (params?: { route_id?: string; brand_id?: string }) => {
+export const getPortfolioReport = (params?: { route_id?: string; brand_id?: string; currency?: string }) => {
 	const queryInfo = useQuery({
 		queryKey: [queryKeyReports.base, queryKeyReports.portfolio, params],
 		placeholderData: keepPreviousData,
@@ -23,7 +24,7 @@ export const getPortfolioReport = (params?: { route_id?: string; brand_id?: stri
 	};
 };
 
-export const getDelinquencyReport = (params?: { route_id?: string; brand_id?: string }) => {
+export const getDelinquencyReport = (params?: { route_id?: string; brand_id?: string; currency?: string }) => {
 	const queryInfo = useQuery({
 		queryKey: [queryKeyReports.base, queryKeyReports.delinquency, params],
 		placeholderData: keepPreviousData,

@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import { getDashboardFilters } from '@/infrastructure/querys/Report';
 import { DashboardParams } from '@/infrastructure/dto/DashboardDto';
+import { useCurrencyScope } from '@/UI/Components/CurrencyTabs';
 
 /**
  * Filtros compartidos por los 3 reportes: Ruta y Recaudador (sin período). Las opciones salen de
@@ -14,6 +15,8 @@ export const useDashboardFilters = () => {
 
 	const [routeId, setRouteIdState] = useState<string | undefined>();
 	const [collectorId, setCollectorIdState] = useState<string | undefined>();
+	// Moneda elegida en el selector (undefined = "Todas": un bloque por moneda).
+	const [currency, setCurrency] = useState<string | undefined>();
 
 	const availableRoutes = useMemo(
 		() => (collectorId ? routes.filter(route => route.collector_ids.includes(collectorId)) : routes),
@@ -35,6 +38,9 @@ export const useDashboardFilters = () => {
 		if (route && collectorId && !route.collector_ids.includes(collectorId)) setCollectorIdState(undefined);
 	}, [routes, collectorId]);
 
+	// Monedas a mostrar: la de la ruta elegida, la elegida en el selector o todas las de la marca.
+	const currencies = useCurrencyScope(currency, effectiveRouteId);
+
 	const params = useMemo<DashboardParams>(
 		() => ({ route_id: effectiveRouteId, collector_id: collectorId }),
 		[effectiveRouteId, collectorId],
@@ -48,6 +54,9 @@ export const useDashboardFilters = () => {
 		collectorId,
 		setRouteId,
 		setCollectorId: setCollectorIdState,
+		currency,
+		setCurrency,
+		currencies,
 		params,
 	};
 };

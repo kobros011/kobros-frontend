@@ -135,6 +135,7 @@ export interface LiquidationPreviewParams {
 }
 
 export interface LiquidationListFilters {
+	currency?: string
 	route_id?: string;
 	collector_id?: string;
 	date_from?: string;

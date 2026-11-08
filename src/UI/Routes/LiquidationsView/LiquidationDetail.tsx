@@ -1,12 +1,18 @@
 import { FC, ReactNode } from 'react';
+
 import { Alert, Button, Empty, Spin } from 'antd';
+
 import dayjs from 'dayjs';
 import { Pill } from '@/UI/Components/Dashboard/ui';
-import { formatCOP } from '@/UI/Components/Dashboard/format';
+
 import { getLiquidationDetail } from '@/infrastructure/querys/Liquidation';
+
 import { LiquidationActions } from './LiquidationActions';
+
 import { NewLoanList } from './SummaryCards';
-import { getDifferenceView, getStatusView, signedCOP } from './statusMeta';
+
+import { getDifferenceView, getStatusView } from './statusMeta';
+import { useRouteMoney } from '@/infrastructure/hooks/useMoney';
 
 const Line: FC<{ label: string; children: ReactNode }> = ({ label, children }) => (
 	<div className="lq-audit-line"><span>{label}</span>{children}</div>
@@ -22,18 +28,20 @@ const Section: FC<{ title: string; total?: ReactNode; children: ReactNode }> = (
 /** Detalle de un cierre: estado, cuadre guardado, recibos, gastos y créditos nuevos incluidos, con sus acciones. */
 export const LiquidationDetail: FC<{ id: string; isAdmin: boolean; onDone?: () => void }> = ({ id, isAdmin, onDone }) => {
 	const { detail, isLoading, isError } = getLiquidationDetail(id);
+	const routeMoney = useRouteMoney();
+	const money = (value: number) => routeMoney(value, detail?.route_id);
 
 	if (isLoading) return <div style={{ textAlign: 'center', padding: 24 }}><Spin /></div>;
 	if (isError || !detail) return <Alert type="error" showIcon message="No se pudo cargar la liquidación" />;
 
 	const status = getStatusView(detail.status, detail.outdated);
-	const diff = getDifferenceView(detail.difference ?? 0);
+	const diff = getDifferenceView(detail.difference ?? 0, money);
 	const confirmedAt = detail.admin_confirmed_at ? dayjs(detail.admin_confirmed_at).format('DD/MM/YYYY hh:mm A') : null;
 
 	return (
 		<div className="lq-audit">
 			{detail.outdated && (
-				<Alert type="warning" showIcon message={`Hay cobros o gastos nuevos desde el cierre (vigente: ${formatCOP(detail.current_total_charged)} de recaudo).`}
+				<Alert type="warning" showIcon message={`Hay cobros o gastos nuevos desde el cierre (vigente: ${money(detail.current_total_charged)} de recaudo).`}
 					description="El cierre está desactualizado: reábrelo para recalcularlo." />
 			)}
 
@@ -45,12 +53,12 @@ export const LiquidationDetail: FC<{ id: string; isAdmin: boolean; onDone?: () =
 			</div>
 
 			<div className="lq-audit-card">
-				<Line label="Recaudo"><span className="kb-mono">{formatCOP(detail.total_value_charged)}</span></Line>
-				<Line label="Gastos"><span className="kb-mono">−{formatCOP(detail.total_value_expenses)}</span></Line>
-				<Line label="Créditos nuevos"><span className="kb-mono">−{formatCOP(detail.value_new_loans)}</span></Line>
-				<Line label="Base entregada"><span className="kb-mono">{formatCOP(detail.value_base_delivered)}</span></Line>
-				<Line label="Efectivo esperado"><strong className="kb-mono">{signedCOP(detail.expected_cash ?? 0)}</strong></Line>
-				<Line label="Efectivo entregado"><strong className="kb-mono">{formatCOP(detail.cash_delivered ?? 0)}</strong></Line>
+				<Line label="Recaudo"><span className="kb-mono">{money(detail.total_value_charged)}</span></Line>
+				<Line label="Gastos"><span className="kb-mono">−{money(detail.total_value_expenses)}</span></Line>
+				<Line label="Créditos nuevos"><span className="kb-mono">−{money(detail.value_new_loans)}</span></Line>
+				<Line label="Base entregada"><span className="kb-mono">{money(detail.value_base_delivered)}</span></Line>
+				<Line label="Efectivo esperado"><strong className="kb-mono">{money(detail.expected_cash ?? 0)}</strong></Line>
+				<Line label="Efectivo entregado"><strong className="kb-mono">{money(detail.cash_delivered ?? 0)}</strong></Line>
 			</div>
 
 			<Section title={`Recibos incluidos (${detail.payments.length})`}>
@@ -62,7 +70,7 @@ export const LiquidationDetail: FC<{ id: string; isAdmin: boolean; onDone?: () =
 									<strong>{payment.client_name}</strong>
 									<span className="lq-audit-sub kb-mono">Crédito #{payment.loan_number} · Cuota {payment.quota_number}</span>
 								</div>
-								<strong className="kb-mono" style={{ color: 'var(--kb-primary)' }}>{formatCOP(payment.applied)}</strong>
+								<strong className="kb-mono" style={{ color: 'var(--kb-primary)' }}>{money(payment.applied)}</strong>
 							</div>
 						))}
 					</div>
@@ -70,7 +78,7 @@ export const LiquidationDetail: FC<{ id: string; isAdmin: boolean; onDone?: () =
 			</Section>
 
 			{detail.expenses.length > 0 && (
-				<Section title="Gastos comprobados" total={<span className="kb-mono">−{formatCOP(detail.total_value_expenses)}</span>}>
+				<Section title="Gastos comprobados" total={<span className="kb-mono">−{money(detail.total_value_expenses)}</span>}>
 					<div className="lq-audit-list">
 						{detail.expenses.map(expense => (
 							<div key={expense.id} className="lq-audit-row">
@@ -78,7 +86,7 @@ export const LiquidationDetail: FC<{ id: string; isAdmin: boolean; onDone?: () =
 									<strong>{expense.name}</strong>
 									{expense.concept && <span className="lq-audit-sub">{expense.concept}</span>}
 								</div>
-								<strong className="kb-mono" style={{ color: 'var(--kb-warn)' }}>{formatCOP(expense.value)}</strong>
+								<strong className="kb-mono" style={{ color: 'var(--kb-warn)' }}>{money(expense.value)}</strong>
 							</div>
 						))}
 					</div>
@@ -86,7 +94,7 @@ export const LiquidationDetail: FC<{ id: string; isAdmin: boolean; onDone?: () =
 			)}
 
 			{detail.new_loans.length > 0 && (
-				<Section title="Créditos nuevos entregados" total={<span className="kb-mono" style={{ color: 'var(--kb-info)' }}>−{formatCOP(detail.value_new_loans)}</span>}>
+				<Section title="Créditos nuevos entregados" total={<span className="kb-mono" style={{ color: 'var(--kb-info)' }}>−{money(detail.value_new_loans)}</span>}>
 					<NewLoanList loans={detail.new_loans} />
 				</Section>
 			)}

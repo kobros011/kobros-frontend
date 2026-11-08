@@ -64,3 +64,17 @@ export const useDeleteLiquidation = () => {
 	const invalidate = useInvalidateAfter();
 	return useMutation({ mutationFn: (id: string) => repository.remove(id), onSuccess: invalidate });
 };
+
+/** Totales del período por moneda: nunca se suman monedas distintas. Solo se pide con más de una moneda a la vez. */
+export const getLiquidationSummaries = (filters: LiquidationListFilters, currencies: string[], enabled: boolean) => {
+	const queryInfo = useQuery({
+		queryKey: [KEY, 'summaries', filters, currencies],
+		enabled: enabled && currencies.length > 1,
+		placeholderData: keepPreviousData,
+		queryFn: async () => Promise.all(currencies.map(async currency => ({
+			currency,
+			totals: (await repository.getPage({ ...filters, currency }, { page: 1, pageSize: 1 })).summary,
+		}))),
+	});
+	return { ...queryInfo, summaries: queryInfo.data };
+};

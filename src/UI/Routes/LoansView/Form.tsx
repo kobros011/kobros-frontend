@@ -20,6 +20,7 @@ import { LoanHistoryStep } from './components/LoanHistoryStep';
 import { LoanDataStep } from './components/LoanDataStep';
 import { StepHeader } from './components/StepHeader';
 import { LoanWizardShell } from './components/LoanWizardShell';
+import { CurrencyProvider } from '@/infrastructure/hooks/useMoney';
 
 /** Ruta mínima para llamar API antes de que el store de rutas termine de cargar. */
 const routePlaceholder = (id: string): Route => ({
@@ -30,6 +31,7 @@ const routePlaceholder = (id: string): Route => ({
 	openingDate: '',
 	brandId: '',
 	allowedUsersIds: [],
+	currency: '',
 	loansNumber: 0,
 	active: true,
 	createdAt: '',
@@ -289,20 +291,22 @@ const FormLoan: FC = () => {
 	];
 
 	return (
-		<Card
-			title="Crear crédito"
-			style={{ overflowX: 'hidden', overflowY: 'auto', maxHeight: '84vh' }}
-		>
-			<LoanWizardShell>
-				<Form form={form} layout="vertical">
-					<Collapse
-						activeKey={activeKey}
-						onChange={handleCollapseChange}
-						items={collapseItems}
-					/>
-				</Form>
-			</LoanWizardShell>
-		</Card>
+		<CurrencyProvider routeId={availableRoute?.id}>
+			<Card
+				title="Crear crédito"
+				style={{ overflowX: 'hidden', overflowY: 'auto', maxHeight: '84vh' }}
+			>
+				<LoanWizardShell>
+					<Form form={form} layout="vertical">
+						<Collapse
+							activeKey={activeKey}
+							onChange={handleCollapseChange}
+							items={collapseItems}
+						/>
+					</Form>
+				</LoanWizardShell>
+			</Card>
+		</CurrencyProvider>
 	);
 };
 

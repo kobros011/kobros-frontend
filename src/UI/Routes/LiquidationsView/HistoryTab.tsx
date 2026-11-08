@@ -7,7 +7,8 @@ import ViewSwitcher from '@/UI/Components/Table/ViewSwitcher';
 import { Pill, SectionCard } from '@/UI/Components/Dashboard/ui';
 import { shortName } from '@/UI/Components/Dashboard/DashboardFilters';
 import { getDashboardFilters } from '@/infrastructure/querys/Report';
-import { getLiquidationPage } from '@/infrastructure/querys/Liquidation';
+import { getLiquidationPage, getLiquidationSummaries } from '@/infrastructure/querys/Liquidation';
+import { CurrencyTabs, useCurrencyScope } from '@/UI/Components/CurrencyTabs';
 import { usePagination } from '@/infrastructure/hooks/usePagination';
 import useTableViewStore from '@/infrastructure/context/TableViewStore';
 import useUserModeStore from '@/infrastructure/context/User/UserModeStore';
@@ -37,15 +38,19 @@ export const HistoryTab: FC<{ isAdmin: boolean }> = ({ isAdmin }) => {
 	const [status, setStatus] = useState<LiquidationStatus>();
 	const [range, setRange] = useState<[Dayjs, Dayjs] | null>([dayjs().startOf('month'), dayjs()]);
 	const [openId, setOpenId] = useState<string>();
+	const [currency, setCurrency] = useState<string>();
 
 	const filters = {
-		route_id: routeId, collector_id: collectorId, status,
+		route_id: routeId, collector_id: collectorId, status, currency,
 		date_from: range?.[0].format('YYYY-MM-DD'), date_to: range?.[1].format('YYYY-MM-DD'),
 	};
 	const { page, pageSize, onChange, clampToTotal } = usePagination(JSON.stringify(filters));
 	const { page: result, isLoading, isError, isFetching, refetch } = getLiquidationPage(filters, { page, pageSize });
 	const { filters: dashFilters } = getDashboardFilters(isAdmin);
 	const total = result?.total ?? 0;
+	const scope = useCurrencyScope(currency, routeId);
+	const { summaries: byCurrency } = getLiquidationSummaries(filters, scope, !!result);
+	const summaries = scope.length > 1 ? (byCurrency ?? []) : [{ currency: scope[0], totals: result?.summary as NonNullable<typeof result>['summary'] }];
 	useEffect(() => clampToTotal(total), [total, clampToTotal]);
 
 	return (
@@ -58,6 +63,7 @@ export const HistoryTab: FC<{ isAdmin: boolean }> = ({ isAdmin }) => {
 			>
 				<div className="lq-filters" style={{ marginBottom: 12 }}>
 					<SelectRoute size="small" aria-label="Filtrar por ruta" allowClear placeholder="Todas las rutas" value={routeId} onChange={value => setRouteId(value)} />
+					{!routeId && <CurrencyTabs value={currency} onChange={setCurrency} />}
 					{isAdmin && (
 						<Select size="small" aria-label="Filtrar por cobrador" allowClear placeholder="Todos los cobradores" value={collectorId} onChange={value => setCollectorId(value)}
 							options={(dashFilters?.collectors ?? []).map(item => ({ value: item.id, label: shortName(item.full_name) }))} />
@@ -72,7 +78,7 @@ export const HistoryTab: FC<{ isAdmin: boolean }> = ({ isAdmin }) => {
 				{isLoading && !result && <Skeleton active paragraph={{ rows: 6 }} />}
 				{result && result.items.length === 0 && <Empty description="Aún no hay cierres con estos filtros" />}
 				{result && result.items.length > 0 && (viewMode === 'table'
-					? <HistoryTable items={result.items} summary={result.summary} loading={isFetching} total={total} page={page} pageSize={pageSize} onPageChange={onChange} onOpen={setOpenId} />
+					? <HistoryTable items={result.items} summaries={summaries} loading={isFetching} total={total} page={page} pageSize={pageSize} onPageChange={onChange} onOpen={setOpenId} />
 					: <>
 						<HistoryCards items={result.items} onOpen={setOpenId} />
 						<div style={{ display: 'flex', justifyContent: 'center', marginTop: 14 }}>

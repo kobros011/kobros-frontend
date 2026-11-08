@@ -1,3 +1,4 @@
+import { formatRouteMoney } from '@/infrastructure/utils/money';
 import { MODULESNAME } from '@/constants/MODULESNAME';
 import { filtersStore } from '@/infrastructure/context/FiltersStore';
 import CustomTable from '@/UI/Components/Table';
@@ -84,7 +85,7 @@ export const TableClients: FC<TableClientsProps> = ({ isSearching, actions, type
 						)}
 						{client.beak > 0 && (
 							<Tag color="success" style={{ borderRadius: 999, margin: 0 }}>
-								Saldo a favor ${Math.round(client.beak).toLocaleString('es-CO')}
+								Saldo a favor {formatRouteMoney(client.beak, client.routeId, { digits: 'brand' })}
 							</Tag>
 						)}
 					</>
