@@ -9,12 +9,14 @@ export const getPermission = (typeUser: TypeUser | string) => {
 	const hasViewUsers = [TypeUser.dev, TypeUser.super, TypeUser.admin].includes(role);
 	const hasViewClients = [TypeUser.dev, TypeUser.super, TypeUser.admin, TypeUser.collector].includes(role);
 	const hasViewLoans = [TypeUser.dev, TypeUser.super, TypeUser.admin, TypeUser.collector].includes(role);
-	const hasViewPayments = [TypeUser.dev, TypeUser.super, TypeUser.admin, TypeUser.collector].includes(role);
+	const hasViewPayments = [TypeUser.dev, TypeUser.super, TypeUser.admin, TypeUser.partner].includes(role);
 	const hasViewExpenses = [TypeUser.dev, TypeUser.super, TypeUser.admin, TypeUser.collector].includes(role);
 	const hasViewCollectionToday = [TypeUser.dev, TypeUser.super, TypeUser.admin, TypeUser.partner, TypeUser.collector].includes(role);
 	const hasViewLiquidations = [TypeUser.dev, TypeUser.super, TypeUser.admin, TypeUser.collector].includes(role);
 	const hasViewReports = [TypeUser.dev, TypeUser.super, TypeUser.admin, TypeUser.partner].includes(role);
 	const hasRouteCashAccess = [TypeUser.dev, TypeUser.super, TypeUser.admin].includes(role);
+	const hasManageSettings = [TypeUser.dev, TypeUser.super].includes(role);
+	const hasManageExpenses = [TypeUser.dev, TypeUser.super, TypeUser.admin].includes(role);
 
 	const hasShowViewsKeys = [];
 
@@ -28,6 +30,7 @@ export const getPermission = (typeUser: TypeUser | string) => {
 	if (hasViewCollectionToday) hasShowViewsKeys.push(routePaths.COLLECTION_TODAY);
 	if (hasViewLiquidations) hasShowViewsKeys.push(routePaths.LIQUIDATIONS);
 	if (hasViewReports) hasShowViewsKeys.push(routePaths.REPORTS);
+	if (hasManageSettings) hasShowViewsKeys.push(routePaths.SETTINGS);
 
 	return {
 		hasViewBrands,
@@ -38,5 +41,7 @@ export const getPermission = (typeUser: TypeUser | string) => {
 		hasViewLoans,
 		hasViewReports,
 		hasRouteCashAccess,
+		hasManageExpenses,
+		hasManageSettings,
 	};
 };

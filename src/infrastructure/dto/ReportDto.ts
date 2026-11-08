@@ -21,9 +21,18 @@ export interface DelinquencyItemDto {
 	route_name: string
 	value_total_loan: number
 	total_paid: number
+	/** Saldo en mora: suma de las cuotas vencidas impagas (no el saldo total del crédito). */
 	balance: number
 	end_date: string
 	days_overdue: number
+	loan_balance: number
+	overdue_quotas: number
+	overdue_since: string
+}
+
+export interface ReportSummaryDto {
+	total_balance: number
+	count: number
 }
 
 export interface PaymentHistoryItemDto {

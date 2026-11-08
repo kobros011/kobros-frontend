@@ -1,4 +1,5 @@
 .kb-dash {
+	font-family: 'Space Grotesk', system-ui, sans-serif;
 	color: var(--kb-text);
 	display: flex;
 	flex-direction: column;
@@ -6,7 +7,7 @@
 }
 
 .kb-mono {
-	font-variant-numeric: tabular-nums;
+	font-family: 'JetBrains Mono', ui-monospace, monospace;
 }
 
 .kb-card {
@@ -21,6 +22,69 @@
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
 	gap: 12px;
+}
+
+.kb-grid-2 {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr));
+	gap: 12px;
+}
+
+.kb-grid-chart {
+	display: grid;
+	grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+	gap: 12px;
+}
+
+@media (max-width: 900px) {
+	.kb-grid-chart {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}
+
+.kb-banner {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+}
+
+.kb-banner-title {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	min-width: 0;
+}
+
+.kb-filters {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	align-items: center;
+}
+
+.kb-filter {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	border: 1px solid var(--kb-border);
+	border-radius: 999px;
+	padding: 2px 4px 2px 12px;
+	background: var(--kb-card-bg);
+	min-height: 40px;
+}
+
+.kb-filter-label {
+	font-size: 12px;
+	color: var(--kb-muted);
+}
+
+.kb-filter .ant-select-selector {
+	background: transparent !important;
+	border: none !important;
+	box-shadow: none !important;
+	font-weight: 600;
 }
 
 .kb-iconbox {
@@ -113,11 +177,51 @@
 	color: var(--kb-muted);
 }
 
+.kb-link {
+	color: var(--kb-primary);
+	font-weight: 600;
+	font-size: 12px;
+}
+
+.kb-bar {
+	display: flex;
+	height: 8px;
+	border-radius: 999px;
+	overflow: hidden;
+	background: color-mix(in srgb, var(--kb-muted) 22%, transparent);
+}
+
+.kb-bar > span {
+	display: block;
+	height: 100%;
+}
+
+.kb-row {
+	border: 1px solid var(--kb-border);
+	border-radius: 12px;
+	padding: 10px 12px;
+	background: color-mix(in srgb, var(--kb-primary) 3%, transparent);
+}
+
+.kb-rank {
+	width: 22px;
+	height: 22px;
+	border-radius: 50%;
+	display: grid;
+	place-items: center;
+	font-size: 11px;
+	font-weight: 700;
+	border: 1px solid var(--kb-border);
+	color: var(--kb-muted);
+	flex-shrink: 0;
+}
+
 .kb-table .ant-table {
 	background: transparent;
 }
 
 .kb-table .ant-table-thead > tr > th {
+	font-family: 'JetBrains Mono', ui-monospace, monospace;
 	font-size: 10px;
 	letter-spacing: 0.08em;
 	text-transform: uppercase;
@@ -134,9 +238,61 @@
 	background: color-mix(in srgb, var(--kb-primary) 5%, transparent) !important;
 }
 
+.kb-avatar {
+	width: 28px;
+	height: 28px;
+	border-radius: 8px;
+	display: grid;
+	place-items: center;
+	font-size: 11px;
+	font-weight: 700;
+	flex-shrink: 0;
+}
+
+.kb-avatar {
+	color: var(--kb-tone);
+	background: color-mix(in srgb, var(--kb-tone) 16%, transparent);
+	border: 1px solid color-mix(in srgb, var(--kb-tone) 30%, transparent);
+}
+
+.kb-legend {
+	display: flex;
+	gap: 14px;
+	font-size: 12px;
+	color: var(--kb-muted);
+	align-items: center;
+}
+
+.kb-dot {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	display: inline-block;
+	background: var(--kb-tone);
+}
+
 @media (prefers-reduced-motion: reduce) {
 	.kb-dash * {
 		transition: none !important;
 		animation: none !important;
 	}
+}
+
+/* Cobro del día fuerza 28px en selects/pickers: los filtros tipo pill necesitan su tamaño normal. */
+.collection-today-page .kb-filter .ant-select-selector {
+	height: 32px !important;
+	min-height: 32px !important;
+	font-size: 14px !important;
+}
+
+.collection-today-page .kb-filter .ant-select-selection-item,
+.collection-today-page .kb-filter .ant-select-selection-placeholder {
+	font-size: 14px !important;
+	line-height: 30px !important;
+}
+
+.collection-today-page .kb-filters .ant-picker {
+	height: 40px !important;
+	min-height: 40px !important;
+	font-size: 14px !important;
 }

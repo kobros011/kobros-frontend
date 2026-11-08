@@ -46,7 +46,7 @@
 
 ### Lo que NO existe (no introducir sin justificación)
 
-- ❌ Librería de gráficos (Recharts, Chart.js, D3…)
+- ❌ Librería de gráficos fuera de los dashboards de Reportes (allí solo se usa `recharts`, ver §6 «Kit Dashboard»)
 - ❌ Drag & drop
 - ❌ Editor de texto enriquecido (Quill, TipTap…)
 - ❌ CSS-in-JS (styled-components, emotion)
@@ -103,7 +103,7 @@ En Kobros, **"Brand"** es una entidad de negocio (franquicia/cliente con rutas a
 
 ### Fuente
 
-Kobros no define ninguna fuente custom. Se usa la **stack tipográfica por defecto de Ant Design**:
+Kobros usa la **stack tipográfica por defecto de Ant Design** en toda la app (el único uso de fuentes propias es el kit Dashboard de Reportes, que importa `@fontsource/space-grotesk` y `@fontsource/jetbrains-mono` solo desde `UI/Components/Dashboard/ui.tsx`):
 
 ```
 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif
@@ -205,6 +205,7 @@ Layout (src/UI/Components/Layout/index.tsx)
 - Sider: 190px expandido / 75px colapsado
 - Header ancho dinámico: `innerWidth - (190 | 75)px` en desktop, `100vw` en mobile
 - El `<Apps>` de AntD (`App as Apps`) envuelve todo para proveer `useApp()` correctamente
+- **`position: fixed` siempre con `z-index` explícito.** Header, Sider y el menú inferior móvil usan `position: fixed`. Sin un `z-index` propio, el navegador no garantiza que queden por encima del `Content`: al hacer scroll, el contenido normal puede pintarse encima del chrome fijo y mezclarse con él. `FIXED_CHROME_Z_INDEX` en `Layout/index.tsx` (Header y Sider) y `z-index: 1000` en `.menu` (layout.css, bottom nav móvil) cubren esto — cualquier elemento nuevo con `position: fixed` debe fijar su propio `z-index` del mismo modo.
 
 ### 6.2 Catálogo de componentes reutilizables
 
@@ -322,6 +323,21 @@ Las tablas vacías muestran el empty state por defecto de AntD. Si se necesita u
 
 ---
 
+### 6.8 Kit Dashboard (Reportes)
+
+Componentes reutilizables en `src/UI/Components/Dashboard/` (estilos en `dashboard.css`, variables `--kb-*`, claro y oscuro):
+
+| Pieza | Uso |
+|---|---|
+| `DashboardShell`, `DashCard`, `SectionCard` | Contenedor y tarjetas con icono, título, `extra` y `footer` |
+| `KpiCard` | KPI con `pill`, `aside` (ej. `RadialGauge`) y `footer` |
+| `Pill`, `IconBox` | Etiquetas de tono (`ok`, `warn`, `danger`, `neutral`, `primary`) e icono |
+| `charts.tsx` | `CollectionAreaChart`, `PortfolioDonut`, `StackedBar`, `RankBar`, `RadialGauge`, `PeriodChart`, `toneByCompliance` (≥90 ok, ≥83 warn, resto danger) |
+| `DashboardFilters` + `useDashboardFilters` | Banner con Ruta y Recaudador en cascada (opciones de `/reports/dashboard/filters`) y botón actualizar |
+| `format.ts` | `formatCOP`, `formatCompactCOP`, `formatPercent`, `getInitials` |
+
+Pantallas: `UI/Routes/ReportsView/` — `Dashboard` (Resumen, compuesto por `Resumen/*Card`), `WeeklyReport` y `AnnualReport` (ambas sobre `PeriodReport`). La tabla de mora crítica pagina y busca en el servidor (5 por página, búsqueda con debounce de 300 ms). El botón «Alerta a recaudadores» del mock no se porta hasta que exista el módulo de recordatorios.
+
 ## 7. Reglas y buenas prácticas UI/UX
 
 ### 7.1 Mobile-first (breakpoint 768px)
@@ -388,6 +404,8 @@ enum TypeUser {
 - El rol se lee desde `user.publicMetadata.role` (Clerk) en `RouterApp.tsx`
 - El filtrado de módulos se hace en `src/infrastructure/utils/Permissions.ts → getPermission()`
 - El menú lateral (`ModulesMenu`) filtra automáticamente según el rol del usuario
+- **Alcance de Reportes** (`/reportes/resumen|semanal|anual`, `/reports/dashboard/*`, `/reports/period`): `dev`/`super`/`admin` ven toda su marca (solo `dev` puede elegir `brand_id`); `partner` solo las rutas donde figura en `allowed_users_ids`; `collector` no tiene acceso. A diferencia de `/routes`, el `admin` ve toda la marca en Reportes. Una ruta o recaudador fuera del alcance devuelve 404.
+- **Definiciones de Reportes** (única fuente en el backend, `loan_stats`): cartera activa = créditos activos con saldo > 0; mora = cuotas vencidas impagas (`pay_date` < hoy en hora de Bogotá); crítica ≥ 30 días; efectividad = pagado / colocado (máx. 100 %). El frontend solo formatea, nunca recalcula.
 
 ### 7.4 Reglas técnicas
 

@@ -1,41 +1,39 @@
 import { MODULESNAME } from '@/constants/MODULESNAME';
-import { Col, Row, Typography } from 'antd';
-import { FC, useState } from 'react';
-import { GlobalFilters } from '@/UI/Components/Filters';
-import { TablePayments } from './Table';
+import { FC } from 'react';
+import { GlobalFilters, ItemFilter } from '@/UI/Components/Filters';
+import { TablePortfolio } from './Table';
 import { useRoutes } from '@/infrastructure/hooks/useRoutes';
-import { PaymentFiltersFields } from '@/UI/Components/Filters/FiltersFields/Payment';
+import { SelectRoute } from '@/UI/Components/Fields/SelectRoute';
+import { CarteraLayout } from './CarteraLayout';
 
 export const Layout: FC = () => {
-	const [isSearching, setSearching] = useState<boolean>(false);
 	const { routes } = useRoutes();
-
 	const hasMultipleRoutes = routes.length > 1;
 
-	const filtersFields = PaymentFiltersFields(hasMultipleRoutes);
-
-	const onHandlerFilter = () => {
-		if (!isSearching) setSearching(true);
-	};
+	const filtersFields: ItemFilter[] = [
+		{
+			key: 'routeId',
+			name: 'routeId',
+			inputComponent: (
+				<SelectRoute allowClear placeholder="Seleccione una ruta para filtrar" />
+			),
+			isShow: hasMultipleRoutes,
+		},
+	];
 
 	return (
-		<>
-			<div className='page-header '>
-				<Row justify="space-between" align="middle">
-					<Col>
-						<Typography.Title level={2}>Pagos</Typography.Title>
-					</Col>
-				</Row>
-			</div>
+		<CarteraLayout>
 			<GlobalFilters
-				placeholderSearch='Buscar(EJ: Nombre completo, documento, No. crédito)'
+				placeholderSearch='Buscar (ej. nombre completo, No. crédito)'
 				moduleName={MODULESNAME.payments}
 				filters={filtersFields}
-				onSearch={onHandlerFilter}
-				initialFilters={{ text: '', routeId: undefined, status: undefined }}
+				onSearch={() => {}}
+				initialFilters={{ text: '', routeId: undefined }}
 			/>
 
-			<TablePayments isSearching={isSearching} />
-		</>
+			<TablePortfolio />
+		</CarteraLayout>
 	);
 };
+
+export default Layout;

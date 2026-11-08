@@ -32,8 +32,9 @@ const FormLoanView = lazy(() => import('@routes/LoansView/Form'));
 const DetailsLoanView = lazy(() => import('@routes/LoansView/DetailsLoan'));
 const LoansView = lazy(() => import('@routes/LoansView/layout'));
 
-// Pagos
+// Cartera
 const PaymentsView = lazy(() => import('@routes/PaymentsView/index'));
+const PaymentsDelinquencyView = lazy(() => import('@routes/PaymentsView/Delinquency'));
 
 // Gastos
 const ExpensesView = lazy(() => import('@routes/ExpensesView/index'));
@@ -46,8 +47,12 @@ const CollectionTodayView = lazy(() => import('./UI/Routes/CollectionTodayView/i
 const LiquidationsView = lazy(() => import('./UI/Routes/LiquidationsView/index'));
 
 // Reportes
-const ReportsPortfolioView = lazy(() => import('./UI/Routes/ReportsView/Portfolio'));
-const ReportsDelinquencyView = lazy(() => import('./UI/Routes/ReportsView/Delinquency'));
+const ReportsDashboardView = lazy(() => import('./UI/Routes/ReportsView/Dashboard'));
+const ReportsWeeklyView = lazy(() => import('./UI/Routes/ReportsView/WeeklyReport'));
+const ReportsAnnualView = lazy(() => import('./UI/Routes/ReportsView/AnnualReport'));
+
+// Configuración
+const SettingsView = lazy(() => import('@routes/SettingsView/index'));
 
 const HomeRoutes = () => {
 	const { typeUser } = useUserStore(state => state.user);
@@ -116,7 +121,10 @@ const HomeRoutes = () => {
 		{
 			path: routePaths.PAYMENTS,
 			children: (
-				<Route index element={<PaymentsView />} />
+				<>
+					<Route index element={<PaymentsView />} />
+					<Route path='mora' element={<PaymentsDelinquencyView />} />
+				</>
 			),
 		},
 		{
@@ -146,9 +154,17 @@ const HomeRoutes = () => {
 			path: routePaths.REPORTS,
 			children: (
 				<>
-					<Route path='cartera' element={<ReportsPortfolioView />} />
-					<Route path='mora' element={<ReportsDelinquencyView />} />
+					<Route index element={<Navigate to="resumen" replace />} />
+					<Route path='resumen' element={<ReportsDashboardView />} />
+					<Route path='semanal' element={<ReportsWeeklyView />} />
+					<Route path='anual' element={<ReportsAnnualView />} />
 				</>
+			),
+		},
+		{
+			path: routePaths.SETTINGS,
+			children: (
+				<Route index element={<SettingsView />} />
 			),
 		},
 	];

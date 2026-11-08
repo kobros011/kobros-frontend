@@ -13,13 +13,16 @@ const routePaths = {
 	USERS: 'usuarios',
 	CLIENTS: 'clientes',
 	LOANS: 'creditos',
-	PAYMENTS: 'pagos',
+	PAYMENTS: 'cartera',
+	PAYMENTS_DELINQUENCY: 'cartera/mora',
 	EXPENSES: 'gastos',
 	COLLECTION_TODAY: 'cobro-dia',
 	LIQUIDATIONS: 'liquidaciones',
 	REPORTS: 'reportes',
-	REPORTS_PORTFOLIO: 'reportes/cartera',
-	REPORTS_DELINQUENCY: 'reportes/mora',
+	REPORTS_DASHBOARD: 'reportes/resumen',
+	REPORTS_WEEKLY: 'reportes/semanal',
+	REPORTS_ANNUAL: 'reportes/anual',
+	SETTINGS: 'configuracion',
 };
 
 export default routePaths;

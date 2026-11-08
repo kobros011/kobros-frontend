@@ -1,59 +1,49 @@
-import { Payment } from '@/domain/Payment';
-import CustomTable from '@/UI/Components/Table';
-import { FC } from 'react';
-import { getColumns } from './columns';
-import { getListPayments } from '@/infrastructure/querys/Payment';
-import { ConfigProvider } from 'antd';
-import dayjs from 'dayjs';
-import { filtersStore } from '@/infrastructure/context/FiltersStore';
 import { MODULESNAME } from '@/constants/MODULESNAME';
+import CustomTable from '@/UI/Components/Table';
+import { FC, useEffect } from 'react';
+import { Typography } from 'antd';
+import { filtersStore } from '@/infrastructure/context/FiltersStore';
 import { useRoutes } from '@/infrastructure/hooks/useRoutes';
+import { usePagination } from '@/infrastructure/hooks/usePagination';
+import { getPagePortfolio, getPortfolioSummary } from '@/infrastructure/querys/Report';
+import { PortfolioItem, getPortfolioColumns } from './columns';
 
-interface TableBrandsProps {
-	isSearching: boolean
-}
+const { Text } = Typography;
 
-export const TablePayments: FC<TableBrandsProps> = ({ isSearching }) => {
-	const columns = getColumns();
+const formatMoney = (val: number) =>
+	new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(val);
+
+export const TablePortfolio: FC = () => {
+	const columns = getPortfolioColumns();
 	const { routes } = useRoutes();
-
-	const currentDate = dayjs().startOf('date').format('YYYY-MM-DD');
 	const filters = filtersStore(state => state.filtersMap[MODULESNAME.payments]);
+	const routeId = routes.length > 1 ? filters?.routeId : routes?.map(item => item.id)?.[0];
 
-	const { payments } = getListPayments({ payDate: currentDate, withPending: true, ...filters, routeId: routes.length > 1 ? filters?.routeId : routes?.map(item => item.id)?.[0] }, isSearching);
+	const { page, pageSize, onChange, clampToTotal } = usePagination(JSON.stringify({ text: filters?.text, routeId }));
+
+	const reportFilters = { route_id: routeId, text: filters?.text };
+	const { items, total, isLoading, isRefetching, isFetching } = getPagePortfolio(reportFilters, { page, pageSize });
+	const { summary } = getPortfolioSummary(reportFilters);
+
+	useEffect(() => clampToTotal(total), [total, clampToTotal]);
+
+	const dataSource: PortfolioItem[] = items.map(item => ({ ...item, id: item.loan_id }));
 
 	return (
-		<ConfigProvider
-			theme={{
-				components: {
-					Table: {
-						cellPaddingBlock: 0,
-						cellPaddingInline: 0,
-						cellPaddingInlineSM: 0,
-						cellPaddingBlockMD: 0,
-						cellPaddingBlockSM: 0,
-						cellPaddingInlineMD: 0,
-					},
-					InputNumber: {
-						fontSize: 13,
-						borderRadius: 0,
-						paddingInline: 5,
-					},
-					Space: {
-						borderRadius: 0,
-						paddingContentVertical: 0,
-					},
-					Button: {
-						borderRadius: 0,
-						padding: 0,
-					},
-				},
-			}}
-		>
-			<CustomTable<Payment>
+		<>
+			<Text type="secondary" style={{ display: 'block', margin: '16px 0' }}>
+				Total en cartera: <strong>{formatMoney(summary?.total_balance ?? 0)}</strong> — {summary?.count ?? 0} crédito(s)
+			</Text>
+			<CustomTable<PortfolioItem>
+				isLoading={isFetching || isLoading || isRefetching}
 				columns={columns}
-				dataSource={payments}
+				dataSource={dataSource}
+				moduleName={MODULESNAME.payments}
+				titleField="client_name"
+				pagination={{ page, pageSize, total, onChange }}
 			/>
-		</ConfigProvider>
+		</>
 	);
 };
+
+export default TablePortfolio;

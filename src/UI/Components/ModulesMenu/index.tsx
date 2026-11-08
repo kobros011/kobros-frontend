@@ -9,7 +9,7 @@ import { Link, useLocation } from 'react-router-dom';
 import useUserStore from '@/infrastructure/context/User/UserDataStore';
 import { getPermission } from '@/infrastructure/utils/Permissions';
 import { MdOutlineReceiptLong, MdOutlinePayments, MdOutlineAccountBalance, MdOutlineBarChart } from 'react-icons/md';
-import { DollarOutlined, MoreOutlined } from '@ant-design/icons';
+import { DollarOutlined, MoreOutlined, SettingOutlined } from '@ant-design/icons';
 import { MdOutlineRequestQuote } from 'react-icons/md';
 
 const MOBILE_PRIMARY_COUNT = 4;
@@ -69,8 +69,8 @@ export const ModulesMenu: FC<{ collapsed: boolean, mobile?: boolean }> = ({ coll
 			icon: <MdOutlineRequestQuote style={{ fontSize: 20, marginLeft: '-2px' }} />,
 			to: `${routePaths.DEFAULT_HOME}/${routePaths.LOANS}`,
 		},
-		{   
-			label: 'Pagos',
+		{
+			label: 'Cartera',
 			key: routePaths.PAYMENTS,
 			isShow: true,
 			icon: <DollarOutlined style={{ fontSize: 18, marginLeft: '-1px' }} />,
@@ -102,7 +102,14 @@ export const ModulesMenu: FC<{ collapsed: boolean, mobile?: boolean }> = ({ coll
 			key: routePaths.REPORTS,
 			isShow: true,
 			icon: <MdOutlineBarChart style={{ fontSize: 18, marginLeft: '-1px' }} />,
-			to: `${routePaths.DEFAULT_HOME}/${routePaths.REPORTS}/cartera`,
+			to: `${routePaths.DEFAULT_HOME}/${routePaths.REPORTS_DASHBOARD}`,
+		},
+		{
+			label: 'Configuración',
+			key: routePaths.SETTINGS,
+			isShow: true,
+			icon: <SettingOutlined style={{ fontSize: 18, marginLeft: '-1px' }} />,
+			to: `${routePaths.DEFAULT_HOME}/${routePaths.SETTINGS}`,
 		},
 	];
 

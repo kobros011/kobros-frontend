@@ -32,7 +32,7 @@ export function getDefaultHomeRoute(typeUser: TypeUser | string | undefined): st
 		case TypeUser.admin:
 			return routePaths.USERS;
 		case TypeUser.partner:
-			return routePaths.REPORTS_PORTFOLIO;
+			return routePaths.PAYMENTS;
 		case TypeUser.collector:
 			return routePaths.COLLECTION_TODAY;
 		default:

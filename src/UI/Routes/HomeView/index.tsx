@@ -75,7 +75,7 @@ const HomeView: FC = () => {
 										formatter={v => formatMoney(Number(v))}
 										valueStyle={{ color: '#1677ff', fontSize: 18 }}
 									/>
-									<Link to={`/${routePaths.DEFAULT_HOME}/${routePaths.REPORTS_PORTFOLIO}`} style={{ fontSize: 12 }}>
+									<Link to={`/${routePaths.DEFAULT_HOME}/${routePaths.PAYMENTS}`} style={{ fontSize: 12 }}>
 										Ver cartera →
 									</Link>
 								</Card>
@@ -88,7 +88,7 @@ const HomeView: FC = () => {
 										formatter={v => formatMoney(Number(v))}
 										valueStyle={{ color: totalDelinquency > 0 ? '#ff4d4f' : '#52c41a', fontSize: 18 }}
 									/>
-									<Link to={`/${routePaths.DEFAULT_HOME}/${routePaths.REPORTS_DELINQUENCY}`} style={{ fontSize: 12 }}>
+									<Link to={`/${routePaths.DEFAULT_HOME}/${routePaths.PAYMENTS_DELINQUENCY}`} style={{ fontSize: 12 }}>
 										Ver mora →
 									</Link>
 								</Card>

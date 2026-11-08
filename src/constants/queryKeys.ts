@@ -35,6 +35,10 @@ export const queryKeyExpensesConcepts = {
 	base: 'expensesconcepts',
 };
 
+export const queryKeySettings = {
+	base: 'settings',
+};
+
 export const queryKeyCollection = {
 	base: 'collection',
 };

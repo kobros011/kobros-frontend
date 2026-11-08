@@ -1,11 +1,16 @@
 import { CSSProperties, FC, ReactNode } from 'react';
 import { theme } from 'antd';
+import '@fontsource/space-grotesk/400.css';
+import '@fontsource/space-grotesk/500.css';
+import '@fontsource/space-grotesk/700.css';
+import '@fontsource/jetbrains-mono/400.css';
+import '@fontsource/jetbrains-mono/500.css';
 import useUserModeStore from '@/infrastructure/context/User/UserModeStore';
 import './dashboard.css';
 
 export type Tone = 'primary' | 'ok' | 'warn' | 'danger' | 'neutral';
 
-/** Contenedor de dashboards: variables CSS derivadas de los tokens reales de antd (sin hex nuevos). */
+/** Contenedor de todos los dashboards: fuentes + variables CSS derivadas de los tokens reales de antd. */
 export const DashboardShell: FC<{ children: ReactNode }> = ({ children }) => {
 	const { token } = theme.useToken();
 	const darkMode = useUserModeStore(state => state.darkMode);
@@ -75,20 +80,28 @@ interface KpiCardProps {
 	icon?: ReactNode;
 	tone?: Tone;
 	valueTone?: Tone;
+	pill?: ReactNode;
+	aside?: ReactNode;
+	footer?: ReactNode;
 }
 
-export const KpiCard: FC<KpiCardProps> = ({ label, subtitle, value, unit, icon, tone = 'primary', valueTone }) => (
+export const KpiCard: FC<KpiCardProps> = ({ label, subtitle, value, unit, icon, tone = 'primary', valueTone, pill, aside, footer }) => (
 	<DashCard style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
 		<div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
 			<div style={{ minWidth: 0 }}>
-				<div className="kb-kpi-label">{label}</div>
+				<div className={`kb-kpi-label ${valueTone ? `kb-tone-${valueTone}` : ''}`} style={valueTone ? { color: 'var(--kb-tone)' } : undefined}>{label}</div>
 				{subtitle && <div className="kb-kpi-sub">{subtitle}</div>}
 			</div>
 			{icon && <IconBox icon={icon} tone={tone} />}
 		</div>
-		<div className={valueTone ? `kb-tone-${valueTone}` : ''}>
-			<span className="kb-kpi-value" style={valueTone ? { color: 'var(--kb-tone)' } : undefined}>{value}</span>
-			{unit && <span className="kb-kpi-unit">{unit}</span>}
+		<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+			<div className={valueTone ? `kb-tone-${valueTone}` : ''}>
+				<span className="kb-kpi-value" style={valueTone ? { color: 'var(--kb-tone)' } : undefined}>{value}</span>
+				{unit && <span className="kb-kpi-unit">{unit}</span>}
+			</div>
+			{aside}
 		</div>
+		{pill && <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', fontSize: 11, color: 'var(--kb-muted)' }}>{pill}</div>}
+		{footer && <div style={{ fontSize: 12, color: 'var(--kb-muted)' }}>{footer}</div>}
 	</DashCard>
 );

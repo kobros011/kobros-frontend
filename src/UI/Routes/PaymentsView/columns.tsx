@@ -1,127 +1,78 @@
 import routePaths from '@/constants/routePaths';
-import { PaymentStatus } from '@/constants/types';
-import { Payment } from '@/domain/Payment';
+import { DelinquencyItemDto, PortfolioItemDto } from '@/infrastructure/dto/ReportDto';
 import { BuildColumns, CustomColumn } from '@/infrastructure/utils/BuildColumns';
-import { formatNumber } from '@/infrastructure/utils/formaNumber';
-import { PayPaymentField } from '@/UI/Components/Fields/PayPaymentField';
 import { HistoryOutlined } from '@ant-design/icons';
 import { Button, Tag, Tooltip } from 'antd';
 import { useNavigate } from 'react-router-dom';
 
-export const getColumns = () => {
+/** El reporte de cartera no trae `id`; se usa `loan_id` como tal (requerido por CustomTable). */
+export type PortfolioItem = PortfolioItemDto & { id: string };
+export type DelinquencyItem = DelinquencyItemDto & { id: string };
 
+const buildActionColumn = <T extends { loan_id: string; client_id: string; route_id: string }>(navigate: ReturnType<typeof useNavigate>): CustomColumn<T> => ({
+	key: 'action',
+	title: 'Acciones',
+	width: 80,
+	render: (record: T) => (
+		<Button
+			onClick={() => void navigate(`/${routePaths.DEFAULT_HOME}/${routePaths.LOANS}/${record.loan_id}`, { state: { clientId: record?.client_id, routesIds: [record?.route_id] } })}
+			size='small'
+			type='primary'
+		>
+			<Tooltip color='lime' title='Historial'><HistoryOutlined /></Tooltip>
+		</Button>
+	),
+});
+
+export const getPortfolioColumns = () => {
 	const navigate = useNavigate();
 
-	const statusConfig = {
-		PENDIENTE: 'blue',
-		PAGADO: 'green',
-		MORA: 'red',
-	};
-
-	const columns: CustomColumn<Payment>[] = [
+	const columns: CustomColumn<PortfolioItem>[] = [
+		{ key: 'client_name', title: 'Cliente', dataIndex: 'client_name', width: 200 },
+		{ key: 'route_name', title: 'Ruta', dataIndex: 'route_name', width: 140 },
+		{ key: 'loan_number', title: 'Crédito #', dataIndex: 'loan_number', width: 100 },
+		{ key: 'value_total_loan', title: 'Valor crédito', dataIndex: 'value_total_loan', width: 120, typeRender: 'money' },
+		{ key: 'total_paid', title: 'Pagado', dataIndex: 'total_paid', width: 120, typeRender: 'money' },
 		{
-			key: 'quotaNumber',
-			title: 'No. cuota',
-			dataIndex: 'quotaNumber',
-			width: 80,
-			render: (quotaNumber: number, record) => {
-				return `${quotaNumber}/${record.agreedQuotas}`;
-			},
+			key: 'balance',
+			title: 'Saldo',
+			dataIndex: 'balance',
+			width: 120,
+			render: (value: number) => <Tag color='blue'>{new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(value)}</Tag>,
 		},
-		{
-			key: 'pendingQuotas',
-			title: 'C Pen',
-			dataIndex: 'pendingQuotas',
-			width: 80,
-		},
-		{
-			key: 'canceledQuotas',
-			title: 'C Can',
-			dataIndex: 'canceledQuotas',
-			width: 80,
-		},
-		{
-			key: 'balanceValue',
-			title: 'Saldo valor',
-			dataIndex: 'valueQuotaFixed',
-			width: 100,
-			render: (valueQuotaFixed: number, record) => {
-				return formatNumber((Number(valueQuotaFixed) * record.pendingQuotas) + Number(record.totalDefault), 2);
-			},
-		},
-		{
-			key: 'valueQuotaFixed',
-			title: 'Cuota',
-			dataIndex: 'valueQuotaFixed',
-			typeRender: 'money',
-			precision: 2,
-			width: 80,
-		},
-		{
-			key: 'client',
-			title: 'Cliente',
-			dataIndex: 'clientFullName',
-			width: 250,
-		},
-		{
-			key: 'pay',
-			title: 'Abono',
-			width: '13rem',
-			render: (record: Payment) => {
-				return <PayPaymentField record={record} />;
-			},
-		},
-		{
-			key: 'applied',
-			title: 'Aplicado',
-			dataIndex: 'applied',
-			typeRender: 'money',
-			width: 100,
-		},
-		{
-			key: 'status',
-			title: 'Estado',
-			dataIndex: 'status',
-			width: 80,
-			render: (value: PaymentStatus) => {
-				const newValue = value.toLocaleUpperCase() as PaymentStatus;
-				return <Tag color={statusConfig[newValue]}>{newValue}</Tag>;
-			},
-		},
-		{
-			key: 'paymentMethod',
-			title: 'Forma de pago',
-			dataIndex: 'paymentMethod',
-			width: 100,
-			render: (value: string) => (`${value.toLocaleUpperCase()}`),
-		},
-		{
-			key: 'payDate',
-			title: 'Fecha de pago',
-			dataIndex: 'payDate',
-			width: 100,
-			typeRender: 'date',
-		},
-		{
-			key: 'paymentDate',
-			title: 'Fecha realizo pago',
-			dataIndex: 'paymentDate',
-			width: 123,
-			typeRender: 'date',
-		},
+		{ key: 'end_date', title: 'Vence', dataIndex: 'end_date', width: 100, typeRender: 'date' },
+		{ key: 'payment_method', title: 'Método', dataIndex: 'payment_method', width: 120 },
+		buildActionColumn<PortfolioItem>(navigate),
 	];
 
-	columns.push(
-		{
-			key: 'action',
-			title: 'Acciones',
-			width: 80,
-			render: (record: Payment) => {
+	return BuildColumns(columns);
+};
 
-				return <Button onClick={() => void navigate(`/${routePaths.DEFAULT_HOME}/${routePaths.LOANS}/${record.loanId}`, { state: { clientId: record?.clientId, routesIds: [record?.routeId] } })} size='small' type='primary'><Tooltip color='lime' title='Historial'><HistoryOutlined /></Tooltip></Button>;
-			},
+export const getDelinquencyColumns = () => {
+	const navigate = useNavigate();
+
+	const columns: CustomColumn<DelinquencyItem>[] = [
+		{ key: 'client_name', title: 'Cliente', dataIndex: 'client_name', width: 200 },
+		{ key: 'route_name', title: 'Ruta', dataIndex: 'route_name', width: 140 },
+		{ key: 'loan_number', title: 'Crédito #', dataIndex: 'loan_number', width: 100 },
+		{ key: 'value_total_loan', title: 'Valor crédito', dataIndex: 'value_total_loan', width: 120, typeRender: 'money' },
+		{
+			key: 'balance',
+			title: 'Saldo en mora',
+			dataIndex: 'balance',
+			width: 130,
+			render: (value: number) => <Tag color='red'>{new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(value)}</Tag>,
 		},
-	);
+		{
+			key: 'days_overdue',
+			title: 'Días en mora',
+			dataIndex: 'days_overdue',
+			width: 110,
+			render: (value: number) => <Tag color={value > 30 ? 'red' : 'orange'}>{value} días</Tag>,
+		},
+		{ key: 'overdue_since', title: 'Vencida desde', dataIndex: 'overdue_since', width: 120, typeRender: 'date' },
+		buildActionColumn<DelinquencyItem>(navigate),
+	];
 
 	return BuildColumns(columns);
 };
