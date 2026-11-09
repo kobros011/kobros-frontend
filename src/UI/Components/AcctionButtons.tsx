@@ -16,7 +16,7 @@ const ActionsButton: FC<ActionsButtonProps> = ({ hiddenSave, hiddenSaveAndExit, 
 	const isMobile = useUserModeStore(state => state.isMobile);
 
 	return (
-		<Flex gap={10} wrap="wrap" justify={isMobile ? 'center' : 'flex-end'}>
+		<Flex gap={16} wrap="wrap" justify={isMobile ? 'center' : 'flex-end'} style={{ marginTop: 12 }}>
 			<Button onClick={onClickCancel} loading={isLoading} type="primary" danger>Cancelar</Button>
 			{!hiddenSave && <Button onClick={onClickSave} loading={isLoading} type="primary" ghost>{textAction}</Button>}
 			{!hiddenSaveAndExit && <Button onClick={onClickSaveExit} loading={isLoading} type="primary">{textAction} y salir</Button>}

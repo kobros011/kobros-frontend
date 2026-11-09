@@ -1,7 +1,7 @@
 import { FC, ReactNode, createContext, useCallback, useContext, useMemo } from 'react';
 import useAppSettingsStore from '@/infrastructure/context/AppSettingsStore';
 import useCurrencyStore from '@/infrastructure/context/CurrencyStore';
-import { MoneyOptions, formatMoney, getRouteCurrency } from '@/infrastructure/utils/money';
+import { MoneyOptions, displaySymbol, formatMoney, getRouteCurrency } from '@/infrastructure/utils/money';
 
 const CurrencyContext = createContext<string | undefined>(undefined);
 
@@ -49,5 +49,5 @@ export const useRouteMoney = () => {
 export const useCurrencyInfo = () => {
 	const currency = useCurrency();
 	const info = useCurrencyStore(state => (currency ? state.catalog[currency] : undefined));
-	return { code: currency, symbol: info?.symbol ?? '', decimals: info?.decimals ?? 0 };
+	return { code: currency, symbol: displaySymbol(info?.symbol), decimals: info?.decimals ?? 0 };
 };

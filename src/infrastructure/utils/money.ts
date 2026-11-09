@@ -2,6 +2,9 @@ import useAppSettingsStore from '@/infrastructure/context/AppSettingsStore';
 import useCurrencyStore from '@/infrastructure/context/CurrencyStore';
 import { formatNumber } from './formaNumber';
 
+/** Un solo "$" al frente (US$, MX$, R$… se muestran como "$"): el código ISO ya va al final y no se repite en el símbolo. */
+export const displaySymbol = (symbol?: string) => (symbol?.endsWith('$') ? '$' : symbol ?? '');
+
 export interface MoneyOptions {
 	/** Agrega el código ISO al final ("$1.200.000 COP"). Por defecto sí; se apaga solo donde el título ya dice la moneda (ejes de gráficas). */
 	code?: boolean
@@ -27,7 +30,7 @@ export const formatMoney = (value: number | string | null | undefined, currency?
 	const amount = Number(value ?? 0) || 0;
 	const info = currency ? useCurrencyStore.getState().catalog[currency] : undefined;
 	const decimals = info?.decimals ?? 0;
-	const symbol = info?.symbol ?? '';
+	const symbol = displaySymbol(info?.symbol);
 	const sign = amount < 0 ? '\u2212' : signed && amount > 0 ? '+' : '';
 	const abs = Math.abs(amount);
 
