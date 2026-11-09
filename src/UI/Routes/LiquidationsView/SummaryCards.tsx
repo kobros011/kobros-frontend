@@ -71,7 +71,12 @@ export const ExpensesCard: FC<{ total: number; expenses: ExpenseLineDto[] }> = (
 		>
 			{expenses.length === 0 ? <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Sin gastos registrados hoy" /> : (
 				<div className="lq-scroll" tabIndex={0} aria-label="Gastos del día">
-					{expenses.map(expense => <Row key={expense.id} label={expense.concept ? `${expense.concept} · ${expense.name}` : expense.name} value={money(expense.value)} />)}
+					{expenses.map(expense => (
+						<div key={expense.id} className="kb-row" style={{ padding: '8px 10px' }}>
+							<Row label={expense.concept ? `${expense.concept} · ${expense.name}` : expense.name} value={money(expense.value)} />
+							{expense.created_by_name && <div className="kb-section-sub">Creado por {expense.created_by_name}</div>}
+						</div>
+					))}
 				</div>
 			)}
 		</SectionCard>
@@ -107,6 +112,11 @@ export const NewLoanList: FC<{ loans: NewLoanLineDto[] }> = ({ loans }) =>{
 					<div className="kb-section-sub kb-mono">
 					Total {money(loan.value_total_loan)} · {loan.agreed_quotas} cuotas de {money(loan.value_quota_fixed)}
 					</div>
+					{loan.created_by_name && (
+						<div className="kb-section-sub">
+						Creado por {loan.created_by_name}
+						</div>
+					)}
 				</div>
 			))}
 		</div>

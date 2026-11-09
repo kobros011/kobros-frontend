@@ -9,6 +9,7 @@ export interface ExpenseLineDto {
 	name: string;
 	concept: string | null;
 	value: number;
+	created_by_name: string | null;
 }
 
 export interface PaymentLineDto {
@@ -30,6 +31,7 @@ export interface NewLoanLineDto {
 	agreed_quotas: number;
 	value_quota_fixed: number;
 	payment_method: string;
+	created_by_name: string | null;
 }
 
 export interface ClosingFiguresDto {
@@ -52,6 +54,8 @@ export interface LiquidationPreviewDto extends ClosingFiguresDto {
 	collector_name: string | null;
 	date: string;
 	suggested_base: number;
+	/** `last_closure` o `route_initial` (valor inicial menos gastos iniciales de la ruta, cuando aún no hay cierres). */
+	suggested_base_source?: 'last_closure' | 'route_initial';
 	expected_cash: number;
 	progress_percent: number;
 	expenses: ExpenseLineDto[];

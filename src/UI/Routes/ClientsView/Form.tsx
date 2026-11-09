@@ -181,7 +181,6 @@ const FormClient: FC<{ readonly?: boolean }> = ({ readonly = false }) => {
 						<Form.Item
 							label="Barrio"
 							name={'neighborhood'}
-							rules={[ ruleRequired ]}
 						>
 							<Input placeholder="Barrio del cliente" />
 						</Form.Item>

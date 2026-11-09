@@ -93,7 +93,7 @@ export const ClientEditDrawer: FC<ClientEditDrawerProps> = ({ clientId, open, on
 							</Form.Item>
 						</Col>
 						<Col xs={24} md={12}>
-							<Form.Item label="Barrio" name="neighborhood" rules={[ruleRequired]}>
+							<Form.Item label="Barrio" name="neighborhood">
 								<Input placeholder="Barrio" />
 							</Form.Item>
 						</Col>

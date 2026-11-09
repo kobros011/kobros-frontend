@@ -43,10 +43,11 @@ export const ClosingForm: FC<ClosingFormProps> = ({ preview, collectorId }) => {
 		setNote('');
 	}, [preview.route_id, preview.date, preview.collector_id, preview.suggested_base]);
 
-	const baseValue = toNumber(base) ?? 0;
+	const baseValue = toNumber(base);
 	const cashValue = toNumber(cash);
+	// Sin una base real todavía no hay nada que calcular: se muestra 0 en vez de restar/sumar sobre un supuesto.
 	const expected = useMemo(
-		() => baseValue + preview.collected_total - preview.expenses_total - preview.new_loans_total,
+		() => baseValue === null ? 0 : baseValue + preview.collected_total - preview.expenses_total - preview.new_loans_total,
 		[baseValue, preview],
 	);
 	const difference = cashValue === null ? null : cashValue - expected;
@@ -59,7 +60,7 @@ export const ClosingForm: FC<ClosingFormProps> = ({ preview, collectorId }) => {
 		create.mutate({
 			route_id: preview.route_id,
 			date: preview.date,
-			value_base_delivered: baseValue,
+			value_base_delivered: baseValue ?? 0,
 			cash_delivered: cashValue ?? 0,
 			note: note.trim() || undefined,
 			collector_id: collectorId,
@@ -79,7 +80,9 @@ export const ClosingForm: FC<ClosingFormProps> = ({ preview, collectorId }) => {
 					<label className="lq-field">
 						<span className="kb-section-sub">Base entregada <Pill tone="neutral">Sugerido</Pill></span>
 						<InputNumber aria-label="Base entregada" thousandsSeparator precision={decimals} size="small" value={base} onChange={value => setBase(value as string)} prefix={symbol} />
-						<span className="kb-section-sub">Último cierre: {money(preview.suggested_base)}</span>
+						<span className="kb-section-sub">
+								{preview.suggested_base_source === 'route_initial' ? 'Primer cierre: valor inicial menos gastos iniciales de la ruta' : 'Último cierre'}: {money(preview.suggested_base)}
+							</span>
 					</label>
 					<label className="lq-field">
 						<span className="kb-section-sub">Efectivo entregado</span>
@@ -98,7 +101,7 @@ export const ClosingForm: FC<ClosingFormProps> = ({ preview, collectorId }) => {
 				<div className="kb-section-sub" style={{ marginTop: 6 }}>Efectivo esperado en caja</div>
 				<div><span className="kb-kpi-value">{money(expected)}</span></div>
 				<div className="kb-section-sub kb-mono" style={{ margin: '4px 0 10px' }}>
-					{money(baseValue)} (base) + {money(preview.collected_total)} (recaudo) − {money(preview.expenses_total)} (gastos) − {money(preview.new_loans_total)} (nuevos)
+					{money(baseValue ?? 0)} (base) + {money(preview.collected_total)} (recaudo) − {money(preview.expenses_total)} (gastos) − {money(preview.new_loans_total)} (nuevos)
 				</div>
 				<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
 					<div>
@@ -130,7 +133,7 @@ export const ClosingForm: FC<ClosingFormProps> = ({ preview, collectorId }) => {
 				cancelButtonProps={{ size: 'small', danger: true }}
 			>
 				{error && <Alert type="error" showIcon message={error} style={{ marginBottom: 12 }} />}
-				<ClosingSummary preview={preview} base={baseValue} cash={cashValue ?? 0} expected={expected} difference={difference ?? 0} />
+				<ClosingSummary preview={preview} base={baseValue ?? 0} cash={cashValue ?? 0} expected={expected} difference={difference ?? 0} />
 			</Modal>
 		</>
 	);
