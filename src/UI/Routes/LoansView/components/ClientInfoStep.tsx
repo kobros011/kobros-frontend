@@ -9,6 +9,8 @@ import { PrioritySelector } from '@/UI/Routes/ClientsView/priority/PrioritySelec
 import { SelectClient } from '@/UI/Components/Fields/SelectClient';
 import { ClientEditDrawer } from './ClientEditDrawer';
 import { FichaField } from './FichaField';
+import { ClientContactsCard } from './ClientContactsCard';
+import { ruleRequired } from '@/constants/rules';
 
 const { Text } = Typography;
 
@@ -45,15 +47,8 @@ export const ClientInfoStep: FC<ClientInfoStepProps> = ({
 }) => {
 	const [drawerOpen, setDrawerOpen] = useState(false);
 
-	const guarantor = client?.guarantorName;
-	const ref1 = client?.references?.[0];
-	const ref2 = client?.references?.[1];
-
 	const handleContinue = () => {
-		const mobile = form.getFieldValue('currentMobile') as string | undefined;
-		const address = form.getFieldValue('currentAddress') as string | undefined;
-		if (!mobile || !address) return;
-		onContinue();
+		form.validateFields(['currentAddress', 'currentMobile']).then(onContinue, () => undefined);
 	};
 
 	const showClientFields = hasClientId && !!client;
@@ -122,7 +117,7 @@ export const ClientInfoStep: FC<ClientInfoStepProps> = ({
 
 			{showClientFields && (
 				<>
-					<FichaField label="Cédula del cliente (DNI)">
+					<FichaField label="Documento">
 						{idDocument}
 					</FichaField>
 					{(client?.beak ?? 0) > 0 && (
@@ -134,50 +129,26 @@ export const ClientInfoStep: FC<ClientInfoStepProps> = ({
 					<FichaField label="Nombre del cliente">
 						<div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8, justifyContent: 'space-between' }}>
 							<span>{fullName}</span>
-							<Button type="link" icon={<RightOutlined />} iconPosition="end" onClick={() => setDrawerOpen(true)} style={{ padding: 0 }}>
+							<Button size="small" type="primary" ghost icon={<RightOutlined />} iconPosition="end" onClick={() => setDrawerOpen(true)}>
 								Editar cliente
 							</Button>
 						</div>
 					</FichaField>
 
 					<div className="loan-wizard-ref-block">
-						<Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 8 }}>
-							Fiador y referencias del cliente
-						</Text>
-						<div className="loan-wizard-ref-grid">
-							<div>
-								<Text type="secondary" style={{ fontSize: 11 }}>Fiador</Text>
-								<div style={{ fontSize: 14, fontWeight: 500 }}>
-									{guarantor || 'Sin registrar'}
-								</div>
-								{client?.guarantorPhone && (
-									<Text type="secondary" style={{ fontSize: 11 }}>{client.guarantorPhone}</Text>
-								)}
-							</div>
-							<div>
-								<Text type="secondary" style={{ fontSize: 11 }}>Referencia 1</Text>
-								<div style={{ fontSize: 14, fontWeight: 500 }}>
-									{ref1?.name || 'Sin registrar'}
-								</div>
-								{ref1?.phone && <Text type="secondary" style={{ fontSize: 11 }}>{ref1.phone}</Text>}
-							</div>
-							<div>
-								<Text type="secondary" style={{ fontSize: 11 }}>Referencia 2</Text>
-								<div style={{ fontSize: 14, fontWeight: 500 }}>
-									{ref2?.name || 'Sin registrar'}
-								</div>
-								{ref2?.phone && <Text type="secondary" style={{ fontSize: 11 }}>{ref2.phone}</Text>}
-							</div>
+						<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8, marginBottom: 8 }}>
+							<strong>Corrección rápida de entrega</strong>
+							<Text type="secondary" style={{ fontSize: 12 }}>Editable directo</Text>
 						</div>
+						<Form.Item label="Dirección de cobro" name="currentAddress" rules={[ruleRequired]} style={{ marginBottom: 12 }} className="loan-wizard-field">
+							<Input size="small" placeholder="Dirección del cliente" />
+						</Form.Item>
+						<Form.Item label="Celular del cliente" name="currentMobile" rules={[ruleRequired]} style={{ marginBottom: 0 }} className="loan-wizard-field">
+							<Input size="small" inputMode="tel" placeholder="Celular del cliente" />
+						</Form.Item>
 					</div>
 
-					<Form.Item label="Dirección" name="currentAddress" style={{ marginBottom: 12 }} className="loan-wizard-field">
-						<Input size="small" placeholder="Dirección del cliente" />
-					</Form.Item>
-
-					<Form.Item label="Celular" name="currentMobile" style={{ marginBottom: 12 }} className="loan-wizard-field">
-						<Input size="small" inputMode="tel" placeholder="Celular del cliente" />
-					</Form.Item>
+					{clientId && <ClientContactsCard clientId={clientId} contacts={client?.contacts} />}
 
 					{routes.length <= 1 && (
 						<FichaField label="Ruta del cliente">

@@ -120,16 +120,57 @@
 	margin-bottom: 16px;
 }
 
+.loan-wizard-ref-editing {
+	border-color: var(--loan-primary);
+}
+
 .loan-wizard-ref-grid {
 	display: grid;
-	grid-template-columns: repeat(3, 1fr);
-	gap: 12px;
+	grid-template-columns: repeat(2, 1fr);
+	gap: 8px;
 }
 
 @media (max-width: 767px) {
 	.loan-wizard-ref-grid {
 		grid-template-columns: 1fr;
 	}
+}
+
+/* Principal de cada tipo (fiador / referencia) */
+.loan-wizard-contact {
+	border: 1px solid var(--loan-border);
+	border-radius: 6px;
+	padding: 8px 10px;
+}
+
+.loan-wizard-contact-head {
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	gap: 8px;
+	margin-bottom: 2px;
+}
+
+.loan-wizard-contacts-empty {
+	border: 1px dashed var(--loan-border);
+	border-radius: 6px;
+	padding: 10px 12px;
+	text-align: center;
+}
+
+.loan-wizard-contacts-more {
+	display: grid;
+	gap: 6px;
+	margin-top: 6px;
+}
+
+.loan-wizard-contacts-more-row {
+	display: flex;
+	align-items: flex-start;
+	gap: 8px;
+	font-size: 13px;
+	border-top: 1px solid var(--loan-border);
+	padding-top: 6px;
 }
 
 .loan-wizard-loan-card {

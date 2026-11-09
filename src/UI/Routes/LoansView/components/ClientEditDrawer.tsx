@@ -3,11 +3,11 @@ import { getClient, useMutationType } from '@/infrastructure/querys/Client';
 import useUserModeStore from '@/infrastructure/context/User/UserModeStore';
 import useLoading from '@/infrastructure/hooks/useLoading';
 import InputDate from '@/UI/Components/Fields/InputDate';
-import { App, Button, Col, Divider, Drawer, Form, Input, Row, Typography } from 'antd';
+import { App, Button, Col, Drawer, Form, Input, Row } from 'antd';
 import { FC } from 'react';
 import { ruleRequired } from '@/constants/rules';
+import { ClientContactsList } from '@/UI/Routes/ClientsView/ClientContactsList';
 
-const { Text } = Typography;
 
 interface ClientEditDrawerProps {
 	clientId: string;
@@ -108,66 +108,9 @@ export const ClientEditDrawer: FC<ClientEditDrawerProps> = ({ clientId, open, on
 							</Form.Item>
 						</Col>
 
-						{/* Fiador */}
 						<Col xs={24}>
-							<Divider orientation="left" style={{ marginTop: 8, marginBottom: 4 }}>
-								<Text type="secondary" style={{ fontSize: 13 }}>Fiador (opcional)</Text>
-							</Divider>
+							<ClientContactsList />
 						</Col>
-						<Col xs={24} md={12}>
-							<Form.Item label="Nombre del fiador" name="guarantorName">
-								<Input placeholder="Nombre completo del fiador" />
-							</Form.Item>
-						</Col>
-						<Col xs={24} md={12}>
-							<Form.Item label="Cédula del fiador" name="guarantorCedula">
-								<Input inputMode="numeric" placeholder="Cédula del fiador" />
-							</Form.Item>
-						</Col>
-						<Col xs={24} md={12}>
-							<Form.Item label="Teléfono del fiador" name="guarantorPhone">
-								<Input inputMode="tel" placeholder="Teléfono del fiador" />
-							</Form.Item>
-						</Col>
-						<Col xs={24} md={12}>
-							<Form.Item label="Dirección del fiador" name="guarantorAddress">
-								<Input placeholder="Dirección del fiador" />
-							</Form.Item>
-						</Col>
-
-						{/* Referencias */}
-						{[0, 1].map((idx) => (
-							<Col xs={24} key={idx}>
-								<Divider orientation="left" style={{ marginTop: 8, marginBottom: 4 }}>
-									<Text type="secondary" style={{ fontSize: 13 }}>Referencia {idx + 1} (opcional)</Text>
-								</Divider>
-								<Row gutter={[16, 0]}>
-									<Col xs={24} md={12}>
-										<Form.Item
-											label="Nombre"
-											name={['references', idx, 'name']}
-											dependencies={[['references', idx, 'phone'], ['references', idx, 'address']]}
-											rules={[({ getFieldValue }) => ({
-												required: !!(getFieldValue(['references', idx, 'phone']) || getFieldValue(['references', idx, 'address'])),
-												message: 'Ingresa el nombre de la referencia',
-											})]}
-										>
-											<Input placeholder={`Nombre referencia ${idx + 1}`} />
-										</Form.Item>
-									</Col>
-									<Col xs={24} md={12}>
-										<Form.Item label="Teléfono" name={['references', idx, 'phone']}>
-											<Input inputMode="tel" placeholder={`Teléfono referencia ${idx + 1}`} />
-										</Form.Item>
-									</Col>
-									<Col xs={24}>
-										<Form.Item label="Dirección" name={['references', idx, 'address']}>
-											<Input placeholder={`Dirección referencia ${idx + 1}`} />
-										</Form.Item>
-									</Col>
-								</Row>
-							</Col>
-						))}
 					</Row>
 				</Form>
 			)}

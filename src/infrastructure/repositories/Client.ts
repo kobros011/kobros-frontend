@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { ImplementationBase } from './base';
-import { Client, ClientModel } from '@/domain/Client';
+import { Client, ClientContact, ClientModel } from '@/domain/Client';
 import { ClientDto } from '../dto/ClientDto';
 import { Filters, FiltersModel } from '@/domain/Filters';
 import { PaginationParams } from '@/domain/Pagination';
@@ -55,6 +55,11 @@ export class ImplementationClientRepository extends ImplementationBase {
 		if (!data || !data.id) return;
 
 		return axios.put<ClientDto>(this.buildUrl({ id: data.id }), ClientModel.ToDto(data as Client));	
+	}
+
+	/** Solo fiadores y referencias: el servidor reemplaza la lista y no toca ningún otro dato del cliente. */
+	async updateContacts(clientId: string, contacts: ClientContact[]) {
+		return axios.put<ClientDto>(this.buildUrl({ id: clientId }), { id: clientId, contacts: ClientModel.contactsToDto(contacts) });
 	}
 
 	async delete(client_id: string) {

@@ -121,9 +121,12 @@ const FormLoan: FC = () => {
 		return {};
 	};
 
+	// Se reinicia el formulario solo si cambian los datos que copia del cliente: guardar fiadores o referencias
+	// (que también refresca `client`) no debe borrar lo que ya se digitó del crédito.
+	const clientKey = client ? JSON.stringify([client.id, client.idDocument, client.fullName, client.currentMobile, client.currentAddress, client.routeName, client.order]) : '';
 	useEffect(() => {
 		form.setFieldsValue(getInitialValues());
-	}, [client, availableRoute?.loansNumber]);
+	}, [clientKey, availableRoute?.loansNumber]);
 
 	const saveLoan = (values: Partial<LoanFull>) => {
 		loanMutation.mutate(

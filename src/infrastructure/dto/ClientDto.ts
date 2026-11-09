@@ -1,10 +1,13 @@
 import { BaseDto } from './BaseDto';
 
-export interface ClientReferenceDto {
+export interface ClientContactDto {
 	id?: string
+	kind: 'fiador' | 'referencia'
 	name: string
-	address?: string
-	phone?: string
+	phone: string
+	address?: string | null
+	position?: number
+	is_primary?: boolean
 }
 
 export interface ClientRouteInfoDto {
@@ -30,11 +33,7 @@ export interface ClientDto extends BaseDto {
 	route_id?: string,
 	route_name?: string,
 	order?: number,
-	guarantor_name?: string | null
-	guarantor_cedula?: string | null
-	guarantor_phone?: string | null
-	guarantor_address?: string | null
-	references?: ClientReferenceDto[]
+	contacts?: ClientContactDto[]
 	active_loans_count?: number
 	loan_id?: string | null
 	loan_number?: number | null

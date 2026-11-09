@@ -1,12 +1,37 @@
-import { ClientDto, ClientReferenceDto, ClientRouteInfoDto } from '@/infrastructure/dto/ClientDto';
+import { ClientContactDto, ClientDto, ClientRouteInfoDto } from '@/infrastructure/dto/ClientDto';
 import { BaseDomain } from './BaseDomain';
 
-export interface ClientReference {
+export type ContactKind = 'fiador' | 'referencia';
+
+export const CONTACT_KIND_LABEL: Record<ContactKind, string> = { fiador: 'Fiador', referencia: 'Referencia' };
+
+/** Fiador o referencia del cliente (nombre y celular obligatorios). Puede haber varios de cada tipo. */
+export interface ClientContact {
 	id?: string
+	kind: ContactKind
 	name: string
-	address?: string
-	phone?: string
+	phone: string
+	address?: string | null
 }
+
+/** Principal de cada tipo = el primero de su tipo; el resto son datos informativos. Fiadores antes que referencias. */
+export const principalContacts = (contacts: ClientContact[] = []) => {
+	const fiadores = contacts.filter(contact => contact.kind === 'fiador');
+	const referencias = contacts.filter(contact => contact.kind === 'referencia');
+	return {
+		fiador: fiadores[0],
+		referencia: referencias[0],
+		others: [...fiadores.slice(1), ...referencias.slice(1)],
+	};
+};
+
+/** Etiqueta de un contacto según su lugar en la lista: "Fiador", "Fiador 2", "Referencia 3"… */
+export const contactLabel = (contacts: ClientContact[], index: number) => {
+	const kind = contacts[index]?.kind;
+	if (!kind) return '';
+	const position = contacts.slice(0, index + 1).filter(contact => contact?.kind === kind).length;
+	return position === 1 ? CONTACT_KIND_LABEL[kind] : `${CONTACT_KIND_LABEL[kind]} ${position}`;
+};
 
 /** Prioridad (1 = primero en visitarse) de un cliente en una de sus rutas. */
 export interface ClientRouteInfo {
@@ -56,11 +81,7 @@ export interface Client extends BaseDomain {
 	routeId?: string,
 	routeName?: string,
 	order?: number,
-	guarantorName?: string | null
-	guarantorCedula?: string | null
-	guarantorPhone?: string | null
-	guarantorAddress?: string | null
-	references?: ClientReference[]
+	contacts?: ClientContact[]
 	activeLoansCount?: number
 }
 
@@ -98,18 +119,22 @@ export class ClientModel {
 			active: DTO.active,
 			updatedAt: DTO.updated_at,
 			createdAt: DTO.created_at,
-			guarantorName: DTO.guarantor_name ?? null,
-			guarantorCedula: DTO.guarantor_cedula ?? null,
-			guarantorPhone: DTO.guarantor_phone ?? null,
-			guarantorAddress: DTO.guarantor_address ?? null,
-			references: (DTO.references ?? []).map((r: ClientReferenceDto) => ({
-				id: r.id,
-				name: r.name,
-				address: r.address,
-				phone: r.phone,
+			contacts: (DTO.contacts ?? []).map((c: ClientContactDto) => ({
+				id: c.id,
+				kind: c.kind,
+				name: c.name,
+				phone: c.phone,
+				address: c.address ?? null,
 			})),
 			activeLoansCount: DTO.active_loans_count ?? 0,
 		};
+	}
+
+	/** Contactos para enviar: se descartan las filas totalmente vacías (las incompletas las rechaza la validación). */
+	static contactsToDto(contacts: ClientContact[]) {
+		return contacts
+			.filter(contact => contact?.name?.trim() || contact?.phone?.trim() || contact?.address?.trim())
+			.map(contact => ({ kind: contact.kind, name: (contact.name ?? '').trim(), phone: (contact.phone ?? '').trim(), address: contact.address?.trim() || null }));
 	}
 
 	private static loanToDto(loan: ClientLoanDraft): Record<string, unknown> {
@@ -140,15 +165,7 @@ export class ClientModel {
 			...(domain.routeAssignments ? { routes: domain.routeAssignments.map(item => ({ route_id: item.routeId, ...(item.order ? { order: item.order } : {}) })) } : {}),
 			...(domain.loan ? { loan: ClientModel.loanToDto(domain.loan) } : {}),
 			...(domain.id ? { id: domain.id } : {}),
-			guarantor_name: domain.guarantorName ?? undefined,
-			guarantor_cedula: domain.guarantorCedula ?? undefined,
-			guarantor_phone: domain.guarantorPhone ?? undefined,
-			guarantor_address: domain.guarantorAddress ?? undefined,
-			references: domain.references?.filter(r => r?.name || r?.phone || r?.address).map(r => ({
-				name: r.name,
-				address: r.address,
-				phone: r.phone,
-			})),
+			...(domain.contacts ? { contacts: ClientModel.contactsToDto(domain.contacts) } : {}),
 		};
 	}
 }

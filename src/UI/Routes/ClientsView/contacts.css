@@ -1,0 +1,52 @@
+.kb-contacts {
+	display: grid;
+	gap: 8px;
+}
+
+.kb-contacts-head {
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	gap: 8px;
+}
+
+.kb-contact {
+	border: 1px solid var(--kb-border);
+	border-radius: 8px;
+	padding: 8px 10px 2px;
+}
+
+.kb-contact:has(.ant-form-item-has-error) {
+	border-color: var(--kb-danger);
+}
+
+.kb-contact-head {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 6px;
+}
+
+.kb-contact .ant-form-item {
+	margin-bottom: 8px;
+}
+
+.kb-contacts-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.kb-contacts-empty {
+	border: 1px dashed var(--kb-border);
+	border-radius: 8px;
+	padding: 10px 12px;
+	text-align: center;
+	color: var(--kb-muted);
+	font-size: 12px;
+}
+
+.kb-contact-principal {
+	margin: 0;
+}

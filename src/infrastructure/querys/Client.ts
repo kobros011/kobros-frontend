@@ -1,7 +1,7 @@
 import { queryKeyClients, queryKeyDefault } from '@/constants/queryKeys';
-import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { repository } from '../repositories/Client';
-import { Client } from '@/domain/Client';
+import { Client, ClientContact } from '@/domain/Client';
 import { TypeAction } from '@/constants/types';
 import { Filters } from '@/domain/Filters';
 import { PaginationParams } from '@/domain/Pagination';
@@ -86,6 +86,13 @@ export const updateClient = () => {
 	});
 
 	return mutation;
+};
+export const updateClientContacts = (clientId: string) => {
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: (contacts: ClientContact[]) => repository.updateContacts(clientId, contacts),
+		onSuccess: () => queryClient.invalidateQueries({ queryKey: [queryKeyClients.base] }),
+	});
 };
 export const deleteClient = () => {
 	const mutation = useMutation({

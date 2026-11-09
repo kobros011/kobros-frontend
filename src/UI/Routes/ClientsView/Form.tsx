@@ -8,6 +8,7 @@ import useUserStore from '@/infrastructure/context/User/UserDataStore';
 import useLoading from '@/infrastructure/hooks/useLoading';
 import { getClient, useMutationType } from '@/infrastructure/querys/Client';
 import { handleError } from '@/infrastructure/utils/handleError';
+import { ClientContactsList } from './ClientContactsList';
 import { ClientRoutesSection } from './priority/ClientRoutesSection';
 import { ClientRoutesPicker } from './priority/ClientRoutesPicker';
 import { ClientLoanSection, resolveLoanRouteId } from './ClientLoanSection';
@@ -21,7 +22,7 @@ import LoadingComponent from '@/UI/Components/LoadingComponent';
 import { useQueryClient } from '@tanstack/react-query';
 import { App, Card, Col, Divider, Form, Input, Result, Row, Typography } from 'antd';
 
-const { Text, Title } = Typography;
+const { Title } = Typography;
 import { ExceptionStatusType } from 'antd/es/result';
 import { AxiosError } from 'axios';
 import { FC, useState } from 'react';
@@ -203,66 +204,9 @@ const FormClient: FC<{ readonly?: boolean }> = ({ readonly = false }) => {
 						</Form.Item>
 					</Col>
 
-					{/* Sección Fiador */}
 					<Col xs={24}>
-						<Divider orientation="left" style={{ marginTop: 8, marginBottom: 4 }}>
-							<Text type="secondary" style={{ fontSize: 13 }}>Datos del fiador (opcional)</Text>
-						</Divider>
+						<ClientContactsList />
 					</Col>
-					<Col {...spanConfigForm.medium}>
-						<Form.Item label="Nombre del fiador" name={'guarantorName'}>
-							<Input placeholder="Nombre completo del fiador" />
-						</Form.Item>
-					</Col>
-					<Col {...spanConfigForm.medium}>
-						<Form.Item label="Cédula del fiador" name={'guarantorCedula'}>
-							<Input inputMode="numeric" placeholder="Cédula del fiador" />
-						</Form.Item>
-					</Col>
-					<Col {...spanConfigForm.medium}>
-						<Form.Item label="Teléfono del fiador" name={'guarantorPhone'}>
-							<Input inputMode="tel" placeholder="Teléfono del fiador" />
-						</Form.Item>
-					</Col>
-					<Col {...spanConfigForm.medium}>
-						<Form.Item label="Dirección del fiador" name={'guarantorAddress'}>
-							<Input placeholder="Dirección del fiador" />
-						</Form.Item>
-					</Col>
-
-					{/* Sección Referencias — máx. 2, bloques fijos */}
-					{[0, 1].map((idx) => (
-						<Col xs={24} key={idx}>
-							<Divider orientation="left" style={{ marginTop: 8, marginBottom: 4 }}>
-								<Text type="secondary" style={{ fontSize: 13 }}>Referencia {idx + 1} (opcional)</Text>
-							</Divider>
-							<Row gutter={[16, 0]}>
-								<Col {...spanConfigForm.medium}>
-									<Form.Item
-										label="Nombre"
-										name={['references', idx, 'name']}
-										dependencies={[['references', idx, 'phone'], ['references', idx, 'address']]}
-										rules={[({ getFieldValue }) => ({
-											required: !!(getFieldValue(['references', idx, 'phone']) || getFieldValue(['references', idx, 'address'])),
-											message: 'Ingresa el nombre de la referencia',
-										})]}
-									>
-										<Input placeholder={`Nombre referencia ${idx + 1}`} />
-									</Form.Item>
-								</Col>
-								<Col {...spanConfigForm.medium}>
-									<Form.Item label="Teléfono" name={['references', idx, 'phone']}>
-										<Input inputMode="tel" placeholder={`Teléfono referencia ${idx + 1}`} />
-									</Form.Item>
-								</Col>
-								<Col {...spanConfigForm.medium}>
-									<Form.Item label="Dirección" name={['references', idx, 'address']}>
-										<Input placeholder={`Dirección referencia ${idx + 1}`} />
-									</Form.Item>
-								</Col>
-							</Row>
-						</Col>
-					))}
 				</Row>
 				{isCreate && (
 					<Form.Item

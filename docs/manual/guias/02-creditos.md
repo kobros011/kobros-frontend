@@ -25,7 +25,7 @@ Lista los créditos con el cliente, su documento y la ruta.
 > URL: `/srv1/home/creditos/crear`
 > Preparar: Entrar desde 'Crear nuevo crédito' en la ficha de Marta Lucía Rojas.
 
-El asistente tiene tres pasos. El primero muestra los datos del cliente, su fiador, las referencias, la ruta y su prioridad en ella.
+El asistente tiene tres pasos. El primero muestra los datos del cliente, su fiador y referencia principales, la ruta y su prioridad en ella. Ahí mismo se pueden corregir la dirección y el celular, y con **Editar contactos** cambiar o agregar fiadores y referencias sin salir del asistente. **Editar cliente** abre el cajón para cambiar cualquier otro dato.
 
 - Puedes corregir la dirección y el celular antes de continuar.
 - Pulsa **Continuar** para pasar al historial.
