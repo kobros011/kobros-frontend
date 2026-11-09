@@ -2,6 +2,7 @@ import { FC, useMemo, useState } from 'react';
 import { Alert, Segmented, Skeleton, theme } from 'antd';
 import { DashboardShell } from '@/UI/Components/Dashboard/ui';
 import { getRouteClients } from '@/infrastructure/querys/ClientRoute';
+import { useSingleRoute } from '@/infrastructure/hooks/useSingleRoute';
 import { PriorityStepper } from './PriorityStepper';
 import { clampPosition, computeMove, pluralClients } from './moveLogic';
 import './priority.css';
@@ -20,6 +21,7 @@ interface PrioritySelectorProps {
 /** Prioridad dentro del asistente de crédito: mantener, elegir una posición o dejarlo al final, con vista previa de vecinos. */
 export const PrioritySelector: FC<PrioritySelectorProps> = ({ clientId, routeId, value, onChange, disabled }) => {
 	const { token } = theme.useToken();
+	const singleRoute = useSingleRoute();
 	const { routeClients, isLoading } = getRouteClients(routeId);
 	const [method, setMethod] = useState<Method>('keep');
 
@@ -50,7 +52,7 @@ export const PrioritySelector: FC<PrioritySelectorProps> = ({ clientId, routeId,
 		<DashboardShell>
 			<section className="pr-card" aria-label="Prioridad en la ruta" style={{ marginBottom: 12, gap: 8, padding: 10 }}>
 				<header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
-					<strong style={{ fontSize: 12 }}>Prioridad en {mine.routeName}</strong>
+					<strong style={{ fontSize: 12 }}>{singleRoute ? 'Prioridad' : `Prioridad en ${mine.routeName}`}</strong>
 					<span className="kb-mono" style={{ fontSize: 10, color: 'var(--kb-muted)' }}>Hoy #{current} de {pluralClients(total)}</span>
 				</header>
 

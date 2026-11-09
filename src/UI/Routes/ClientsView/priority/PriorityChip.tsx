@@ -2,6 +2,7 @@ import '@/UI/Components/Dashboard/ui'; // fuentes y clase .kb-mono del kit
 import { FC } from 'react';
 import { theme } from 'antd';
 import { ClientRouteInfo } from '@/domain/Client';
+import { useSingleRoute } from '@/infrastructure/hooks/useSingleRoute';
 
 interface PriorityBadgeProps {
 	order: number
@@ -31,7 +32,8 @@ export const PriorityBadge: FC<PriorityBadgeProps> = ({ order, size = 32, state 
 };
 
 interface RouteChipProps {
-	routeName: string
+	/** Sin nombre (usuario con una sola ruta) la píldora dice solo "Prioridad #n". */
+	routeName?: string
 	order: number
 	highlight?: boolean
 }
@@ -51,7 +53,7 @@ export const RouteChip: FC<RouteChipProps> = ({ routeName, order, highlight }) =
 				fontWeight: hot ? 700 : 500,
 			}}
 		>
-			{routeName}
+			{routeName ?? 'Prioridad'}
 			<span style={{ paddingLeft: 6, borderLeft: `1px solid ${hot ? 'rgba(0,0,0,0.25)' : token.colorBorder}`, fontWeight: 800 }}>#{order}</span>
 		</span>
 	);
@@ -60,12 +62,13 @@ export const RouteChip: FC<RouteChipProps> = ({ routeName, order, highlight }) =
 /** Todas las rutas del cliente con su prioridad; si no caben, "+N". */
 export const RouteChips: FC<{ routes?: ClientRouteInfo[], max?: number, highlight?: boolean }> = ({ routes = [], max = 2, highlight }) => {
 	const { token } = theme.useToken();
+	const singleRoute = useSingleRoute();
 	if (routes.length === 0) return <span style={{ color: token.colorTextTertiary }}>Sin rutas</span>;
-	const shown = routes.slice(0, max);
-	const hidden = routes.slice(max);
+	const shown = routes.slice(0, singleRoute ? 1 : max);
+	const hidden = singleRoute ? [] : routes.slice(max);
 	return (
 		<span style={{ display: 'inline-flex', flexWrap: 'wrap', gap: 6, alignItems: 'center' }}>
-			{shown.map(route => <RouteChip key={route.clientRouteId} routeName={route.routeName} order={route.order} highlight={highlight} />)}
+			{shown.map(route => <RouteChip key={route.clientRouteId} routeName={singleRoute ? undefined : route.routeName} order={route.order} highlight={highlight} />)}
 			{hidden.length > 0 && (
 				<span className="kb-mono" title={hidden.map(route => `${route.routeName} #${route.order}`).join(', ')} style={{ fontSize: 11, color: token.colorTextTertiary }}>
 					+{hidden.length}

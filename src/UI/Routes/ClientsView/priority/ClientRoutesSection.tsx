@@ -5,6 +5,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Client } from '@/domain/Client';
 import { queryKeyClientRoutes, queryKeyClients } from '@/constants/queryKeys';
 import { useRoutes } from '@/infrastructure/hooks/useRoutes';
+import { useSingleRoute } from '@/infrastructure/hooks/useSingleRoute';
 import { updateClient } from '@/infrastructure/querys/Client';
 import { handleError } from '@/infrastructure/utils/handleError';
 import { DashboardShell } from '@/UI/Components/Dashboard/ui';
@@ -23,6 +24,7 @@ export const ClientRoutesSection: FC<ClientRoutesSectionProps> = ({ client, canM
 	const { notification, modal } = App.useApp();
 	const queryClient = useQueryClient();
 	const { routes: allRoutes } = useRoutes();
+	const singleRoute = useSingleRoute(); // una sola ruta: solo importa la prioridad, no el nombre de la ruta
 	const update = updateClient();
 	const [drawerOpen, setDrawerOpen] = useState(false);
 	const [newRoute, setNewRoute] = useState<string>();
@@ -58,8 +60,8 @@ export const ClientRoutesSection: FC<ClientRoutesSectionProps> = ({ client, canM
 			<section className="pr-card" aria-label="Rutas y prioridad asignadas" style={{ marginTop: 12 }}>
 				<header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
 					<div>
-						<strong>Rutas y prioridad asignadas</strong> <span className="kb-mono" style={{ fontSize: 11, color: 'var(--kb-muted)' }}>({routes.length} {routes.length === 1 ? 'ruta activa' : 'rutas activas'})</span>
-						<div className="pr-hint" style={{ marginTop: 2 }}>Un cliente puede estar en más de una ruta con prioridades independientes.</div>
+						{singleRoute ? <strong>Prioridad del cliente</strong> : <><strong>Rutas y prioridad asignadas</strong> <span className="kb-mono" style={{ fontSize: 11, color: 'var(--kb-muted)' }}>({routes.length} {routes.length === 1 ? 'ruta activa' : 'rutas activas'})</span>
+							<div className="pr-hint" style={{ marginTop: 2 }}>Un cliente puede estar en más de una ruta con prioridades independientes.</div></>}
 					</div>
 					{canManage && <Button size="small" onClick={() => setDrawerOpen(true)} disabled={routes.length === 0}>Cambiar prioridades</Button>}
 				</header>
@@ -71,8 +73,11 @@ export const ClientRoutesSection: FC<ClientRoutesSectionProps> = ({ client, canM
 							<div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
 								<PriorityBadge order={route.order} />
 								<div>
-									<strong>{route.routeName}</strong>
-									<div className="kb-mono" style={{ fontSize: 11, color: 'var(--kb-muted)' }}>#{route.order} de {route.routeTotal}</div>
+									{singleRoute
+										? <strong>Prioridad #{route.order}</strong>
+										: <><strong>{route.routeName}</strong>
+											<div className="kb-mono" style={{ fontSize: 11, color: 'var(--kb-muted)' }}>#{route.order} de {route.routeTotal}</div></>}
+									{singleRoute && <div className="kb-mono" style={{ fontSize: 11, color: 'var(--kb-muted)' }}>de {route.routeTotal} clientes</div>}
 								</div>
 							</div>
 							{editable && (

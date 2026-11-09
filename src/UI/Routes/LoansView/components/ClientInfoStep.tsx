@@ -150,7 +150,7 @@ export const ClientInfoStep: FC<ClientInfoStepProps> = ({
 
 					{clientId && <ClientContactsCard clientId={clientId} contacts={client?.contacts} />}
 
-					{routes.length <= 1 && (
+					{routes.length === 0 && (
 						<FichaField label="Ruta del cliente">
 							{routeNameValue || client?.routeName || routeName}
 						</FichaField>
