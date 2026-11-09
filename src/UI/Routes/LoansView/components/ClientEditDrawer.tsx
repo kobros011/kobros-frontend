@@ -78,7 +78,7 @@ export const ClientEditDrawer: FC<ClientEditDrawerProps> = ({ clientId, open, on
 							</Form.Item>
 						</Col>
 						<Col xs={24} md={12}>
-							<Form.Item label="Documento (Cédula, DNI)" name="idDocument" rules={[ruleRequired]}>
+							<Form.Item label="Documento" name="idDocument" rules={[ruleRequired]}>
 								<Input inputMode="numeric" placeholder="Documento del cliente" />
 							</Form.Item>
 						</Col>

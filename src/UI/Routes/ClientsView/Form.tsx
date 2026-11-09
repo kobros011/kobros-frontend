@@ -133,7 +133,7 @@ const FormClient: FC<{ readonly?: boolean }> = ({ readonly = false }) => {
 					</Col>
 					<Col {...spanConfigForm.medium}>
 						<Form.Item
-							label="Documento (Cédula, DNI)"
+							label="Documento"
 							name={'idDocument'}
 							rules={[ ruleRequired ]}
 						>
