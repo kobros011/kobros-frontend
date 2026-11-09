@@ -10,8 +10,6 @@ export const LoanWizardShell: FC<LoanWizardShellProps> = ({ children }) => {
 	const { token } = theme.useToken();
 
 	const cssVars: CSSProperties = {
-		['--loan-primary' as string]: token.colorPrimary,
-		['--loan-bg' as string]: token.colorBgContainer,
 		['--loan-border' as string]: token.colorBorder,
 	};
 
