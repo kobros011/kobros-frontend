@@ -45,9 +45,9 @@ const RouteRow: FC<RouteRowProps> = ({ name, assignment, canRemove, onOrder, onR
 				</Button>
 			</div>
 			{isLoading ? <Skeleton active title={false} paragraph={{ rows: 1 }} /> : (
-				<div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8 }}>
+				<div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6 }}>
 					<Button size="small" onClick={() => setPosition(1)} disabled={position === 1}>Inicio (#1)</Button>
-					<PriorityStepper value={position} max={total} onChange={value => setPosition(clampPosition(value, total))} label={`Posición en ${name}`} />
+					<PriorityStepper value={position} max={total} onChange={value => setPosition(clampPosition(value, total))} label={`Posición en ${name}`} compact />
 					<Button size="small" onClick={() => onOrder(undefined)} disabled={assignment.order === undefined}>Final (#{total})</Button>
 				</div>
 			)}
