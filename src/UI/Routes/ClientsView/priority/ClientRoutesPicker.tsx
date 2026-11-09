@@ -1,11 +1,13 @@
-import { FC, useEffect } from 'react';
-import { Segmented, Select, Skeleton, Typography } from 'antd';
+import { FC, useEffect, useState } from 'react';
+import { Alert, Button, Select, Skeleton } from 'antd';
+import { LockOutlined, PlusOutlined } from '@ant-design/icons';
 import { useRoutes } from '@/infrastructure/hooks/useRoutes';
 import { getRouteClients } from '@/infrastructure/querys/ClientRoute';
+import { DashboardShell } from '@/UI/Components/Dashboard/ui';
+import { PriorityBadge } from './PriorityChip';
 import { PriorityStepper } from './PriorityStepper';
+import { clampPosition } from './moveLogic';
 import './priority.css';
-
-const { Text } = Typography;
 
 export interface RouteAssignment {
 	routeId: string
@@ -16,40 +18,40 @@ export interface RouteAssignment {
 interface RouteRowProps {
 	name: string
 	assignment: RouteAssignment
+	canRemove: boolean
 	onOrder: (order?: number) => void
-	disabled?: boolean
+	onRemove: () => void
 }
 
-/** Prioridad del cliente nuevo en UNA ruta: al final o en una posición, mostrando cuántos clientes tiene ya la ruta. */
-const RouteRow: FC<RouteRowProps> = ({ name, assignment, onOrder, disabled }) => {
+/** Una ruta del cliente nuevo: mismo bloque que "Rutas y prioridad asignadas" al editar (#n de m, orden y quitar). */
+const RouteRow: FC<RouteRowProps> = ({ name, assignment, canRemove, onOrder, onRemove }) => {
 	const { routeClients, isLoading } = getRouteClients(assignment.routeId);
-	const last = routeClients.length + 1; // el cliente nuevo ocupa el lugar total + 1 si va al final
-	const specific = assignment.order !== undefined;
-	const position = Math.min(assignment.order ?? last, last);
+	const total = routeClients.length + 1; // el cliente nuevo cuenta en la ruta
+	const position = clampPosition(assignment.order ?? total, total);
+	const setPosition = (next: number) => onOrder(next >= total ? undefined : next);
 
 	return (
-		<section className="pr-card" aria-label={`Prioridad en ${name}`} style={{ marginTop: 8 }}>
-			<header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
-				<strong>{name}</strong>
-				{isLoading ? <Skeleton.Button active size="small" /> : <span className="kb-mono" style={{ fontSize: 11, color: 'var(--kb-muted)' }}>{routeClients.length} {routeClients.length === 1 ? 'cliente' : 'clientes'} hoy</span>}
-			</header>
-			<Segmented
-				size="small"
-				block
-				disabled={disabled}
-				value={specific ? 'position' : 'end'}
-				onChange={next => onOrder(next === 'end' ? undefined : position)}
-				options={[{ value: 'end', label: `Al final (#${last})` }, { value: 'position', label: 'Posición específica' }]}
-			/>
-			{specific && (
-				<div style={{ marginTop: 8 }}>
-					<PriorityStepper value={position} max={last} disabled={disabled} onChange={onOrder} label={`Posición en ${name}`} />
-					<Text type="secondary" style={{ display: 'block', fontSize: 12, marginTop: 4 }}>
-						{position < last ? 'Los clientes desde esa posición se recorren un lugar.' : 'Quedará al final de la ruta.'}
-					</Text>
+		<div style={{ display: 'grid', gap: 8 }}>
+			<div className="pr-row">
+				<div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+					<PriorityBadge order={position} />
+					<div>
+						<strong>{name}</strong>
+						<div className="kb-mono" style={{ fontSize: 11, color: 'var(--kb-muted)' }}>#{position} de {total}</div>
+					</div>
+				</div>
+				<Button size="small" danger icon={canRemove ? undefined : <LockOutlined />} disabled={!canRemove} title={canRemove ? undefined : 'Un cliente debe tener al menos una ruta'} onClick={onRemove}>
+					Quitar
+				</Button>
+			</div>
+			{isLoading ? <Skeleton active title={false} paragraph={{ rows: 1 }} /> : (
+				<div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8 }}>
+					<Button size="small" onClick={() => setPosition(1)} disabled={position === 1}>Inicio (#1)</Button>
+					<PriorityStepper value={position} max={total} onChange={value => setPosition(clampPosition(value, total))} label={`Posición en ${name}`} />
+					<Button size="small" onClick={() => onOrder(undefined)} disabled={assignment.order === undefined}>Final (#{total})</Button>
 				</div>
 			)}
-		</section>
+		</div>
 	);
 };
 
@@ -57,13 +59,13 @@ interface ClientRoutesPickerProps {
 	/** Control de `Form.Item`. */
 	value?: RouteAssignment[]
 	onChange?: (value: RouteAssignment[]) => void
-	disabled?: boolean
 }
 
-/** Al crear un cliente: rutas a las que se asigna y su prioridad en cada una (opcional; sin prioridad va al final). */
-export const ClientRoutesPicker: FC<ClientRoutesPickerProps> = ({ value = [], onChange, disabled }) => {
+/** Al crear un cliente: el mismo bloque "Rutas y prioridad asignadas" de la edición, pero para elegir sus rutas y su lugar en cada una. */
+export const ClientRoutesPicker: FC<ClientRoutesPickerProps> = ({ value = [], onChange }) => {
 	const { routes } = useRoutes();
-	const options = routes.map(route => ({ value: route.id, label: route.name }));
+	const [newRoute, setNewRoute] = useState<string>();
+	const available = routes.filter(route => !value.some(item => item.routeId === route.id));
 	const nameOf = (id: string) => routes.find(route => route.id === id)?.name ?? 'Ruta';
 
 	// Con una sola ruta disponible ya viene marcada.
@@ -71,26 +73,45 @@ export const ClientRoutesPicker: FC<ClientRoutesPickerProps> = ({ value = [], on
 		if (routes.length === 1 && value.length === 0) onChange?.([{ routeId: routes[0].id }]);
 	}, [routes, value.length, onChange]);
 
-	const setRoutes = (ids: string[]) => onChange?.(ids.map(id => value.find(item => item.routeId === id) ?? { routeId: id }));
-	const setOrder = (routeId: string, order?: number) => onChange?.(value.map(item => (item.routeId === routeId ? { ...item, order } : item)));
+	const add = () => {
+		if (!newRoute) return;
+		onChange?.([...value, { routeId: newRoute }]);
+		setNewRoute(undefined);
+	};
 
 	return (
-		<div>
-			<Select
-				mode="multiple"
-				size="small"
-				style={{ width: '100%' }}
-				placeholder="Elige una o varias rutas"
-				aria-label="Rutas del cliente"
-				disabled={disabled}
-				options={options}
-				optionFilterProp="label"
-				value={value.map(item => item.routeId)}
-				onChange={setRoutes}
-			/>
-			{value.map(item => (
-				<RouteRow key={item.routeId} name={nameOf(item.routeId)} assignment={item} disabled={disabled} onOrder={order => setOrder(item.routeId, order)} />
-			))}
-		</div>
+		<DashboardShell>
+			<section className="pr-card" aria-label="Rutas y prioridad asignadas">
+				<header>
+					<strong>Rutas y prioridad asignadas</strong> <span className="kb-mono" style={{ fontSize: 11, color: 'var(--kb-muted)' }}>({value.length} {value.length === 1 ? 'ruta activa' : 'rutas activas'})</span>
+					<div className="pr-hint" style={{ marginTop: 2 }}>Un cliente puede estar en más de una ruta con prioridades independientes. Sin prioridad queda al final.</div>
+				</header>
+
+				<div style={{ display: 'grid', gap: 12 }}>
+					{value.length === 0 && <Alert type="info" showIcon message="Elige al menos una ruta para el cliente" />}
+					{value.map(item => (
+						<RouteRow
+							key={item.routeId}
+							name={nameOf(item.routeId)}
+							assignment={item}
+							canRemove={value.length > 1}
+							onOrder={order => onChange?.(value.map(entry => (entry.routeId === item.routeId ? { ...entry, order } : entry)))}
+							onRemove={() => onChange?.(value.filter(entry => entry.routeId !== item.routeId))}
+						/>
+					))}
+				</div>
+
+				<div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+					<Select
+						size="small" style={{ minWidth: 220 }} showSearch optionFilterProp="label" placeholder={value.length === 0 ? 'Elegir ruta…' : 'Asignar a otra ruta…'} aria-label="Ruta a agregar"
+						value={newRoute} onChange={setNewRoute} disabled={available.length === 0}
+						options={available.map(route => ({ value: route.id, label: route.name }))}
+					/>
+					<Button size="small" type="primary" icon={<PlusOutlined />} disabled={!newRoute} onClick={add}>
+						Asignar ruta
+					</Button>
+				</div>
+			</section>
+		</DashboardShell>
 	);
 };

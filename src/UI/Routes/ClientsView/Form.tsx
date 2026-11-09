@@ -247,16 +247,12 @@ const FormClient: FC<{ readonly?: boolean }> = ({ readonly = false }) => {
 					))}
 				</Row>
 				{isCreate && (
-					<>
-						<Divider orientation="left" plain>Rutas y prioridad</Divider>
-						<Form.Item
-							name="routeAssignments"
-							extra="Elige la ruta del cliente y, si quieres, su lugar en el recorrido. Sin prioridad queda al final; puedes cambiarla después."
-							rules={[{ validator: (_, assigned?: unknown[]) => (assigned?.length ? Promise.resolve() : Promise.reject(new Error('Elige al menos una ruta'))) }]}
-						>
-							<ClientRoutesPicker />
-						</Form.Item>
-					</>
+					<Form.Item
+						name="routeAssignments"
+						rules={[{ validator: (_, assigned?: unknown[]) => (assigned?.length ? Promise.resolve() : Promise.reject(new Error('Elige al menos una ruta'))) }]}
+					>
+						<ClientRoutesPicker />
+					</Form.Item>
 				)}
 			</Form>
 
