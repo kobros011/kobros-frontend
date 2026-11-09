@@ -30,7 +30,7 @@ export function getDefaultHomeRoute(typeUser: TypeUser | string | undefined): st
 		case TypeUser.super:
 			return routePaths.ROUTES;
 		case TypeUser.admin:
-			return routePaths.USERS;
+			return routePaths.LIQUIDATIONS;
 		case TypeUser.partner:
 			return routePaths.PAYMENTS;
 		case TypeUser.collector:
