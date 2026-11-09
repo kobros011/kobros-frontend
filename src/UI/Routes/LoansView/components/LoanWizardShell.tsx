@@ -11,6 +11,7 @@ export const LoanWizardShell: FC<LoanWizardShellProps> = ({ children }) => {
 
 	const cssVars: CSSProperties = {
 		['--loan-border' as string]: token.colorBorder,
+		['--loan-primary' as string]: token.colorPrimary,
 	};
 
 	return (

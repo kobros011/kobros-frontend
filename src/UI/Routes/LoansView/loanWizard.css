@@ -1,6 +1,6 @@
 .loan-wizard {
-	--loan-primary: #a0d911;
-	/* Verde fijo del crédito (no el color de la marca) y fondo transparente: se ve igual en claro y en oscuro. */
+	--loan-primary: var(--kb-primary, #a0d911);
+	/* Color de la marca y fondo transparente: se ve igual en claro y en oscuro. */
 	--loan-bg: transparent;
 	--loan-border: #d9d9d9;
 	--loan-text-on-primary: #ffffff;
