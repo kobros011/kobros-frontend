@@ -11,7 +11,7 @@ import { FC, useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { recalculateLoanForm } from './Hooks/useChangeDataLoan';
 import { nameRequiredFilesLoan, nameRequiredFilesLoanMessage } from '@/constants/requieredFiles';
-import { useMutationType } from '@/infrastructure/querys/Loan';
+import { getListLoans, useMutationType } from '@/infrastructure/querys/Loan';
 import { useClientRoutes } from '@/infrastructure/hooks/useClientRoute';
 import { useRoutes } from '@/infrastructure/hooks/useRoutes';
 import { LoanFull } from '@/domain/Loan';
@@ -77,6 +77,9 @@ const FormLoan: FC = () => {
 
 	const { client, isError: isErrorClient, error: errorClient, refetch, isLoading: isLoadingClient, isFetching: isFetchingClient } =
 		getClientMoreInfo(availableClientId, availableRoute?.id);
+
+	// Mismo listado que usa el historial (paso 2): con un cliente sin créditos el paso 2 se omite solo.
+	const { loans: clientLoans } = getListLoans({ clientId: availableClientId }, !!availableClientId);
 
 	const { clientRoutes, getClientRoutes } = useClientRoutes(availableRoute?.id);
 	const loanMutation = useMutationType('create');
@@ -230,6 +233,12 @@ const FormLoan: FC = () => {
 					onClientSelected={(id) => setAvailableClientId(id)}
 					onContinue={() => {
 						setStep1Done(true);
+						if (clientLoans?.length === 0) {
+							// Primer crédito: no hay historial que revisar, se pasa directo a los datos del crédito.
+							setStep2Done(true);
+							setActiveKey(['data']);
+							return;
+						}
 						setActiveKey((prev) => [...new Set([...(Array.isArray(prev) ? prev : [prev]), 'history'])]);
 					}}
 					onClientSaved={() => void refetch()}
