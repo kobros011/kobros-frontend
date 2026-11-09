@@ -4,12 +4,12 @@ import routePaths from '@/constants/routePaths';
 import { ruleRequired } from '@/constants/rules';
 import { TypeUser } from '@/constants/types';
 import { Client } from '@/domain/Client';
-import useRouteStore from '@/infrastructure/context/RoutesStore';
 import useUserStore from '@/infrastructure/context/User/UserDataStore';
 import useLoading from '@/infrastructure/hooks/useLoading';
 import { getClient, useMutationType } from '@/infrastructure/querys/Client';
 import { handleError } from '@/infrastructure/utils/handleError';
 import { ClientRoutesSection } from './priority/ClientRoutesSection';
+import { ClientRoutesPicker } from './priority/ClientRoutesPicker';
 import { useCanManagePriority } from './priority/usePriorityAccess';
 import ActionsButton from '@/UI/Components/AcctionButtons';
 import { ClientCreditSummary } from '@components/ClientCreditSummary';
@@ -30,7 +30,6 @@ const FormClient: FC<{ readonly?: boolean }> = ({ readonly = false }) => {
 	const [form] = Form.useForm<Partial<Client>>();
 	
 	const { typeUser, brandId } = useUserStore(state => state.user);
-	const { routes } = useRouteStore(state => state);
 
 	const { notification } = App.useApp();
 	const navigate = useNavigate();
@@ -53,7 +52,8 @@ const FormClient: FC<{ readonly?: boolean }> = ({ readonly = false }) => {
 			...client,
 			...values,
 			brandId: values.brandId ? values.brandId : brandId,
-			...(isCreate ? { routesIds: routes?.map(item => item.id) } : {}),
+			// Al crear, las rutas y prioridades salen del selector del formulario (el servidor las valida y aplica en una sola transacción).
+			...(isCreate ? { routeAssignments: values.routeAssignments } : {}),
 		}, {
 			onSuccess: (response) => {
 				const data = response?.data;
@@ -246,6 +246,18 @@ const FormClient: FC<{ readonly?: boolean }> = ({ readonly = false }) => {
 						</Col>
 					))}
 				</Row>
+				{isCreate && (
+					<>
+						<Divider orientation="left" plain>Rutas y prioridad</Divider>
+						<Form.Item
+							name="routeAssignments"
+							extra="Elige la ruta del cliente y, si quieres, su lugar en el recorrido. Sin prioridad queda al final; puedes cambiarla después."
+							rules={[{ validator: (_, assigned?: unknown[]) => (assigned?.length ? Promise.resolve() : Promise.reject(new Error('Elige al menos una ruta'))) }]}
+						>
+							<ClientRoutesPicker />
+						</Form.Item>
+					</>
+				)}
 			</Form>
 
 			{id && client && <ClientRoutesSection client={client} canManage={canManagePriority} readonly={readonly} />}

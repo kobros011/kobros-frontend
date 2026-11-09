@@ -17,6 +17,12 @@ export interface ClientRouteInfo {
 	routeTotal: number
 }
 
+/** Ruta elegida al crear el cliente y su prioridad (vacía = al final de la ruta). */
+export interface ClientRouteAssignment {
+	routeId: string
+	order?: number
+}
+
 export interface Client extends BaseDomain {
 	fullName: string
 	idDocument: string
@@ -28,6 +34,8 @@ export interface Client extends BaseDomain {
 	beak: number
 	brandId: string
 	routesIds?: string[]
+	/** Solo al crear: rutas con su prioridad. */
+	routeAssignments?: ClientRouteAssignment[]
 	routes?: ClientRouteInfo[]
 	routeId?: string,
 	routeName?: string,
@@ -88,7 +96,7 @@ export class ClientModel {
 		};
 	}
 
-	static ToDto(domain: Client): Partial<ClientDto> {
+	static ToDto(domain: Client): Omit<Partial<ClientDto>, 'routes'> & { routes?: { route_id: string, order?: number }[] } {
 		return {
 			full_name: domain.fullName,
 			id_document: domain.idDocument,
@@ -99,6 +107,7 @@ export class ClientModel {
 			linking_date: domain.linkingDate,
 			brand_id: domain.brandId,
 			...(domain.routesIds ? { routes_ids: domain.routesIds } : {}),
+			...(domain.routeAssignments ? { routes: domain.routeAssignments.map(item => ({ route_id: item.routeId, ...(item.order ? { order: item.order } : {}) })) } : {}),
 			...(domain.id ? { id: domain.id } : {}),
 			guarantor_name: domain.guarantorName ?? undefined,
 			guarantor_cedula: domain.guarantorCedula ?? undefined,
