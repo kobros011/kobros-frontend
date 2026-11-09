@@ -35,7 +35,7 @@ export const ClientLoanSection: FC<ClientLoanSectionProps> = ({ form, routeIds, 
 	return (
 		<CurrencyProvider routeId={routeId}>
 			<DashboardShell>
-				<section className="pr-card" aria-label="Datos del crédito" style={{ opacity: started ? 1 : 0.85, borderColor: submitted && missing ? 'var(--kb-danger, #E5484D)' : undefined }}>
+				<section className="pr-card loan-wizard" aria-label="Datos del crédito" style={{ opacity: started ? 1 : 0.85, borderColor: submitted && missing ? 'var(--kb-danger, #E5484D)' : undefined }}>
 					<header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
 						<div>
 							<strong>Datos del Crédito</strong> <span className="kb-mono" style={{ fontSize: 11, color: 'var(--kb-muted)' }}>(Opcional)</span>

@@ -9,12 +9,12 @@ interface PriorityStepperProps {
 	onChange: (value: number) => void
 	disabled?: boolean
 	label?: string
-	/** Versión mínima (28 px) para formularios donde el control va dentro de una tarjeta. */
+	/** Versión mínima (28 px, por defecto); `false` devuelve los controles de 40 px. */
 	compact?: boolean
 }
 
-/** − #8 + : controles de 40 px para el dedo, con el número editable. */
-export const PriorityStepper: FC<PriorityStepperProps> = ({ value, max, onChange, disabled, label = 'Posición', compact = false }) => {
+/** − #8 + : controles mínimos con el número editable. */
+export const PriorityStepper: FC<PriorityStepperProps> = ({ value, max, onChange, disabled, label = 'Posición', compact = true }) => {
 	const { token } = theme.useToken();
 	const box = compact ? 28 : 40;
 	return (
