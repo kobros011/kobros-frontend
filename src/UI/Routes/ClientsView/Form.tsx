@@ -3,13 +3,15 @@ import { queryKeyClients, queryKeyDefault } from '@/constants/queryKeys';
 import routePaths from '@/constants/routePaths';
 import { ruleRequired } from '@/constants/rules';
 import { TypeUser } from '@/constants/types';
-import { Client } from '@/domain/Client';
+import { Client, ClientLoanDraft } from '@/domain/Client';
 import useUserStore from '@/infrastructure/context/User/UserDataStore';
 import useLoading from '@/infrastructure/hooks/useLoading';
 import { getClient, useMutationType } from '@/infrastructure/querys/Client';
 import { handleError } from '@/infrastructure/utils/handleError';
 import { ClientRoutesSection } from './priority/ClientRoutesSection';
 import { ClientRoutesPicker } from './priority/ClientRoutesPicker';
+import { ClientLoanSection, resolveLoanRouteId } from './ClientLoanSection';
+import { queryKeyCollection, queryKeyLoans, queryKeyPayments, queryKeyReports } from '@/constants/queryKeys';
 import { useCanManagePriority } from './priority/usePriorityAccess';
 import ActionsButton from '@/UI/Components/AcctionButtons';
 import { ClientCreditSummary } from '@components/ClientCreditSummary';
@@ -40,11 +42,21 @@ const FormClient: FC<{ readonly?: boolean }> = ({ readonly = false }) => {
 	const clientMutation = useMutationType(id ? 'update' : 'create');
 
 	const [exit, setExit] = useState<boolean>(false);
+	const [submitted, setSubmitted] = useState(false);
 
 	const isCreate = !id;
 	const canManagePriority = useCanManagePriority();
 
 	const isDev = typeUser == TypeUser.dev;
+	const assignments = Form.useWatch('routeAssignments', form);
+	const routeIds = (assignments ?? []).map(item => item.routeId);
+
+	/** El crédito solo se envía si se llenó alguno de sus datos principales; la ruta es la única (o la elegida entre varias). */
+	const buildLoan = (loan?: Partial<ClientLoanDraft>): ClientLoanDraft | undefined => {
+		const started = [loan?.valueCapital, loan?.valueQuotaFixed, loan?.agreedQuotas, loan?.paymentMethod].some(value => value !== undefined && value !== null && value !== '');
+		const routeId = resolveLoanRouteId(routeIds, loan?.routeId);
+		return started && loan && routeId ? { ...(loan as ClientLoanDraft), routeId } : undefined;
+	};
 
 	const onFinish = (values: Partial<Omit<Client, 'loansNumber'>>) => {
 		startLoading();
@@ -53,11 +65,16 @@ const FormClient: FC<{ readonly?: boolean }> = ({ readonly = false }) => {
 			...values,
 			brandId: values.brandId ? values.brandId : brandId,
 			// Al crear, las rutas y prioridades salen del selector del formulario (el servidor las valida y aplica en una sola transacción).
-			...(isCreate ? { routeAssignments: values.routeAssignments } : {}),
+			...(isCreate ? { routeAssignments: values.routeAssignments, loan: buildLoan(values.loan) } : {}),
 		}, {
 			onSuccess: (response) => {
 				const data = response?.data;
-				notification.success({ message: `El cliente fue ${isCreate ? 'creado' : 'actualizado'} exitosamente` });
+				const loanNumber = response?.data?.loan_number;
+				notification.success({ message: loanNumber ? `Cliente creado y crédito #${loanNumber} creado` : `El cliente fue ${isCreate ? 'creado' : 'actualizado'} exitosamente` });
+				if (loanNumber) {
+					// Un crédito nuevo mueve cartera, cobro del día, pagos y reportes.
+					for (const key of [queryKeyLoans.base, queryKeyPayments.base, queryKeyCollection.base, queryKeyReports.base]) void queryClient.invalidateQueries({ queryKey: [key] });
+				}
 				stopLoading();
 
 				if (exit) {
@@ -109,6 +126,7 @@ const FormClient: FC<{ readonly?: boolean }> = ({ readonly = false }) => {
 				initialValues={client ? client : {}}
 				disabled={isRefetching || isLoading || readonly}
 				onFinish={onFinish}
+				onFinishFailed={() => setSubmitted(true)}
 			>
 				<Row gutter={[16, 0]}>
 					{(isDev) &&
@@ -254,6 +272,7 @@ const FormClient: FC<{ readonly?: boolean }> = ({ readonly = false }) => {
 						<ClientRoutesPicker />
 					</Form.Item>
 				)}
+				{isCreate && routeIds.length > 0 && <ClientLoanSection form={form} routeIds={routeIds} submitted={submitted} />}
 			</Form>
 
 			{id && client && <ClientRoutesSection client={client} canManage={canManagePriority} readonly={readonly} />}

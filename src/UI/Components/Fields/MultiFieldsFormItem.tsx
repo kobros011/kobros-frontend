@@ -12,8 +12,9 @@ export const style: CSSProperties = { padding: '0 0 0 2px', margin: 0 };
 
 interface FormItemCustomProps extends Pick<FormItemProps, 'label' | 'name' | 'rules' | 'hasFeedback' > {}
 
-interface FieldDateProps extends FormItemCustomProps, Omit<InputDateProps, 'label' | 'name'>  {
-	name: string;
+interface FieldDateProps extends Omit<FormItemCustomProps, 'name'>, Omit<InputDateProps, 'label' | 'name'>  {
+	/** Un campo (`'dateFirstQuota'`) o una ruta dentro del formulario (`['loan', 'dateFirstQuota']`). */
+	name: string | string[];
 	useCurrentDate?: boolean;
 }
 

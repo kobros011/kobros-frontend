@@ -29,6 +29,7 @@ El asistente tiene tres pasos. El primero muestra los datos del cliente, su fiad
 
 - Puedes corregir la dirección y el celular antes de continuar.
 - Pulsa **Continuar** para pasar al historial.
+- Para un cliente **nuevo** no hace falta pasar por aquí: al crear el cliente también puedes llenar los datos del crédito y se crea en el mismo paso.
 
 ![Paso 1: información del cliente](img/creditos/02-asistente.png)
 

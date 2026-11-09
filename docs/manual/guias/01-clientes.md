@@ -30,7 +30,8 @@ Se llenan los datos personales y de contacto del cliente.
 
 - Obligatorios: nombre completo, documento, celular, dirección, barrio y fecha de vinculación.
 - Más abajo se pueden agregar los datos del fiador y las referencias, que luego se ven al crear un crédito.
-- Elige la ruta (o rutas) del cliente. Un mismo cliente puede estar en varias rutas.
+- **Rutas y prioridad asignadas:** elige la ruta (o rutas) del cliente y, en cada una, su lugar en el recorrido: *Inicio*, una posición específica con el control −/+, o *Final*. Con una sola ruta disponible ya viene asignada.
+- **Datos del Crédito (opcional):** si el cliente ya recibe su primer préstamo, llena capital, cuota fija, cuotas y forma de pago (y el valor pagado hoy, si lo hay). Al guardar se crea el cliente, se le asignan las rutas y prioridades y se crea el crédito, todo de una vez. Si el cliente está en varias rutas, elige en "Ruta del crédito" a cuál va. Si no llenas nada, solo se crea el cliente.
 
 ![Formulario Crear cliente](img/clientes/02-nuevo.png)
 

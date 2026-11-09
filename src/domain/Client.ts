@@ -23,6 +23,18 @@ export interface ClientRouteAssignment {
 	order?: number
 }
 
+/** Primer crédito que se crea junto con el cliente (valores tal como salen del formulario). */
+export interface ClientLoanDraft {
+	routeId: string
+	valueCapital: string | number
+	valueQuotaFixed: string | number
+	agreedQuotas: string | number
+	paymentMethod: string
+	dateFirstQuota?: string
+	fixedPaymentDay?: string | number
+	valuePayment?: string | number
+}
+
 export interface Client extends BaseDomain {
 	fullName: string
 	idDocument: string
@@ -36,6 +48,10 @@ export interface Client extends BaseDomain {
 	routesIds?: string[]
 	/** Solo al crear: rutas con su prioridad. */
 	routeAssignments?: ClientRouteAssignment[]
+	/** Solo al crear: crédito opcional que se crea con el cliente. */
+	loan?: ClientLoanDraft
+	/** Respuesta al crear con crédito. */
+	loanNumber?: number
 	routes?: ClientRouteInfo[]
 	routeId?: string,
 	routeName?: string,
@@ -96,7 +112,21 @@ export class ClientModel {
 		};
 	}
 
-	static ToDto(domain: Client): Omit<Partial<ClientDto>, 'routes'> & { routes?: { route_id: string, order?: number }[] } {
+	private static loanToDto(loan: ClientLoanDraft): Record<string, unknown> {
+		const num = (value: string | number | undefined) => (value === undefined || value === '' ? undefined : Number(String(value).replace(/,/g, '')));
+		return {
+			route_id: loan.routeId,
+			value_capital: num(loan.valueCapital),
+			value_quota_fixed: num(loan.valueQuotaFixed),
+			agreed_quotas: num(loan.agreedQuotas),
+			payment_method: loan.paymentMethod,
+			date_first_quota: loan.dateFirstQuota,
+			...(loan.fixedPaymentDay ? { fixed_payment_day: num(loan.fixedPaymentDay) } : {}),
+			...(loan.valuePayment ? { value_payment: num(loan.valuePayment) } : {}),
+		};
+	}
+
+	static ToDto(domain: Client): Omit<Partial<ClientDto>, 'routes'> & { routes?: { route_id: string, order?: number }[], loan?: Record<string, unknown> } {
 		return {
 			full_name: domain.fullName,
 			id_document: domain.idDocument,
@@ -108,6 +138,7 @@ export class ClientModel {
 			brand_id: domain.brandId,
 			...(domain.routesIds ? { routes_ids: domain.routesIds } : {}),
 			...(domain.routeAssignments ? { routes: domain.routeAssignments.map(item => ({ route_id: item.routeId, ...(item.order ? { order: item.order } : {}) })) } : {}),
+			...(domain.loan ? { loan: ClientModel.loanToDto(domain.loan) } : {}),
 			...(domain.id ? { id: domain.id } : {}),
 			guarantor_name: domain.guarantorName ?? undefined,
 			guarantor_cedula: domain.guarantorCedula ?? undefined,

@@ -36,4 +36,6 @@ export interface ClientDto extends BaseDto {
 	guarantor_address?: string | null
 	references?: ClientReferenceDto[]
 	active_loans_count?: number
+	loan_id?: string | null
+	loan_number?: number | null
 }
