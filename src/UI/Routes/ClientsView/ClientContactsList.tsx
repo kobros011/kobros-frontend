@@ -1,7 +1,7 @@
 import { FC, ReactNode } from 'react';
 import { Button, Col, Form, Input, Row, Tag, Typography } from 'antd';
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
-import { ClientContact, ContactKind, CONTACT_KIND_LABEL, contactLabel } from '@/domain/Client';
+import { ClientContact, ContactKind, CONTACT_KIND_LABEL, contactLabel, contactPosition } from '@/domain/Client';
 import { DashboardShell } from '@/UI/Components/Dashboard/ui';
 import './contacts.css';
 
@@ -50,7 +50,7 @@ export const ClientContactsList: FC<ClientContactsListProps> = ({
 							{fields.map((field, index) => {
 								const kind = contacts[index]?.kind;
 								const label = contactLabel(contacts, index);
-								const principal = label === CONTACT_KIND_LABEL[kind ?? 'referencia'];
+								const principal = contactPosition(contacts, index) === 1;
 								return (
 									<section key={field.key} className="kb-contact" aria-label={label}>
 										<div className="kb-contact-head">

@@ -25,11 +25,15 @@ export const principalContacts = (contacts: ClientContact[] = []) => {
 	};
 };
 
+/** Lugar del contacto dentro de su tipo (1 = principal). */
+export const contactPosition = (contacts: ClientContact[], index: number) =>
+	contacts.slice(0, index + 1).filter(contact => contact?.kind === contacts[index]?.kind).length;
+
 /** Etiqueta de un contacto según su lugar en la lista: "Fiador", "Fiador 2", "Referencia 3"… */
 export const contactLabel = (contacts: ClientContact[], index: number) => {
 	const kind = contacts[index]?.kind;
 	if (!kind) return '';
-	const position = contacts.slice(0, index + 1).filter(contact => contact?.kind === kind).length;
+	const position = contactPosition(contacts, index);
 	return position === 1 ? CONTACT_KIND_LABEL[kind] : `${CONTACT_KIND_LABEL[kind]} ${position}`;
 };
 
