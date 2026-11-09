@@ -47,24 +47,26 @@ export const ClientLoanSection: FC<ClientLoanSectionProps> = ({ form, routeIds, 
 					</header>
 
 					{multiple && (
-						<Form.Item
-							label="Ruta del crédito"
-							name={['loan', 'routeId']}
-							rules={[{ validator: (_, value?: string) => (!started || routeIds.includes(value ?? '') ? Promise.resolve() : Promise.reject(new Error('Elige la ruta del crédito'))) }]}
-							extra={<Text type="secondary" style={{ fontSize: 12 }}>El cliente está en varias rutas: elige a cuál va el crédito.</Text>}
-							className="loan-wizard-field"
-						>
-							<Segmented
-								size="small"
-								block
-								options={routeIds.map(id => ({ value: id, label: routes.find(item => item.id === id)?.name ?? 'Ruta' }))}
-							/>
-						</Form.Item>
+						<div className="kb-loan-compact">
+							<Form.Item
+								label="Ruta del crédito"
+								name={['loan', 'routeId']}
+								rules={[{ validator: (_, value?: string) => (!started || routeIds.includes(value ?? '') ? Promise.resolve() : Promise.reject(new Error('Elige la ruta del crédito'))) }]}
+								extra={<Text type="secondary" style={{ fontSize: 12 }}>El cliente está en varias rutas: elige a cuál va el crédito.</Text>}
+								className="loan-wizard-field"
+							>
+								<Segmented
+									size="small"
+									block
+									options={routeIds.map(id => ({ value: id, label: routes.find(item => item.id === id)?.name ?? 'Ruta' }))}
+								/>
+							</Form.Item>
+						</div>
 					)}
 
 					{submitted && missing && <Alert type="error" showIcon style={{ fontSize: 12 }} message="Completa capital, cuota, cuotas y forma de pago." />}
 
-					<LoanFields form={form} prefix={['loan']} optional />
+					<LoanFields form={form} prefix={['loan']} optional compact />
 				</section>
 			</DashboardShell>
 		</CurrencyProvider>

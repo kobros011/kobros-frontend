@@ -26,6 +26,8 @@ interface LoanFieldsProps {
 	disabled?: boolean
 	/** Crédito opcional: los campos solo son obligatorios cuando se empezó a llenar alguno. */
 	optional?: boolean
+	/** Distribución compacta (cuota y cuotas, forma de pago y fecha en pares, menos aire entre campos) para formularios largos. */
+	compact?: boolean
 }
 
 const SummaryRow: FC<{ label: string; value: string | number | undefined; bold?: boolean }> = ({ label, value, bold }) => (
@@ -39,7 +41,7 @@ const SummaryRow: FC<{ label: string; value: string | number | undefined; bold?:
 	</div>
 );
 
-export const LoanFields: FC<LoanFieldsProps> = ({ form, prefix = [], disabled, optional = false }) => {
+export const LoanFields: FC<LoanFieldsProps> = ({ form, prefix = [], disabled, optional = false, compact = false }) => {
 	const money = useMoney();
 	const currency = useCurrency();
 	const path = (field: string) => (prefix.length ? [...prefix, field] : field);
@@ -68,29 +70,66 @@ export const LoanFields: FC<LoanFieldsProps> = ({ form, prefix = [], disabled, o
 
 	const moneySummary = (amount: number) => (creditInputsReady ? money(amount) : '—');
 
-	return (
+	const half = compact ? { span: 12 } : spanConfigForm.large;
+	const full = compact ? { span: 24 } : spanConfigForm.large;
+	const date = <FieldDateTable label="Fecha 1ra cuota a pagar" useCurrentDate readOnly name={path('dateFirstQuota')} />;
+
+	const paymentBlock = (
 		<>
-			<Row gutter={[12, 4]}>
-				<Col {...spanConfigForm.large}>
+			<Form.Item label="Valor pagado hoy" name={path('valuePayment')} style={{ marginBottom: 12 }} className="loan-wizard-field">
+				<InputNumber size="small" thousandsSeparator addonAfter={currency} style={{ width: '100%' }} disabled={disabled} />
+			</Form.Item>
+			{initialPaymentEffect && (
+				<Text type="secondary" style={{ display: 'block', fontSize: 12, marginBottom: 12 }}>{initialPaymentEffect}</Text>
+			)}
+		</>
+	);
+	const summaryBlock = (
+		<div className="loan-wizard-summary-panel">
+			<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, flexWrap: 'wrap', gap: 8 }}>
+				<Text strong>Resumen calculado</Text>
+				<Text type="secondary" style={{ fontSize: 11 }}>
+					<ThunderboltOutlined /> se recalcula al cambiar capital, cuotas o cuota fija
+				</Text>
+			</div>
+			<SummaryRow label="Saldo capital préstamo" value={moneySummary(parseFormNumber(valueCapital))} />
+			<SummaryRow label="Saldo utilidad préstamo" value={moneySummary(derived.valueUtilityLoan)} />
+			<SummaryRow label="Saldo préstamo + utilidad" value={moneySummary(derived.valueTotalLoan)} />
+			<SummaryRow label="Plazo del préstamo" value={creditInputsReady ? derived.daysLoan : '—'} />
+			<SummaryRow label="Tasa de interés" value={creditInputsReady ? `${formatNumber(derived.interestRate, 4)}%` : '—'} />
+			<SummaryRow label="Fecha final" value={endDateLabel} />
+			<SummaryRow label="Total deuda" value={moneySummary(derived.totalLoan)} bold />
+		</div>
+	);
+
+	return (
+		<div className={compact ? 'kb-loan-compact' : undefined}>
+			<Row gutter={[compact ? 8 : 12, 4]}>
+				<Col {...full}>
 					<Form.Item label="Valor capital" name={path('valueCapital')} rules={rules} className="loan-wizard-field">
 						<InputNumber size="small" thousandsSeparator addonAfter={currency} style={{ width: '100%' }} disabled={disabled} />
 					</Form.Item>
 				</Col>
-				<Col {...spanConfigForm.large}>
+				<Col {...half}>
 					<Form.Item label="Valor cuota fija" name={path('valueQuotaFixed')} rules={rules} className="loan-wizard-field">
 						<InputNumber size="small" thousandsSeparator addonAfter={currency} style={{ width: '100%' }} disabled={disabled} />
 					</Form.Item>
 				</Col>
-				<Col {...spanConfigForm.large}>
+				<Col {...half}>
 					<Form.Item label="Cuotas pactadas" name={path('agreedQuotas')} rules={rules} className="loan-wizard-field">
 						<InputNumber size="small" precision={0} style={{ width: '100%' }} disabled={disabled} />
 					</Form.Item>
 				</Col>
-				<Col {...spanConfigForm.large}>
+				<Col {...half}>
 					<Form.Item label="Forma de pago" name={path('paymentMethod')} rules={rules} className="loan-wizard-field">
 						<Select size="small" options={PaymentMethodOptions} style={{ width: '100%' }} disabled={disabled} placeholder="Selecciona forma de pago" allowClear />
 					</Form.Item>
 				</Col>
+				{compact && (
+					<Col span={12}>
+						<Form.Item label="Fecha 1ra cuota" className="loan-wizard-readonly-field">{date}</Form.Item>
+					</Col>
+				)}
 			</Row>
 
 			{isFixedDate && (
@@ -99,30 +138,9 @@ export const LoanFields: FC<LoanFieldsProps> = ({ form, prefix = [], disabled, o
 				</Form.Item>
 			)}
 
-			<FieldDateTable label="Fecha 1ra cuota a pagar" useCurrentDate readOnly name={path('dateFirstQuota')} />
+			{!compact && date}
 
-			<div className="loan-wizard-summary-panel">
-				<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, flexWrap: 'wrap', gap: 8 }}>
-					<Text strong>Resumen calculado</Text>
-					<Text type="secondary" style={{ fontSize: 11 }}>
-						<ThunderboltOutlined /> se recalcula al cambiar capital, cuotas o cuota fija
-					</Text>
-				</div>
-				<SummaryRow label="Saldo capital préstamo" value={moneySummary(parseFormNumber(valueCapital))} />
-				<SummaryRow label="Saldo utilidad préstamo" value={moneySummary(derived.valueUtilityLoan)} />
-				<SummaryRow label="Saldo préstamo + utilidad" value={moneySummary(derived.valueTotalLoan)} />
-				<SummaryRow label="Plazo del préstamo" value={creditInputsReady ? derived.daysLoan : '—'} />
-				<SummaryRow label="Tasa de interés" value={creditInputsReady ? `${formatNumber(derived.interestRate, 4)}%` : '—'} />
-				<SummaryRow label="Fecha final" value={endDateLabel} />
-				<SummaryRow label="Total deuda" value={moneySummary(derived.totalLoan)} bold />
-			</div>
-
-			<Form.Item label="Valor pagado hoy" name={path('valuePayment')} style={{ marginBottom: 12 }} className="loan-wizard-field">
-				<InputNumber size="small" thousandsSeparator addonAfter={currency} style={{ width: '100%' }} disabled={disabled} />
-			</Form.Item>
-			{initialPaymentEffect && (
-				<Text type="secondary" style={{ display: 'block', fontSize: 12, marginBottom: 12 }}>{initialPaymentEffect}</Text>
-			)}
-		</>
+			{compact ? <>{paymentBlock}{summaryBlock}</> : <>{summaryBlock}{paymentBlock}</>}
+		</div>
 	);
 };

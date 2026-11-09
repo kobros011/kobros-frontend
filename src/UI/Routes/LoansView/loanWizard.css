@@ -190,3 +190,34 @@
 	min-height: 24px;
 	padding: 4px 8px 0;
 }
+
+
+/* Distribución compacta de los campos del crédito (crear cliente): menos aire entre etiqueta, campo y filas. */
+.kb-loan-compact .ant-form-item {
+	margin-bottom: 8px;
+}
+
+.kb-loan-compact .ant-form-item-label {
+	padding-bottom: 2px;
+}
+
+.kb-loan-compact .ant-form-vertical .ant-form-item-label > label,
+.kb-loan-compact .ant-form-item-label > label {
+	font-size: 11px;
+}
+
+.kb-loan-compact .loan-wizard-summary-panel {
+	padding: 10px 12px;
+	border: 1px solid var(--kb-primary, #8fbf1b);
+	border-radius: 12px;
+	background: color-mix(in srgb, var(--kb-primary, #8fbf1b) 7%, transparent);
+}
+
+.kb-loan-compact .loan-wizard-summary-row {
+	padding: 4px 0;
+}
+
+.kb-loan-compact .ant-form-item-extra {
+	min-height: 0;
+	margin-top: 2px;
+}
