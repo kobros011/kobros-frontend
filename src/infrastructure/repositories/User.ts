@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { ImplementationBase } from './base';
 import { User, UserModel } from '@/domain/User';
-import { UserDto } from '../dto/UserDto';
+import { UserDto, UserRouteDto, UserRouteRemovedDto } from '../dto/UserDto';
 import { Filters, FiltersModel } from '@/domain/Filters';
 import { PaginationParams } from '@/domain/Pagination';
 import { PageDto } from '../dto/PageDto';
@@ -54,6 +54,20 @@ export class ImplementationUserRepository extends ImplementationBase {
 		if (!data || !data.id) return;
 
 		return axios.put<UserDto>(this.buildUrl({ id: data.id }), UserModel.ToDto(data as User));	
+	}
+
+	async getRoutes(userId: string) {
+		const response = await axios.get<UserRouteDto[]>(`${this.baseUrl}${userId}/routes`);
+		return response.data.map(route => UserModel.routeToDomain(route));
+	}
+
+	async assignRoute(userId: string, routeId: string) {
+		await axios.put(`${this.baseUrl}${userId}/routes/${routeId}`);
+	}
+
+	async removeRoute(userId: string, routeId: string) {
+		const response = await axios.delete<UserRouteRemovedDto>(`${this.baseUrl}${userId}/routes/${routeId}`);
+		return response.data;
 	}
 
 	async delete(user_id: string) {

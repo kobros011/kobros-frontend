@@ -26,11 +26,21 @@ Muestra el nombre, el tipo de usuario (administrador, socio o recaudador) y si e
 
 Se digitan los datos personales, el documento y la fecha de vinculación.
 
-- Más abajo se elige el tipo de usuario y, para socios y recaudadores, las rutas a las que tendrán acceso.
+- Más abajo se elige la marca y el tipo de usuario. Las rutas se asignan después, desde la pestaña **Rutas** del usuario.
 
 ![Formulario Crear usuario](img/usuarios/02-nuevo.png)
 
-### 3 · Cambiar la vista y elegir columnas
+### 3 · Asignar o quitar rutas a un usuario
+> URL: `/srv1/home/usuarios/<id>/editar`
+> Preparar: Abrir un usuario y pulsar la pestaña 'Rutas'. Solo la ven el Desarrollador y el Super.
+
+La pestaña **Rutas** muestra a qué rutas pertenece el usuario. Un administrador, socio o recaudador solo ve y cobra en las rutas asignadas; el Desarrollador y el Super ven todas las de su marca y no se asignan.
+
+- **Asignar ruta** abre un selector con las rutas de la marca que aún no tiene. Elige una y pulsa **Asignar**.
+- **Quitar** saca al usuario de esa ruta. Si tiene cobros sin liquidar o un cierre abierto en ella, antes aparece un aviso con esos datos; confirma con **Quitar ruta** o cancela.
+- Cada cambio se guarda al instante: no hay que pulsar Actualizar.
+
+### 4 · Cambiar la vista y elegir columnas
 > URL: `/srv1/home/usuarios`
 > Preparar: Alternar entre los iconos de tabla y lista sobre el listado.
 

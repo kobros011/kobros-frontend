@@ -1,4 +1,4 @@
-import { UserDto } from '@/infrastructure/dto/UserDto';
+import { UserDto, UserRouteDto } from '@/infrastructure/dto/UserDto';
 import { BaseDomain } from './BaseDomain';
 import { TypeUser } from '@/constants/types';
 import { normalizeTypeUser } from '@/infrastructure/utils/defaultHomeRoute';
@@ -19,11 +19,36 @@ export interface User extends BaseDomain {
 	password?: string
 }
 
+/** Ruta de la marca del usuario con su estado de asignación (para la pestaña "Rutas" del usuario). */
+export interface UserRoute {
+	routeId: string
+	name: string
+	currency: string
+	active: boolean
+	assigned: boolean
+	/** Cobros del usuario en esta ruta que aún no se liquidan. */
+	pendingPayments: number
+	/** Cierres del usuario en esta ruta que aún no se confirman. */
+	openLiquidations: number
+}
+
 export class UserModel {
 	user: User;
 
 	constructor(user: User) {
 		this.user = user;
+	}
+
+	static routeToDomain(dto: UserRouteDto): UserRoute {
+		return {
+			routeId: dto.route_id,
+			name: dto.name,
+			currency: dto.currency,
+			active: dto.active,
+			assigned: dto.assigned,
+			pendingPayments: dto.pending_payments,
+			openLiquidations: dto.open_liquidations,
+		};
 	}
 
 	static ToDomain(DTO: UserDto): User {

@@ -1,5 +1,5 @@
-import { queryKeyDefault, queryKeyUsers } from '@/constants/queryKeys';
-import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query';
+import { queryKeyDefault, queryKeyRoutes, queryKeyUsers } from '@/constants/queryKeys';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { repository } from '../repositories/User';
 import { User } from '@/domain/User';
 import { TypeAction } from '@/constants/types';
@@ -118,6 +118,29 @@ export const getPageUsers = (filters: Partial<Filters>, pagination: PaginationPa
 		...queryInfo,
 		users: queryInfo.data?.page.items,
 		total: queryInfo.data?.page.total ?? 0,
+	};
+};
+
+export const getUserRoutes = (user_id?: string, enabled = true) => {
+	const queryInfo = useQuery({
+		queryKey: [queryKeyUsers.base, 'routes', user_id],
+		enabled: !!user_id && enabled,
+		queryFn: () => repository.getRoutes(user_id!),
+	});
+
+	return { ...queryInfo, routes: queryInfo.data };
+};
+
+/** Asignar o quitar una ruta: refresca las rutas del usuario y las listas de rutas. */
+export const useUserRouteMutations = (user_id: string) => {
+	const queryClient = useQueryClient();
+	const refresh = () => {
+		void queryClient.invalidateQueries({ queryKey: [queryKeyUsers.base, 'routes', user_id] });
+		void queryClient.invalidateQueries({ queryKey: [queryKeyRoutes.base] });
+	};
+	return {
+		assign: useMutation({ mutationFn: (routeId: string) => repository.assignRoute(user_id, routeId), onSuccess: refresh }),
+		remove: useMutation({ mutationFn: (routeId: string) => repository.removeRoute(user_id, routeId), onSuccess: refresh }),
 	};
 };
 
