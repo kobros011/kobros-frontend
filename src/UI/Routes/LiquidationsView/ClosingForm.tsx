@@ -81,8 +81,8 @@ export const ClosingForm: FC<ClosingFormProps> = ({ preview, collectorId }) => {
 						<span className="kb-section-sub">Base entregada <Pill tone="neutral">Sugerido</Pill></span>
 						<InputNumber aria-label="Base entregada" thousandsSeparator precision={decimals} size="small" value={base} onChange={value => setBase(value as string)} prefix={symbol} />
 						<span className="kb-section-sub">
-								{preview.suggested_base_source === 'route_initial' ? 'Primer cierre: valor inicial menos gastos iniciales de la ruta' : 'Último cierre'}: {money(preview.suggested_base)}
-							</span>
+							{preview.suggested_base_source === 'route_initial' ? 'Primer cierre: valor inicial menos gastos iniciales de la ruta' : 'Último cierre'}: {money(preview.suggested_base)}
+						</span>
 					</label>
 					<label className="lq-field">
 						<span className="kb-section-sub">Efectivo entregado</span>
