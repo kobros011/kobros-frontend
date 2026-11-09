@@ -151,7 +151,7 @@ export const ModulesMenu: FC<{ collapsed: boolean, mobile?: boolean }> = ({ coll
 					<MenuItem isActive={locationKey == key} key={key} {...item} mobile={mobile}/>
 				))}
 				{hasOverflow && (
-					<Flex justify="center" align="center" vertical style={{ flex: 1 }}>
+					<Flex justify="center" align="center" vertical style={{ flex: '1 1 0', minWidth: 0 }}>
 						<Button
 							type="text"
 							onClick={() => setMoreOpen(true)}

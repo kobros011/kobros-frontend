@@ -17,9 +17,11 @@ const MenuItem: FC<MenuItemProps> = ({ label, icon, mobile, isActive, to }) => {
 	const style: CSSProperties = {
 		height: 'auto',
 		minHeight: 44,
-		minWidth: 44,
+		minWidth: 0,
+		width: '100%',
 		flex: 1,
 		paddingTop: 5,
+		paddingInline: 2,
 		border: 'none',
 		display: 'flex',
 		alignItems: 'center',
@@ -27,7 +29,7 @@ const MenuItem: FC<MenuItemProps> = ({ label, icon, mobile, isActive, to }) => {
 		background: isActive ? token.colorPrimaryBgHover : 'inherit',
 	};
 	return (
-		<Flex justify="center" align="center" vertical style={mobile ? { flex: 1 } : {}}>
+		<Flex justify="center" align="center" vertical style={mobile ? { flex: '1 1 0', minWidth: 0 } : {}}>
 			<Button
 				type='text'
 				style={mobile ? style : {}}
