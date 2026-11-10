@@ -66,7 +66,7 @@ export const ClientLoanSection: FC<ClientLoanSectionProps> = ({ form, routeIds, 
 
 					{submitted && missing && <Alert type="error" showIcon style={{ fontSize: 12 }} message="Completa capital, cuota, cuotas y forma de pago." />}
 
-					<LoanFields form={form} prefix={['loan']} optional compact />
+					<LoanFields form={form} prefix={['loan']} optional compact routeId={routeId} />
 				</section>
 			</DashboardShell>
 		</CurrencyProvider>

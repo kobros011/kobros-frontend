@@ -9,12 +9,13 @@ interface LoanDataStepProps {
 	onCancel: () => void;
 	onSave: () => void;
 	isLoading?: boolean;
+	routeId?: string;
 }
 
 /** Paso 3 del asistente de crédito: los campos del crédito (`LoanFields`) más Cancelar / Guardar. */
-export const LoanDataStep: FC<LoanDataStepProps> = ({ form, disabled, onCancel, onSave, isLoading }) => (
+export const LoanDataStep: FC<LoanDataStepProps> = ({ form, disabled, onCancel, onSave, isLoading, routeId }) => (
 	<>
-		<LoanFields form={form as FormInstance} disabled={disabled} compact />
+		<LoanFields form={form as FormInstance} disabled={disabled} compact routeId={routeId} />
 		<div className="loan-wizard-actions" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-end', alignItems: 'center', gap: 8 }}>
 			<Button size="small" onClick={onCancel} disabled={isLoading}>
 				Cancelar

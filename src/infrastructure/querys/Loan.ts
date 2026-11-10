@@ -6,6 +6,15 @@ import { TypeAction } from '@/constants/types';
 import { Filters } from '@/domain/Filters';
 import { PaginationParams } from '@/domain/Pagination';
 
+export const getAvailableCash = (route_id?: string) => {
+	const queryInfo = useQuery({
+		queryKey: [queryKeyLoans.base, 'available-cash', route_id],
+		enabled: !!route_id,
+		queryFn: () => repository.availableCash(route_id!),
+	});
+	return { ...queryInfo, available: queryInfo.data };
+};
+
 export const getLoan = (loan_id?: string) => {
 	const queryInfo = useQuery({
 		queryKey: [queryKeyLoans.base, queryKeyDefault.get, loan_id],

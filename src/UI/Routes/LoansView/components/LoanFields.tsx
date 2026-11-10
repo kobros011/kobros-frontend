@@ -10,6 +10,7 @@ import { ThunderboltOutlined } from '@ant-design/icons';
 import { Col, Form, FormInstance, Row, Select, Typography } from 'antd';
 import { FC, useMemo } from 'react';
 import { FieldDateTable } from '@/UI/Components/Fields/MultiFieldsFormItem';
+import { AvailableCashHint } from './AvailableCashHint';
 import { computeLoanDerived, describeInitialPayment, formatLoanEndDate } from '../Hooks/useChangeDataLoan';
 
 const { Text } = Typography;
@@ -28,6 +29,8 @@ interface LoanFieldsProps {
 	optional?: boolean
 	/** Distribución compacta (cuota y cuotas, forma de pago y fecha en pares, menos aire entre campos) para formularios largos. */
 	compact?: boolean
+	/** Ruta del crédito: con ella se muestra el efectivo disponible en caja bajo el capital. */
+	routeId?: string
 }
 
 const SummaryRow: FC<{ label: string; value: string | number | undefined; bold?: boolean }> = ({ label, value, bold }) => (
@@ -41,7 +44,7 @@ const SummaryRow: FC<{ label: string; value: string | number | undefined; bold?:
 	</div>
 );
 
-export const LoanFields: FC<LoanFieldsProps> = ({ form, prefix = [], disabled, optional = false, compact = false }) => {
+export const LoanFields: FC<LoanFieldsProps> = ({ form, prefix = [], disabled, optional = false, compact = false, routeId }) => {
 	const money = useMoney();
 	const currency = useCurrency();
 	const path = (field: string) => (prefix.length ? [...prefix, field] : field);
@@ -106,9 +109,10 @@ export const LoanFields: FC<LoanFieldsProps> = ({ form, prefix = [], disabled, o
 		<div className={compact ? 'kb-loan-compact' : undefined}>
 			<Row gutter={[compact ? 8 : 12, 4]}>
 				<Col {...full}>
-					<Form.Item label="Valor capital" name={path('valueCapital')} rules={rules} className="loan-wizard-field">
+					<Form.Item label="Valor capital" name={path('valueCapital')} rules={rules} className="loan-wizard-field" style={routeId ? { marginBottom: 4 } : undefined}>
 						<InputNumber size="small" thousandsSeparator addonAfter={currency} style={{ width: '100%' }} disabled={disabled} />
 					</Form.Item>
+					{routeId && <AvailableCashHint routeId={routeId} capital={parseFormNumber(valueCapital)} />}
 				</Col>
 				<Col {...half}>
 					<Form.Item label="Valor cuota fija" name={path('valueQuotaFixed')} rules={rules} className="loan-wizard-field">

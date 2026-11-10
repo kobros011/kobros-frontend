@@ -50,6 +50,8 @@ Resume los créditos anteriores del cliente: cuotas canceladas, pendientes y tot
 
 Se digitan el capital, la cuota fija, el número de cuotas y la forma de pago (diaria, semanal, quincenal o fecha fija).
 
+Bajo el capital aparece **Disponible en caja hoy**: la base de la ruta más las cuotas cobradas, menos los gastos y los créditos ya entregados hoy. Si el capital supera ese valor se muestra una alerta y, al guardar, se pide confirmación.
+
 - Cada campo de dinero muestra la moneda de la ruta.
 - El resumen calcula la utilidad, el total a pagar, el plazo, la tasa y la fecha final.
 - Si el cliente paga algo ese mismo día, escríbelo en **Valor pagado hoy**.

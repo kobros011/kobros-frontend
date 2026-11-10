@@ -12,6 +12,8 @@ import { ClientContactsList } from './ClientContactsList';
 import { ClientRoutesSection } from './priority/ClientRoutesSection';
 import { ClientRoutesPicker } from './priority/ClientRoutesPicker';
 import { ClientLoanSection, resolveLoanRouteId } from './ClientLoanSection';
+import { confirmWithinAvailableCash } from '@/UI/Routes/LoansView/availableCash';
+import { parseFormNumber } from '@/infrastructure/utils/formaNumber';
 import { queryKeyCollection, queryKeyLoans, queryKeyPayments, queryKeyReports } from '@/constants/queryKeys';
 import { useCanManagePriority } from './priority/usePriorityAccess';
 import ActionsButton from '@/UI/Components/AcctionButtons';
@@ -34,7 +36,7 @@ const FormClient: FC<{ readonly?: boolean }> = ({ readonly = false }) => {
 	
 	const { typeUser, brandId } = useUserStore(state => state.user);
 
-	const { notification } = App.useApp();
+	const { notification, modal } = App.useApp();
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
 	const { startLoading, stopLoading, isLoading } = useLoading();
@@ -59,14 +61,18 @@ const FormClient: FC<{ readonly?: boolean }> = ({ readonly = false }) => {
 		return started && loan && routeId ? { ...(loan as ClientLoanDraft), routeId } : undefined;
 	};
 
-	const onFinish = (values: Partial<Omit<Client, 'loansNumber'>>) => {
+	const onFinish = async (values: Partial<Omit<Client, 'loansNumber'>>) => {
+		const loan = isCreate ? buildLoan(values.loan) : undefined;
+		// Con crédito: si el capital supera el efectivo disponible en la ruta, se confirma antes de guardar.
+		if (loan && !(await confirmWithinAvailableCash(modal, loan.routeId, parseFormNumber(loan.valueCapital)))) return;
+
 		startLoading();
 		clientMutation.mutate({
 			...client,
 			...values,
 			brandId: values.brandId ? values.brandId : brandId,
 			// Al crear, las rutas y prioridades salen del selector del formulario (el servidor las valida y aplica en una sola transacción).
-			...(isCreate ? { routeAssignments: values.routeAssignments, loan: buildLoan(values.loan) } : {}),
+			...(isCreate ? { routeAssignments: values.routeAssignments, loan } : {}),
 		}, {
 			onSuccess: (response) => {
 				const data = response?.data;
@@ -126,7 +132,7 @@ const FormClient: FC<{ readonly?: boolean }> = ({ readonly = false }) => {
 				key={client ? `${client.id}-${client.updatedAt}` : 'new'}
 				initialValues={client ? client : {}}
 				disabled={isRefetching || isLoading || readonly}
-				onFinish={onFinish}
+				onFinish={values => void onFinish(values)}
 				onFinishFailed={() => setSubmitted(true)}
 			>
 				<Row gutter={[16, 0]}>

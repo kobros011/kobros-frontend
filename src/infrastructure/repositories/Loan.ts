@@ -19,6 +19,12 @@ export class ImplementationLoanRepository extends ImplementationBase {
 		};
 	}
 
+	/** Efectivo disponible hoy en la ruta para entregar un crédito nuevo (nunca negativo). */
+	async availableCash(routeId: string): Promise<number> {
+		const response = await axios.get<{ available: number }>(`${this.baseUrl}available-cash`, { params: { route_id: routeId } });
+		return Number(response.data.available ?? 0);
+	}
+
 	async listLoans(filters: Partial<Filters>) {
 		const response = await axios.get<LoanFullReadDTO[]>(this.baseUrl, { params: FiltersModel.toDto(filters) });
 

@@ -18,6 +18,8 @@ import { LoanFull } from '@/domain/Loan';
 import { ClientInfoStep } from './components/ClientInfoStep';
 import { LoanHistoryStep } from './components/LoanHistoryStep';
 import { LoanDataStep } from './components/LoanDataStep';
+import { confirmWithinAvailableCash } from './availableCash';
+import { parseFormNumber } from '@/infrastructure/utils/formaNumber';
 import { StepHeader } from './components/StepHeader';
 import { LoanWizardShell } from './components/LoanWizardShell';
 import { CurrencyProvider } from '@/infrastructure/hooks/useMoney';
@@ -71,7 +73,7 @@ const FormLoan: FC = () => {
 	const [step1Done, setStep1Done] = useState(false);
 	const [step2Done, setStep2Done] = useState(false);
 
-	const { notification } = App.useApp();
+	const { notification, modal } = App.useApp();
 	const navigate = useNavigate();
 	const { startLoading, stopLoading, isLoading } = useLoading();
 
@@ -157,7 +159,7 @@ const FormLoan: FC = () => {
 		);
 	};
 
-	const handleSubmit = () => {
+	const handleSubmit = async () => {
 		recalculateLoanForm(form);
 		const values = form.getFieldsValue();
 		const keysValues = Object.keys(values) as Array<keyof LoanFull>;
@@ -172,6 +174,8 @@ const FormLoan: FC = () => {
 			});
 			return;
 		}
+
+		if (!(await confirmWithinAvailableCash(modal, availableRoute?.id, parseFormNumber(values.valueCapital)))) return;
 
 		startLoading();
 		saveLoan(values);
@@ -293,9 +297,10 @@ const FormLoan: FC = () => {
 			children: (
 				<LoanDataStep
 					form={form}
+					routeId={availableRoute?.id}
 					disabled={isLoading}
 					onCancel={() => void navigate(-1)}
-					onSave={handleSubmit}
+					onSave={() => void handleSubmit()}
 					isLoading={isLoading}
 				/>
 			),
