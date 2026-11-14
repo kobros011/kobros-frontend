@@ -21,6 +21,10 @@ export const getPrimaryCurrency = (): string | undefined => useAppSettingsStore.
 export const getRouteCurrency = (routeId?: string | null): string | undefined =>
 	(routeId ? useCurrencyStore.getState().routeCurrency[routeId] : undefined) ?? getPrimaryCurrency();
 
+/** Decimales con los que se muestra y digita una moneda: si la marca eligió "sin decimales" ninguna moneda los lleva; si no, cada una usa los suyos. */
+export const currencyDecimals = (currencyDecimalsInfo?: number): number =>
+	useAppSettingsStore.getState().numberDecimals === 0 ? 0 : currencyDecimalsInfo ?? 0;
+
 /**
  * Valor con su moneda: signo antes del símbolo, monto y código ISO.
  * Sin moneda conocida muestra solo el monto (nunca asume una).
@@ -29,7 +33,7 @@ export const formatMoney = (value: number | string | null | undefined, currency?
 	const { code = true, compact = false, signed = false } = options;
 	const amount = Number(value ?? 0) || 0;
 	const info = currency ? useCurrencyStore.getState().catalog[currency] : undefined;
-	const decimals = info?.decimals ?? 0;
+	const decimals = currencyDecimals(info?.decimals);
 	const symbol = displaySymbol(info?.symbol);
 	const sign = amount < 0 ? '\u2212' : signed && amount > 0 ? '+' : '';
 	const abs = Math.abs(amount);

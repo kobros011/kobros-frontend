@@ -473,7 +473,7 @@ const SettingsView: FC = () => {
 								<Form.Item
 									label="Decimales por defecto"
 									name="numberDecimals"
-									extra="Una columna que ya define su propia cantidad de decimales no se ve afectada por este ajuste."
+									extra="Con 'Sin decimales' ninguna moneda muestra decimales. Con 'Dos decimales' cada moneda usa los suyos (COP sin decimales; USD y BRL con centavos). Una columna que ya define sus decimales no se ve afectada."
 								>
 									<Radio.Group
 										optionType="button"

@@ -1,7 +1,7 @@
 import { FC, ReactNode, createContext, useCallback, useContext, useMemo } from 'react';
 import useAppSettingsStore from '@/infrastructure/context/AppSettingsStore';
 import useCurrencyStore from '@/infrastructure/context/CurrencyStore';
-import { MoneyOptions, displaySymbol, formatMoney, getRouteCurrency } from '@/infrastructure/utils/money';
+import { MoneyOptions, currencyDecimals, displaySymbol, formatMoney, getRouteCurrency } from '@/infrastructure/utils/money';
 
 const CurrencyContext = createContext<string | undefined>(undefined);
 
@@ -49,5 +49,6 @@ export const useRouteMoney = () => {
 export const useCurrencyInfo = () => {
 	const currency = useCurrency();
 	const info = useCurrencyStore(state => (currency ? state.catalog[currency] : undefined));
-	return { code: currency, symbol: displaySymbol(info?.symbol), decimals: info?.decimals ?? 0 };
+	useAppSettingsStore(state => state.numberDecimals); // vuelve a pintar si la marca cambia sus decimales
+	return { code: currency, symbol: displaySymbol(info?.symbol), decimals: currencyDecimals(info?.decimals) };
 };
