@@ -18,6 +18,7 @@ export interface LoanDto extends BaseDto {
 	interest_rate: string,
 	agreedQuotas: number,
 	clientroute_id?: string
+	custom_fields?: Record<string, unknown>
 }
 
 export interface LoanFullDTO extends Partial<LoanDto> {

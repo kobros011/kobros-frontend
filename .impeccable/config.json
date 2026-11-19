@@ -11,6 +11,12 @@
         ],
         "createdAt": "2026-11-08T00:31:54.661Z",
         "reason": "Left accent encodes quota status and comes from the Stitch mockup the user supplied and asked to replicate; assistant triage, not a user-typed confirmation"
+      },
+      {
+        "rule": "overused-font",
+        "value": "plus jakarta sans",
+        "createdAt": "2026-11-18T02:58:02.578Z",
+        "reason": "User confirmed: adopt Stitch fonts (Plus Jakarta Sans for titles, Inter for body) in the approved frontend plan, T1."
       }
     ]
   }

@@ -15,7 +15,7 @@ export const DropdownUser: FC = () => {
 	const { user: userStore, resetStore: resetUserStore } = useUserStore(state => state);
 	const { signOut } = useClerk();
 	const { user: clerkUser } = useUser();
-	const { darkMode, userMode, setUserMode, setMode, resetStore } = useUserModeStore(state => state);
+	const { darkMode, userMode, isMobile, setUserMode, setMode, resetStore } = useUserModeStore(state => state);
 
 	const navigate = useNavigate();
 
@@ -59,7 +59,37 @@ export const DropdownUser: FC = () => {
 		void signOut(() => navigate(`/${routePaths.LOGIN}`));
 	};
 
+	const getNames = () => {
+		const fullName = clerkUser?.fullName ?? userStore.fullName ?? '';
+		const words = fullName.trim().split(/\s+/);
+		let names = { name: '', lastName: '' };
+		if (words.length === 0) {
+			return names;
+		} else if (words.length === 1) {
+			names = { name: words[0], lastName: '' };
+		} else {
+			names = { name: words[0], lastName: words[words.length - 1] };
+		}
+
+		return names;
+	};
+
+	// En móvil el botón del header solo muestra el avatar; nombre y rol van dentro del menú.
+	const mobileUserInfoItems: MenuProps['items'] = isMobile ? [
+		{
+			key: 'userInfo',
+			label: (
+				<Flex vertical style={{ cursor: 'default' }}>
+					<Typography.Text strong>{`${getNames()?.name} ${getNames()?.lastName}`}</Typography.Text>
+					<Typography.Text type="secondary" style={{ fontSize: 12 }}>{getNameTypeUser(userStore.typeUser as TypeUser)}</Typography.Text>
+				</Flex>
+			),
+		},
+		{ type: 'divider', key: 'userInfoDivider' },
+	] : [];
+
 	const itemsMenu: MenuProps['items'] = [
+		...(mobileUserInfoItems ?? []),
 		{
 			key: 'mondeFont',
 			label:  (
@@ -90,41 +120,46 @@ export const DropdownUser: FC = () => {
 		},
 	];
 
-	const getNames = () => {
-		const fullName = clerkUser?.fullName ?? userStore.fullName ?? '';
-		const words = fullName.trim().split(/\s+/);
-		let names = { name: '', lastName: '' };
-		if (words.length === 0) {
-			return names;
-		} else if (words.length === 1) {
-			names = { name: words[0], lastName: '' };
-		} else {
-			names = { name: words[0], lastName: words[words.length - 1] };
-		}
-
-		return names;
-	};
-
 	return (
 		<Dropdown
 			trigger={['click']}
 			menu={{ items: itemsMenu }}
 		>
-			<Button style={{
-				height: '2.5rem',
-				marginTop: '10px',
-				position: 'absolute',
-				right: 8,
-			}}>
-				<Flex gap={10}>
+			{isMobile ? (
+				<Button
+					shape="circle"
+					aria-label="Menú de usuario"
+					style={{
+						width: 36,
+						height: 36,
+						padding: 0,
+						position: 'absolute',
+						top: 12,
+						right: 8,
+						display: 'flex',
+						alignItems: 'center',
+						justifyContent: 'center',
+					}}
+				>
 					<UserInitialsLogo name={getNames()?.name ?? ''} lastName={getNames()?.lastName ?? ''} />
-					<Flex vertical align="start">
-						<Typography.Title style={{ margin: 0, padding: 0 }} level={5}>{`${getNames()?.name} ${getNames()?.lastName}`}</Typography.Title>
-						<Typography.Text style={{ margin: 0, padding: 0, marginTop: '-5px' }} >{getNameTypeUser(userStore.typeUser as TypeUser)}</Typography.Text>
+				</Button>
+			) : (
+				<Button style={{
+					height: '2.5rem',
+					marginTop: '10px',
+					position: 'absolute',
+					right: 8,
+				}}>
+					<Flex gap={10}>
+						<UserInitialsLogo name={getNames()?.name ?? ''} lastName={getNames()?.lastName ?? ''} />
+						<Flex vertical align="start">
+							<Typography.Title style={{ margin: 0, padding: 0 }} level={5}>{`${getNames()?.name} ${getNames()?.lastName}`}</Typography.Title>
+							<Typography.Text style={{ margin: 0, padding: 0, marginTop: '-5px' }} >{getNameTypeUser(userStore.typeUser as TypeUser)}</Typography.Text>
+						</Flex>
+						<DownOutlined />
 					</Flex>
-					<DownOutlined />
-				</Flex>
-			</Button>
+				</Button>
+			)}
 		</Dropdown>
 	);
 };

@@ -1,4 +1,6 @@
 import { spanConfigForm } from '@/constants/getSpan';
+import useUnsavedChangesGuard from '@/infrastructure/hooks/useUnsavedChangesGuard';
+import useFormHeader from '@/UI/Components/useFormHeader';
 import { queryKeyRoutes, queryKeyDefault } from '@/constants/queryKeys';
 import routePaths from '@/constants/routePaths';
 import { ruleRequired } from '@/constants/rules';
@@ -13,6 +15,9 @@ import ActionsButton from '@/UI/Components/AcctionButtons';
 import InputDate from '@/UI/Components/Fields/InputDate';
 import InputNumber from '@/UI/Components/Fields/InputNumber';
 import { RouteCurrencyField } from './RouteCurrencyField';
+import CustomFieldsSection from '@/UI/Components/Fields/CustomFieldsSection';
+import useModuleCustomFields from '@/infrastructure/hooks/useModuleCustomFields';
+import { customFieldsPayload } from '@/UI/Routes/ClientsView/customFieldsPayload';
 import { SelectBrand } from '@/UI/Components/Fields/SelectBrand';
 import { SelectUsers } from '@/UI/Components/Fields/SelectUsers';
 import LoadingComponent from '@/UI/Components/LoadingComponent';
@@ -41,7 +46,11 @@ const FormRoute: FC<{ readonly?: boolean, bare?: boolean }> = ({ readonly = fals
 	const [exit, setExit] = useState<boolean>(false);
 
 	const isCreate = !id;
+	const { bindForm, markClean } = useUnsavedChangesGuard(readonly ? false : undefined);
+	// `bare`: el formulario va dentro de otra tarjeta (detalle de ruta), que pone su propio título.
+	const cardTitle = useFormHeader(routePaths.ROUTES, `${isCreate ? 'Crear' : readonly ? 'Ver' : 'Actualizar'} ruta`, { enabled: !bare });
 	const watchedBrandId = Form.useWatch('brandId', form) ;
+	const customView = useModuleCustomFields('routes', watchedBrandId ?? route?.brandId);
 
 	const onFinish = (values: Partial<Route>) => {
 		startLoading();
@@ -49,8 +58,10 @@ const FormRoute: FC<{ readonly?: boolean, bare?: boolean }> = ({ readonly = fals
 			...route,
 			...values,
 			brandId: values.brandId ? values.brandId : brandId,
+			customFields: customFieldsPayload(values.customFields, customView.activeCustomFields),
 		}, {
 			onSuccess: (response) => {
+				markClean();
 				const data = response?.data;
 				notification.success({ message: `La ruta fue ${isCreate ? 'creada' : 'actualizada'} exitosamente` });
 				void resetRouteStore();
@@ -103,6 +114,7 @@ const FormRoute: FC<{ readonly?: boolean, bare?: boolean }> = ({ readonly = fals
 		<>
 			<Form
 				form={form}
+				{...bindForm(form)}
 				layout="vertical"
 				key={route ? `${route.id}-${route.updatedAt}` : 'new'}
 				initialValues={route ? route : {}}
@@ -181,6 +193,7 @@ const FormRoute: FC<{ readonly?: boolean, bare?: boolean }> = ({ readonly = fals
 							</Form.Item>
 						</Col>
 					}
+					<CustomFieldsSection fields={customView.activeCustomFields} />
 				</Row>
 			</Form>
 
@@ -202,8 +215,8 @@ const FormRoute: FC<{ readonly?: boolean, bare?: boolean }> = ({ readonly = fals
 
 	return (
 		<Card
-			title={`${isCreate ? 'Crear' : readonly ? 'Ver' : 'Actualizar'} ruta`}
-			style={{ overflowX: 'hidden', overflowY: 'auto', maxHeight: '84vh' }}
+			title={cardTitle}
+			className="kb-form-card"
 		>
 			{content}
 		</Card>

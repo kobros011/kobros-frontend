@@ -1,13 +1,13 @@
-import { Card } from 'antd';
 import { FC } from 'react';
 import { Layout } from './layout';
+import ResponsiveCard from '@/UI/Components/ResponsiveCard';
 
 
 const UsersView: FC = () => {
 	return (
-		<Card>
+		<ResponsiveCard>
 			<Layout />
-		</Card>
+		</ResponsiveCard>
 	);
 };
 

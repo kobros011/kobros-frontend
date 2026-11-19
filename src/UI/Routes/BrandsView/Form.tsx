@@ -1,4 +1,6 @@
 import { spanConfigForm } from '@/constants/getSpan';
+import useUnsavedChangesGuard from '@/infrastructure/hooks/useUnsavedChangesGuard';
+import useFormHeader from '@/UI/Components/useFormHeader';
 import { queryKeyBrands, queryKeyDefault } from '@/constants/queryKeys';
 import routePaths from '@/constants/routePaths';
 import { ruleRequired } from '@/constants/rules';
@@ -32,6 +34,8 @@ const FormBrand: FC<{ readonly?: boolean }> = ({ readonly = false }) => {
 	const [exit, setExit] = useState<boolean>(false);
 
 	const isCreate = !id;
+	const { bindForm, markClean } = useUnsavedChangesGuard(readonly ? false : undefined);
+	const cardTitle = useFormHeader(routePaths.BRANDS, `${isCreate ? 'Crear' : readonly ? 'Ver' : 'Actualizar'} marca`);
 
 	const onFinish = (values: Partial<Omit<Brand, 'loansNumber'>>) => {
 		startLoading();
@@ -40,6 +44,7 @@ const FormBrand: FC<{ readonly?: boolean }> = ({ readonly = false }) => {
 			...values,
 		}, {
 			onSuccess: (response) => {
+				markClean();
 				const data = response?.data;
 				notification.success({ message: `La marca ${isCreate ? 'creada' : 'actualizada'} exitosamente` });
 				stopLoading();
@@ -84,11 +89,12 @@ const FormBrand: FC<{ readonly?: boolean }> = ({ readonly = false }) => {
 
 	return (
 		<Card
-			title={`${isCreate ? 'Crear' : readonly ? 'Ver' : 'Actualizar'} marca`}
-			style={{ overflowX: 'hidden', overflowY: 'auto', maxHeight: '84vh' }}
+			title={cardTitle}
+			className="kb-form-card"
 		>
 			<Form
 				form={form}
+				{...bindForm(form)}
 				layout="vertical"
 				key={brand ? `${brand.id}-${brand.updatedAt}` : 'new'}
 				initialValues={brand ? brand : {}}

@@ -73,7 +73,7 @@ algorithm: darkMode ? darkAlgorithm : defaultAlgorithm,
 
 | Token | Valor | Descripción |
 |-------|-------|-------------|
-| `colorPrimary` | `lime-6` (AntD token) | Verde lima — único color de marca en código |
+| `colorPrimary` | `#84cc16` (lima de Stitch, `App.tsx`) | Verde lima — color de marca; una marca puede sobrescribirlo |
 
 > **Importante:** El color de marca es verde lima (`lime-6` del sistema de tokens de Ant Design). No existe ningún otro color de marca definido en el código. No inventar ni hardcodear valores hexadecimales nuevos sin actualizar primero el `ConfigProvider`.
 
@@ -103,7 +103,7 @@ En Kobros, **"Brand"** es una entidad de negocio (franquicia/cliente con rutas a
 
 ### Fuente
 
-Kobros usa la **stack tipográfica por defecto de Ant Design** en toda la app (el único uso de fuentes propias es el kit Dashboard de Reportes, que importa `@fontsource/space-grotesk` y `@fontsource/jetbrains-mono` solo desde `UI/Components/Dashboard/ui.tsx`):
+Kobros usa **Inter** para el cuerpo y los controles, y **Plus Jakarta Sans** para los títulos (`h1`–`h5`), ambas cargadas con `@fontsource` en `App.tsx` y `App.css`. El tablero de Reportes conserva su propio kit (Space Grotesk y JetBrains Mono).
 
 ```
 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif
@@ -315,11 +315,11 @@ Las tablas vacías muestran el empty state por defecto de AntD. Si se necesita u
 
 | Botón | `type` / prop | Notas |
 |-------|----------------|-------|
-| Cancelar | `<Button danger>` | Siempre `danger`, aunque no sea destructivo en sí: marca visualmente la salida/descarte del flujo. |
-| Acción principal (Guardar, Crear, Ingresar, Confirmar) | `<Button type="primary">` | — |
+| Cancelar | `<Button type="primary" danger ghost>` | Siempre `primary`, `danger` y `ghost` juntos (borde y texto rojos, sin relleno), aunque no sea destructivo en sí: marca visualmente la salida/descarte del flujo. |
+| Acción principal (Guardar, Crear, Ingresar, Confirmar) | `<Button type="primary">` | En formularios de cliente el texto es «Crear cliente» al crear y «Guardar cliente» al editar. |
 | Acción secundaria destructiva (Eliminar, Retirar) | `<Button danger>` | Mismo tratamiento visual que Cancelar, coherente con "esto cambia o descarta algo". |
 
-> **Regla:** todo botón **Cancelar** lleva la prop `danger`, en cualquier formulario o modal (edición de usuario, cambio de contraseña, movimientos de caja, etc.).
+> **Regla:** todo botón **Cancelar** lleva `type="primary"`, `danger` y `ghost` a la vez (borde y texto rojos, sin relleno), en cualquier formulario o modal (edición de usuario, cambio de contraseña, movimientos de caja, etc.).
 
 ---
 
@@ -359,7 +359,17 @@ Pantallas: `UI/Routes/ReportsView/` — `Dashboard` (Resumen, compuesto por `Res
 - **Todo lo calcula el servidor** (`/liquidations/preview`): recaudo por fecha de cobro y por cobrador, gastos, créditos nuevos (con su lista), meta y efectivo esperado = base + recaudo − gastos − créditos nuevos. Quien cierra solo digita **base entregada**, **efectivo entregado** y **nota** (obligatoria si hay diferencia). El front solo muestra el cuadre en vivo con las mismas cifras.
 - Estados con icono + texto: Pendiente de confirmación · Confirmada · Reabierta · **Desactualizada** (hay cobros, gastos o créditos posteriores al cierre; no se puede confirmar hasta que un admin lo **reabra**). Diferencia: Cuadrado (verde) · Faltante (rojo) · Sobrante (naranja).
 - Permisos: cobrador (05) cierra solo su caja en sus rutas; admin (01–03) confirma, reabre y cierra a nombre de un cobrador; socio (04) solo consulta. Cierre confirmado no se edita ni elimina.
-- Cancelar siempre `danger`; botones `small`; dinero con signo delante (`−$47.014.667`, helper `signedCOP`).
+- Cancelar siempre `type="primary" danger ghost`; botones `small`; dinero con signo delante (`−$47.014.667`, helper `signedCOP`).
+
+### 6.12 Configuración de formularios (Clientes)
+
+Cada marca decide, desde **Configuración › Formularios** (solo dev y super), qué pide el formulario de clientes:
+
+- **Campos estándar:** teléfono, barrio y fecha de vinculación pueden ser obligatorios u ocultos. Dirección, celular, nombre, documento, marca y rutas son fijos.
+- **Fiadores y referencias:** cada sección puede ocultarse; los fiadores pueden ser obligatorios.
+- **Campos personalizados:** texto, número, correo, teléfono, fecha, lista o sí/no. Se crean, reordenan y archivan; un campo archivado se puede restaurar o eliminar definitivamente (con confirmación; también borra sus valores en los clientes). Se guardan al instante, sin botones de guardar, y pueden mostrarse como columna, en la tarjeta o como filtro.
+
+Piezas: `infrastructure/hooks/useClientFormConfig.ts` (única puerta de lectura), `UI/Components/Fields/ConfigurableFormItem.tsx` (campo con visibilidad y obligatoriedad), `UI/Components/Fields/CustomFieldInput.tsx` (control por tipo), `UI/Routes/ClientsView/ClientFields.tsx`, `UI/Routes/ClientsView/customFieldsPayload.ts` y `UI/Routes/SettingsView/FormsConfig/`. Contrato con el backend: `kobros-backend/docs/contrato-configuracion-formularios.md`.
 
 ## 7. Reglas y buenas prácticas UI/UX
 

@@ -1,7 +1,6 @@
-import { spanConfigForm } from '@/constants/getSpan';
 import { queryKeyClients, queryKeyDefault } from '@/constants/queryKeys';
+import useUnsavedChangesGuard from '@/infrastructure/hooks/useUnsavedChangesGuard';
 import routePaths from '@/constants/routePaths';
-import { ruleRequired } from '@/constants/rules';
 import { TypeUser } from '@/constants/types';
 import { Client, ClientLoanDraft } from '@/domain/Client';
 import useUserStore from '@/infrastructure/context/User/UserDataStore';
@@ -16,18 +15,28 @@ import { confirmWithinAvailableCash } from '@/UI/Routes/LoansView/availableCash'
 import { parseFormNumber } from '@/infrastructure/utils/formaNumber';
 import { queryKeyCollection, queryKeyLoans, queryKeyPayments, queryKeyReports } from '@/constants/queryKeys';
 import { useCanManagePriority } from './priority/usePriorityAccess';
-import ActionsButton from '@/UI/Components/AcctionButtons';
+import useUserModeStore from '@/infrastructure/context/User/UserModeStore';
 import { ClientCreditSummary } from '@components/ClientCreditSummary';
-import InputDate from '@/UI/Components/Fields/InputDate';
-import { SelectBrand } from '@/UI/Components/Fields/SelectBrand';
 import LoadingComponent from '@/UI/Components/LoadingComponent';
+import PageTitle from '@/UI/Components/PageTitle';
+import FormFooter from '@/UI/Components/FormFooter';
+import useRouteStore from '@/infrastructure/context/RoutesStore';
+import useModuleCustomFields from '@/infrastructure/hooks/useModuleCustomFields';
 import { useQueryClient } from '@tanstack/react-query';
-import { App, Card, Col, Divider, Form, Input, Result, Row, Typography } from 'antd';
+import { CheckOutlined, UserAddOutlined, UserOutlined } from '@ant-design/icons';
+import { Alert, App, Button, Card, Col, Collapse, Divider, Flex, Form, Result, Row, Typography } from 'antd';
+import { ClientFields } from './ClientFields';
+import { customFieldsPayload, displayCustomValue } from './customFieldsPayload';
+import { buildClientFormView, ClientFormConfigContext, useClientFormConfig } from '@/infrastructure/hooks/useClientFormConfig';
+import { getSettings } from '@/infrastructure/querys/Settings';
+import usePageTitle from '@/infrastructure/hooks/usePageTitle';
+import useAppSettingsStore from '@/infrastructure/context/AppSettingsStore';
+import { ContactKind } from '@/domain/Client';
 
 const { Title } = Typography;
 import { ExceptionStatusType } from 'antd/es/result';
 import { AxiosError } from 'axios';
-import { FC, useState } from 'react';
+import { FC, useMemo, useState } from 'react';
 import {  useNavigate, useParams } from 'react-router-dom';
 
 const FormClient: FC<{ readonly?: boolean }> = ({ readonly = false }) => {
@@ -35,7 +44,9 @@ const FormClient: FC<{ readonly?: boolean }> = ({ readonly = false }) => {
 	const [form] = Form.useForm<Partial<Client>>();
 	
 	const { typeUser, brandId } = useUserStore(state => state.user);
+	const isDev = typeUser == TypeUser.dev;
 
+	const isMobile = useUserModeStore(state => state.isMobile);
 	const { notification, modal } = App.useApp();
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
@@ -44,38 +55,69 @@ const FormClient: FC<{ readonly?: boolean }> = ({ readonly = false }) => {
 	const { client, isLoading: isLoadingClient, isRefetching, isError, error: errorClient } = getClient(id);
 	const clientMutation = useMutationType(id ? 'update' : 'create');
 
-	const [exit, setExit] = useState<boolean>(false);
 	const [submitted, setSubmitted] = useState(false);
+	const [errorCount, setErrorCount] = useState(0);
+	const ownConfig = useClientFormConfig();
+	// Desarrollador: no tiene marca propia, así que los campos salen de la marca del cliente (o de la elegida al crear).
+	const watchedBrand = Form.useWatch('brandId', form);
+	const targetBrand = isDev ? (client?.brandId || watchedBrand || undefined) : undefined;
+	const { settings: brandSettings } = getSettings(targetBrand, isDev && !!targetBrand);
+	const config = useMemo(
+		() => (isDev && targetBrand && brandSettings ? buildClientFormView(brandSettings.formConfig.clients) : ownConfig),
+		[isDev, targetBrand, brandSettings, ownConfig],
+	);
+	const contactKinds = (['fiador', 'referencia'] as ContactKind[]).filter(kind => config.isSectionVisible(kind));
 
 	const isCreate = !id;
+	const { bindForm, markClean } = useUnsavedChangesGuard(readonly ? false : undefined);
+	const pageTitle = isCreate ? 'Nuevo cliente' : readonly ? 'Ver cliente' : 'Editar cliente';
+	// En móvil el título va en la barra del layout (icono + texto, a la izquierda) y la tarjeta no lo repite; con logo de marca la barra muestra el logo y el título se queda en la tarjeta.
+	const hasBrandLogo = useAppSettingsStore(state => !!(state.logoFullUrl || state.logoMarkUrl));
+	const titleInLayout = isMobile && !hasBrandLogo;
+	usePageTitle(titleInLayout ? pageTitle : undefined);
+	const listPath = `/${routePaths.DEFAULT_HOME}/${routePaths.CLIENTS}`;
 	const canManagePriority = useCanManagePriority();
 
-	const isDev = typeUser == TypeUser.dev;
 	const assignments = Form.useWatch('routeAssignments', form);
 	const routeIds = (assignments ?? []).map(item => item.routeId);
+	// Campos personalizados del crédito que se crea junto con el cliente (marca de la ruta del crédito).
+	const loanDraft = Form.useWatch('loan', form) as Partial<ClientLoanDraft> | undefined;
+	const allRoutes = useRouteStore(state => state.routes);
+	const loanRoute = allRoutes.find(item => item.id === resolveLoanRouteId(routeIds, loanDraft?.routeId));
+	const { activeCustomFields: loanCustomFields } = useModuleCustomFields('loans', loanRoute?.brandId);
 
 	/** El crédito solo se envía si se llenó alguno de sus datos principales; la ruta es la única (o la elegida entre varias). */
 	const buildLoan = (loan?: Partial<ClientLoanDraft>): ClientLoanDraft | undefined => {
 		const started = [loan?.valueCapital, loan?.valueQuotaFixed, loan?.agreedQuotas, loan?.paymentMethod].some(value => value !== undefined && value !== null && value !== '');
 		const routeId = resolveLoanRouteId(routeIds, loan?.routeId);
-		return started && loan && routeId ? { ...(loan as ClientLoanDraft), routeId } : undefined;
+		return started && loan && routeId ? { ...(loan as ClientLoanDraft), routeId, customFields: customFieldsPayload(loan.customFields, loanCustomFields) } : undefined;
 	};
 
 	const onFinish = async (values: Partial<Omit<Client, 'loansNumber'>>) => {
+		setErrorCount(0);
 		const loan = isCreate ? buildLoan(values.loan) : undefined;
 		// Con crédito: si el capital supera el efectivo disponible en la ruta, se confirma antes de guardar.
 		if (loan && !(await confirmWithinAvailableCash(modal, loan.routeId, parseFormNumber(loan.valueCapital)))) return;
+
+		// Fiadores y referencias: las secciones ocultas no se envían; un fiador requerido es obligatorio.
+		const contacts = values.contacts?.filter(contact => config.isSectionVisible(contact.kind));
+		if (config.isSectionRequired('fiador') && !(contacts ?? []).some(contact => contact?.kind === 'fiador')) {
+			notification.error({ message: 'Debes agregar al menos un fiador' });
+			return;
+		}
 
 		startLoading();
 		clientMutation.mutate({
 			...client,
 			...values,
+			...(contacts ? { contacts } : {}),
+			customFields: customFieldsPayload(values.customFields as Record<string, unknown>, config.activeCustomFields),
 			brandId: values.brandId ? values.brandId : brandId,
 			// Al crear, las rutas y prioridades salen del selector del formulario (el servidor las valida y aplica en una sola transacción).
 			...(isCreate ? { routeAssignments: values.routeAssignments, loan } : {}),
 		}, {
 			onSuccess: (response) => {
-				const data = response?.data;
+				markClean();
 				const loanNumber = response?.data?.loan_number;
 				notification.success({ message: loanNumber ? `Cliente creado y crédito #${loanNumber} creado` : `El cliente fue ${isCreate ? 'creado' : 'actualizado'} exitosamente` });
 				if (loanNumber) {
@@ -83,21 +125,8 @@ const FormClient: FC<{ readonly?: boolean }> = ({ readonly = false }) => {
 					for (const key of [queryKeyLoans.base, queryKeyPayments.base, queryKeyCollection.base, queryKeyReports.base]) void queryClient.invalidateQueries({ queryKey: [key] });
 				}
 				stopLoading();
-
-				if (exit) {
-					void queryClient.invalidateQueries({
-						queryKey: [queryKeyClients.base, queryKeyDefault.list],
-						exact: false,
-					});
-					setExit(false);
-					form.resetFields();
-					void navigate(-1);
-					return;
-				}
-
-				if (isCreate && data) {
-					void navigate(`/${routePaths.DEFAULT_HOME}/${routePaths.CLIENTS}/${data?.id}/editar`, { replace: true });
-				}
+				void queryClient.invalidateQueries({ queryKey: [queryKeyClients.base, queryKeyDefault.list], exact: false });
+				void navigate(listPath, { replace: true });
 			},
 			onError: (error) => {
 				stopLoading();
@@ -122,130 +151,86 @@ const FormClient: FC<{ readonly?: boolean }> = ({ readonly = false }) => {
 	}
 
 	return (
-		<Card
-			title={`${isCreate ? 'Crear' : readonly ? 'Ver' : 'Actualizar'} cliente`}
-			style={{ overflowX: 'hidden', overflowY: 'auto', maxHeight: '84vh' }}
-		>
-			<Form
-				form={form}
-				layout="vertical"
-				key={client ? `${client.id}-${client.updatedAt}` : 'new'}
-				initialValues={client ? client : {}}
-				disabled={isRefetching || isLoading || readonly}
-				onFinish={values => void onFinish(values)}
-				onFinishFailed={() => setSubmitted(true)}
+		<ClientFormConfigContext.Provider value={config}>
+			<Card
+				title={titleInLayout ? undefined : <PageTitle icon={isCreate ? <UserAddOutlined /> : <UserOutlined />} title={pageTitle} />}
+				className="kb-form-card"
 			>
-				<Row gutter={[16, 0]}>
-					{(isDev) &&
-						<Col {...spanConfigForm.medium}>
-							<Form.Item
-								label="Marca"
-								name={'brandId'}
-								rules={[ ruleRequired ]}
-							>
-								<SelectBrand disabled={!isCreate} />
-							</Form.Item>
-						</Col>
-					}
-					<Col {...spanConfigForm.medium}>
+				<Form
+					form={form}
+					{...bindForm(form)}
+					layout="vertical"
+					key={client ? `${client.id}-${client.updatedAt}` : 'new'}
+					initialValues={client ? client : {}}
+					disabled={isRefetching || isLoading || readonly}
+					onFinish={values => void onFinish(values)}
+					onFinishFailed={info => { setSubmitted(true); setErrorCount(info.errorFields.length); }}
+				>
+					{errorCount > 0 && (
+						<Alert type="error" showIcon style={{ marginBottom: 16 }} message={`Revisa ${errorCount} ${errorCount === 1 ? 'campo' : 'campos'} antes de guardar`} />
+					)}
+					<Row gutter={[16, 0]}>
+						<ClientFields isDev={isDev} isCreate={isCreate} />
+						{contactKinds.length > 0 && (
+							<Col xs={24}>
+								<ClientContactsList kinds={contactKinds} />
+							</Col>
+						)}
+					</Row>
+					{!isCreate && config.archivedCustomFields.length > 0 && (
+						<Collapse
+							ghost
+							items={[{
+								key: 'archived',
+								label: `Campos archivados (${config.archivedCustomFields.length})`,
+								children: (
+									<Flex vertical gap={8}>
+										{config.archivedCustomFields.map(field => (
+											<Flex key={field.key} justify="space-between" gap={8}>
+												<Typography.Text type="secondary">{field.label}</Typography.Text>
+												<Typography.Text>{displayCustomValue(client?.customFields?.[field.key], field)}</Typography.Text>
+											</Flex>
+										))}
+									</Flex>
+								),
+							}]}
+						/>
+					)}
+					{isCreate && (
 						<Form.Item
-							label="Nombre completo"
-							name={'fullName'}
-							rules={[ ruleRequired ]}
+							name="routeAssignments"
+							rules={[{ validator: (_, assigned?: unknown[]) => (assigned?.length ? Promise.resolve() : Promise.reject(new Error('Elige al menos una ruta'))) }]}
 						>
-							<Input placeholder="Nombre completo del cliente" />
+							<ClientRoutesPicker />
 						</Form.Item>
-					</Col>
-					<Col {...spanConfigForm.medium}>
-						<Form.Item
-							label="Documento"
-							name={'idDocument'}
-							rules={[ ruleRequired ]}
-						>
-							<Input inputMode="numeric" placeholder="Documento del cliente" />
-						</Form.Item>
-					</Col>
-					<Col {...spanConfigForm.medium}>
-						<Form.Item
-							label="Celular"
-							name={'currentMobile'}
-							rules={[ ruleRequired ]}
-						>
-							<Input inputMode="tel" placeholder="Celular del cliente" />
-						</Form.Item>
-					</Col>
-					<Col {...spanConfigForm.medium}>
-						<Form.Item
-							label="Dirección"
-							name={'currentAddress'}
-							rules={[ ruleRequired ]}
-						>
-							<Input placeholder="Dirección del cliente" />
-						</Form.Item>
-					</Col>
-					<Col {...spanConfigForm.medium}>
-						<Form.Item
-							label="Barrio"
-							name={'neighborhood'}
-						>
-							<Input placeholder="Barrio del cliente" />
-						</Form.Item>
-					</Col>
-					<Col {...spanConfigForm.medium}>
-						<Form.Item
-							label="Teléfono"
-							name={'currentPhone'}
-						>
-							<Input inputMode="tel" placeholder="Teléfono del cliente" />
-						</Form.Item>
-					</Col>
-					<Col {...spanConfigForm.medium}>
-						<Form.Item
-							label="Fecha vinculación"
-							name={'linkingDate'}
-							rules={[ ruleRequired ]}
-						>
-							<InputDate useCurrentDate disabled={!isCreate} placeholder="Fecha vinculación del cliente" />
-						</Form.Item>
-					</Col>
+					)}
+					{isCreate && routeIds.length > 0 && <ClientLoanSection form={form} routeIds={routeIds} submitted={submitted} />}
+				</Form>
 
-					<Col xs={24}>
-						<ClientContactsList />
-					</Col>
-				</Row>
-				{isCreate && (
-					<Form.Item
-						name="routeAssignments"
-						rules={[{ validator: (_, assigned?: unknown[]) => (assigned?.length ? Promise.resolve() : Promise.reject(new Error('Elige al menos una ruta'))) }]}
-					>
-						<ClientRoutesPicker />
-					</Form.Item>
+				{id && client && <ClientRoutesSection client={client} canManage={canManagePriority} readonly={readonly} />}
+
+				{id && (
+					<>
+						<Divider style={{ marginTop: 8 }} />
+						<Title level={5} style={{ marginBottom: 12 }}>
+							Historial de créditos
+						</Title>
+						<ClientCreditSummary clientId={id} />
+					</>
 				)}
-				{isCreate && routeIds.length > 0 && <ClientLoanSection form={form} routeIds={routeIds} submitted={submitted} />}
-			</Form>
 
-			{id && client && <ClientRoutesSection client={client} canManage={canManagePriority} readonly={readonly} />}
-
-			{id && (
-				<>
-					<Divider style={{ marginTop: 8 }} />
-					<Title level={5} style={{ marginBottom: 12 }}>
-						Historial de créditos
-					</Title>
-					<ClientCreditSummary clientId={id} />
-				</>
-			)}
-
-			<ActionsButton
-				textAction={id ? 'Actualizar' : 'Crear'}
-				hiddenSave={readonly}
-				hiddenSaveAndExit={readonly}
-				isLoading={isRefetching || isLoading}
-				onClickCancel={() => void navigate(-1)}
-				onClickSave={form.submit}
-				onClickSaveExit={() => { form.submit(); setExit(true); }}
-			/>
-		</Card>
+				<FormFooter>
+					<Button type="primary" danger ghost onClick={() => void navigate(listPath)} disabled={isLoading}>
+						{readonly ? 'Volver' : 'Cancelar'}
+					</Button>
+					{!readonly && (
+						<Button type="primary" icon={<CheckOutlined />} loading={isRefetching || isLoading} onClick={form.submit}>
+							{id ? 'Guardar cliente' : 'Crear cliente'}
+						</Button>
+					)}
+				</FormFooter>
+			</Card>
+		</ClientFormConfigContext.Provider>
 	);
 };
 

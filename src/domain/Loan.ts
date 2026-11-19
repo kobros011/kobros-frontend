@@ -18,6 +18,8 @@ export interface Loan extends BaseDomain {
 	valueTotalLoan: string,
 	interestRate: string,
 	clientrouteId?: string
+	/** Valores de los campos personalizados de la marca (clave → valor). */
+	customFields?: Record<string, unknown>
 }
 
 export interface LoanFull extends Partial<Loan> {
@@ -63,6 +65,7 @@ export class LoanModel {
 			valueTotalLoan: DTO.value_total_loan,
 			interestRate: DTO.interest_rate,
 			clientrouteId: DTO.clientroute_id,
+			customFields: DTO.custom_fields ?? {},
 			active: DTO.active,
 			updatedAt: DTO.updated_at,
 			createdAt: DTO.created_at,
@@ -104,6 +107,7 @@ export class LoanModel {
 			valueTotalLoan: DTO.value_total_loan,
 			interestRate: DTO.interest_rate,
 			clientrouteId: DTO.clientroute_id,
+			customFields: DTO.custom_fields ?? {},
 			currentMobile: DTO.current_mobile,
 			active: DTO.active,
 			updatedAt: DTO.updated_at,
@@ -127,6 +131,7 @@ export class LoanModel {
 			valueTotalLoan: DTO.value_total_loan,
 			interestRate: DTO.interest_rate,
 			clientrouteId: DTO.clientroute_id,
+			customFields: DTO.custom_fields ?? {},
 			canceledQuotas: DTO.canceled_quotas,
 			pendingQuotas: DTO.pending_quotas,
 			totalDefault: DTO.total_default,
@@ -161,6 +166,7 @@ export class LoanModel {
 			value_total_loan: domain.valueTotalLoan,
 			interest_rate: domain.interestRate,
 			clientroute_id: domain.clientrouteId,
+			...(domain.customFields ? { custom_fields: domain.customFields } : {}),
 			current_address: domain.currentAddress,
 			current_mobile: domain.currentMobile,
 			value_payment: domain.valuePayment ? Number(domain.valuePayment) : undefined,

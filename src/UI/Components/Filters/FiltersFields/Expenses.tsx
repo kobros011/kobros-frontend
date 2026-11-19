@@ -1,9 +1,11 @@
 import { ItemFilter } from '..';
+import type { CustomFieldDef } from '@/domain/Settings';
+import { customFilterItems } from './Client';
 import InputDate from '../../Fields/InputDate';
 import { SelectConcept } from '../../Fields/SelectConcept';
 import { SelectRoute } from '../../Fields/SelectRoute';
 
-export const ExpenseFiltersFields = (hasMultipleRoutes: boolean) => {
+export const ExpenseFiltersFields = (hasMultipleRoutes: boolean, customFields: CustomFieldDef[] = []) => {
 	const fields: ItemFilter[] = [
 		{
 			key: 'routeId',
@@ -34,5 +36,5 @@ export const ExpenseFiltersFields = (hasMultipleRoutes: boolean) => {
 		},
 	];
 
-	return fields;
+	return [...fields, ...customFilterItems(customFields)];
 };

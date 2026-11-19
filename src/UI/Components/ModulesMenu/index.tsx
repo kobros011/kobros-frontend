@@ -1,26 +1,34 @@
-import { Button, Drawer, Flex, Menu, theme } from 'antd';
-import { FC, ReactNode, useState } from 'react';
+import { Button, Drawer, Flex, Menu, MenuProps, theme, Typography } from 'antd';
+import { FC, useState } from 'react';
 import MenuItem from './MenuItem';
+import useGuardedNavigate from '../useGuardedNavigate';
 import routePaths from '@/constants/routePaths';
-import { TbRouteSquare, TbBrandAirtable } from 'react-icons/tb';
-import { FaUsers } from 'react-icons/fa';
-import { BsPersonCircle } from 'react-icons/bs';
 import { Link, useLocation } from 'react-router-dom';
 import useUserStore from '@/infrastructure/context/User/UserDataStore';
 import { getPermission } from '@/infrastructure/utils/Permissions';
-import { MdOutlineReceiptLong, MdOutlinePayments, MdOutlineAccountBalance, MdOutlineBarChart } from 'react-icons/md';
-import { DollarOutlined, MoreOutlined, SettingOutlined } from '@ant-design/icons';
-import { MdOutlineRequestQuote } from 'react-icons/md';
+import { AppstoreOutlined } from '@ant-design/icons';
+import {
+	ADMIN_SECTION_LABEL,
+	ItemTypeWithKey,
+	OPERATION_SECTION_LABEL,
+	adminItems,
+	operationalItems,
+} from './menuItems';
 
 const MOBILE_PRIMARY_COUNT = 4;
 
-type ItemTypeWithKey =  {
-	label: ReactNode,
-	icon: ReactNode,
-	key: string;
-	to: string;
-	isShow: boolean;
-};
+/** Clic con Ctrl, Cmd, Mayús o botón del medio: se deja al navegador (abrir en otra pestaña). */
+const isModifiedClick = (event: { metaKey: boolean, ctrlKey: boolean, shiftKey: boolean, button?: number }) =>
+	event.metaKey || event.ctrlKey || event.shiftKey || (event.button !== undefined && event.button !== 0);
+
+const SectionLabel: FC<{ children: string }> = ({ children }) => (
+	<Typography.Text
+		type="secondary"
+		style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.08em' }}
+	>
+		{children}
+	</Typography.Text>
+);
 
 export const ModulesMenu: FC<{ collapsed: boolean, mobile?: boolean }> = ({ collapsed, mobile = false }) => {
 
@@ -28,106 +36,48 @@ export const ModulesMenu: FC<{ collapsed: boolean, mobile?: boolean }> = ({ coll
 	const { typeUser } = useUserStore(state => state.user);
 	const { hasShowViewsKeys } = getPermission(typeUser);
 	const [moreOpen, setMoreOpen] = useState(false);
+	// Toda navegación del menú pasa por aquí: pregunta antes de salir de un formulario con cambios sin guardar.
+	const go = useGuardedNavigate();
 
 	const location = useLocation();
 	const pattern = new RegExp(`${routePaths.DEFAULT_HOME}/([^/]+)`); // Expresión regular construida dinámicamente
 	const locationKey = location.pathname.match(pattern)?.[1];
-
-	// Operativos: lo que se usa día a día. Administrativos: configuración de la operación (menos frecuente).
-	const operationalItems: ItemTypeWithKey[] = [
-		{
-			label: 'Clientes',
-			key:routePaths.CLIENTS,
-			isShow: true,
-			icon: <FaUsers style={{ fontSize: 18, marginLeft: '-1px' }} />,
-			to: `${routePaths.DEFAULT_HOME}/${routePaths.CLIENTS}`,
-		},
-		{
-			label: 'Créditos',
-			key: routePaths.LOANS,
-			isShow: true,
-			icon: <MdOutlineRequestQuote style={{ fontSize: 20, marginLeft: '-2px' }} />,
-			to: `${routePaths.DEFAULT_HOME}/${routePaths.LOANS}`,
-		},
-		{
-			label: 'Cartera',
-			key: routePaths.PAYMENTS,
-			isShow: true,
-			icon: <DollarOutlined style={{ fontSize: 18, marginLeft: '-1px' }} />,
-			to:`${routePaths.DEFAULT_HOME}/${routePaths.PAYMENTS}`,
-		},
-		{
-			label: 'Cobro del día',
-			key: routePaths.COLLECTION_TODAY,
-			isShow: true,
-			icon: <MdOutlinePayments style={{ fontSize: 18, marginLeft: '-1px' }} />,
-			to: `${routePaths.DEFAULT_HOME}/${routePaths.COLLECTION_TODAY}`,
-		},
-		{
-			label: 'Gastos',
-			key: routePaths.EXPENSES,
-			isShow: true,
-			icon: <MdOutlineReceiptLong style={{ fontSize: 18, marginLeft: '-1px' }} />,
-			to: `${routePaths.DEFAULT_HOME}/${routePaths.EXPENSES}`,
-		},
-		{
-			label: 'Liquidaciones',
-			key: routePaths.LIQUIDATIONS,
-			isShow: true,
-			icon: <MdOutlineAccountBalance style={{ fontSize: 18, marginLeft: '-1px' }} />,
-			to: `${routePaths.DEFAULT_HOME}/${routePaths.LIQUIDATIONS}`,
-		},
-		{
-			label: 'Reportes',
-			key: routePaths.REPORTS,
-			isShow: true,
-			icon: <MdOutlineBarChart style={{ fontSize: 18, marginLeft: '-1px' }} />,
-			to: `${routePaths.DEFAULT_HOME}/${routePaths.REPORTS_DASHBOARD}`,
-		},
-	];
-
-	const adminItems: ItemTypeWithKey[] = [
-		{
-			label: 'Marcas',
-			key: routePaths.BRANDS,
-			isShow: true,
-			icon: <TbBrandAirtable style={{ fontSize: 18, marginLeft: '-1px' }} />,
-			to:`${routePaths.DEFAULT_HOME}/${routePaths.BRANDS}`,
-		},
-		{
-			label: 'Rutas',
-			key: routePaths.ROUTES,
-			isShow: true,
-			icon: <TbRouteSquare style={{ fontSize: 18, marginLeft: '-1px' }} />,
-			to:`${routePaths.DEFAULT_HOME}/${routePaths.ROUTES}`,
-		},
-		{
-			label: 'Usuarios',
-			key: routePaths.USERS,
-			isShow: true,
-			icon: <BsPersonCircle style={{ fontSize: 18, marginLeft: '-1px' }} />,
-			to:`${routePaths.DEFAULT_HOME}/${routePaths.USERS}`,
-		},
-		{
-			label: 'Configuración',
-			key: routePaths.SETTINGS,
-			isShow: true,
-			icon: <SettingOutlined style={{ fontSize: 18, marginLeft: '-1px' }} />,
-			to: `${routePaths.DEFAULT_HOME}/${routePaths.SETTINGS}`,
-		},
-	];
 
 	const operationalFiltered = operationalItems.filter(item => hasShowViewsKeys.includes(item.key));
 	const adminFiltered = adminItems.filter(item => hasShowViewsKeys.includes(item.key));
 	const menuItemsFiltered = [...operationalFiltered, ...adminFiltered];
 
 	if (!mobile) {
-		const toMenuItem = ({ label, to, ...item }: ItemTypeWithKey) => ({ label: <Link to={to}>{label}</Link>, ...item });
-		const items = [
-			...operationalFiltered.map(toMenuItem),
-			...(adminFiltered.length > 0 ? [{ type: 'divider' as const, key: 'admin-divider' }] : []),
-			...adminFiltered.map(toMenuItem),
-		];
+		// El enlace conserva su href (abrir en otra pestaña); el clic normal lo maneja el menú, que navega con o sin confirmación.
+		const toMenuItem = ({ label, to, ...item }: ItemTypeWithKey) => ({
+			label: <Link to={to} onClick={event => { if (!isModifiedClick(event)) event.preventDefault(); }}>{label}</Link>,
+			...item,
+		});
+		const pathByKey = new Map([...operationalFiltered, ...adminFiltered].map(item => [item.key, `/${item.to}`]));
+		const operationChildren = operationalFiltered.map(toMenuItem);
+		const adminChildren = adminFiltered.map(toMenuItem);
+
+		// Con el menú angosto antd oculta los títulos de grupo: ahí se separa con un divider.
+		const items: MenuProps['items'] = collapsed
+			? [
+				...operationChildren,
+				...(adminChildren.length > 0 ? [{ type: 'divider' as const, key: 'admin-divider' }] : []),
+				...adminChildren,
+			]
+			: [
+				...(operationChildren.length > 0 ? [{
+					type: 'group' as const,
+					key: 'group-operation',
+					label: <SectionLabel>{OPERATION_SECTION_LABEL}</SectionLabel>,
+					children: operationChildren,
+				}] : []),
+				...(adminChildren.length > 0 ? [{
+					type: 'group' as const,
+					key: 'group-admin',
+					label: <SectionLabel>{ADMIN_SECTION_LABEL}</SectionLabel>,
+					children: adminChildren,
+				}] : []),
+			];
 
 		return (
 			<Menu
@@ -135,6 +85,10 @@ export const ModulesMenu: FC<{ collapsed: boolean, mobile?: boolean }> = ({ coll
 				items={items}
 				inlineCollapsed={collapsed}
 				selectedKeys={[ locationKey ?? routePaths.INICIO ]}
+				onClick={({ key, domEvent }) => {
+					const path = pathByKey.get(key);
+					if (path && !isModifiedClick(domEvent)) go(path);
+				}}
 			/>
 		);
 	}
@@ -144,14 +98,20 @@ export const ModulesMenu: FC<{ collapsed: boolean, mobile?: boolean }> = ({ coll
 	const hasOverflow = overflowItems.length > 0;
 	const moreIsActive = overflowItems.some(item => locationKey === item.key);
 
+	const adminKeys = new Set(adminFiltered.map(item => item.key));
+	const overflowSections = [
+		{ title: OPERATION_SECTION_LABEL, items: overflowItems.filter(item => !adminKeys.has(item.key)) },
+		{ title: ADMIN_SECTION_LABEL, items: overflowItems.filter(item => adminKeys.has(item.key)) },
+	].filter(section => section.items.length > 0);
+
 	return (
 		<>
 			<Flex className={'menu'} style={{ background: colorBgContainer }}>
 				{primaryItems.map(({ isShow, key, ...item }) => (
-					<MenuItem isActive={locationKey == key} key={key} {...item} mobile={mobile}/>
+					<MenuItem isActive={locationKey == key} key={key} {...item} mobile={mobile} onNavigate={go} />
 				))}
 				{hasOverflow && (
-					<Flex justify="center" align="center" vertical style={{ flex: '1 1 0', minWidth: 0 }}>
+					<Flex justify="center" align="center" vertical style={{ flex: '0 1 auto', minWidth: 0 }}>
 						<Button
 							type="text"
 							onClick={() => setMoreOpen(true)}
@@ -161,6 +121,7 @@ export const ModulesMenu: FC<{ collapsed: boolean, mobile?: boolean }> = ({ coll
 								minWidth: 44,
 								flex: 1,
 								paddingTop: 5,
+								paddingInline: 10,
 								border: 'none',
 								display: 'flex',
 								alignItems: 'center',
@@ -175,8 +136,8 @@ export const ModulesMenu: FC<{ collapsed: boolean, mobile?: boolean }> = ({ coll
 								className="flex-menu-item"
 								style={{ color: moreIsActive ? colorPrimary : 'inherit' }}
 							>
-								<MoreOutlined style={{ fontSize: 18 }} />
-								<span style={{ color: moreIsActive ? colorPrimary : 'inherit', fontSize: 12 }}>Más</span>
+								<AppstoreOutlined style={{ fontSize: 18 }} />
+								<span style={{ color: moreIsActive ? colorPrimary : 'inherit', fontSize: 11 }}>Más</span>
 							</Flex>
 						</Button>
 					</Flex>
@@ -189,26 +150,38 @@ export const ModulesMenu: FC<{ collapsed: boolean, mobile?: boolean }> = ({ coll
 				height="auto"
 				open={moreOpen}
 				onClose={() => setMoreOpen(false)}
-				styles={{ body: { padding: 0, background: colorBgContainer } }}
+				styles={{ body: { padding: 0, background: colorBgContainer }, mask: { backdropFilter: 'blur(4px)' } }}
 			>
-				{overflowItems.map(({ label, icon, to, key }) => (
-					<Link
-						key={key}
-						to={`/${to}`}
-						onClick={() => setMoreOpen(false)}
-						style={{
-							display: 'flex',
-							alignItems: 'center',
-							gap: 12,
-							padding: '12px 16px',
-							minHeight: 44,
-							color: 'inherit',
-							background: locationKey === key ? colorPrimaryBgHover : undefined,
-						}}
-					>
-						{icon}
-						<span>{label}</span>
-					</Link>
+				{overflowSections.map(section => (
+					<div key={section.title}>
+						<div style={{ padding: '12px 16px 4px' }}>
+							<SectionLabel>{section.title}</SectionLabel>
+						</div>
+						{section.items.map(({ label, icon, to, key }) => (
+							<Link
+								key={key}
+								to={`/${to}`}
+								onClick={event => {
+									if (isModifiedClick(event)) return;
+									event.preventDefault();
+									setMoreOpen(false);
+									go(`/${to}`);
+								}}
+								style={{
+									display: 'flex',
+									alignItems: 'center',
+									gap: 12,
+									padding: '12px 16px',
+									minHeight: 48,
+									color: locationKey === key ? colorPrimary : 'inherit',
+									background: locationKey === key ? colorPrimaryBgHover : undefined,
+								}}
+							>
+								{icon}
+								<span>{label}</span>
+							</Link>
+						))}
+					</div>
 				))}
 			</Drawer>
 		</>

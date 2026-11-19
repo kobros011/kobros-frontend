@@ -11,6 +11,8 @@ export interface Route extends BaseDomain {
 	loansNumber: number
 	/** Moneda de la ruta (código ISO); una de las monedas de la marca. */
 	currency: string
+	/** Valores de los campos personalizados de la marca (clave → valor). */
+	customFields?: Record<string, unknown>
 }
 
 export class RouteModel {
@@ -31,6 +33,7 @@ export class RouteModel {
 			allowedUsersIds: DTO.allowed_users_ids ?? [],
 			loansNumber: DTO.loans_number,
 			currency: DTO.currency,
+			customFields: DTO.custom_fields ?? {},
 			active: DTO.active,
 			updatedAt: DTO.updated_at,
 			createdAt: DTO.created_at,
@@ -47,6 +50,7 @@ export class RouteModel {
 			allowed_users_ids: domain.allowedUsersIds ?? [],
 			// Solo se envía si se eligió: sin valor el servidor usa la única moneda de la marca (o la actual al editar).
 			...(domain.currency ? { currency: domain.currency } : {}),
+			...(domain.customFields ? { custom_fields: domain.customFields } : {}),
 			...(domain.id ? { id: domain.id } : {}),
 		};
 	} 

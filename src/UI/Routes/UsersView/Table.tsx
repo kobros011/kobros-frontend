@@ -12,13 +12,15 @@ interface TableUsersProps {
 	isSearching: boolean
 	actions: OnClickActions<User>
 	type: 'active' | 'inactive'
+	/** Dónde dibujar la barra de vista en móvil (ver `toolbarTarget` de CustomTable). */
+	toolbarTarget?: HTMLElement | null
 	setCount:  React.Dispatch<React.SetStateAction<{
 		active: number;
 		inactive: number;
 	}>>
 }
 
-export const TableUsers: FC<TableUsersProps> = ({ isSearching, actions, type, setCount }) => {
+export const TableUsers: FC<TableUsersProps> = ({ isSearching, actions, type, setCount, toolbarTarget }) => {
 	const moduleName = MODULESNAME.users;
 	const filters = filtersStore(state => state.filtersMap[moduleName]);
 
@@ -59,6 +61,7 @@ export const TableUsers: FC<TableUsersProps> = ({ isSearching, actions, type, se
 			dataSource={users}
 			columns={getColumns(actions)}
 			moduleName={moduleName}
+			toolbarTarget={toolbarTarget}
 			titleField="fullName"
 			onRowClick={actions.see}
 			pagination={{ page, pageSize, total, onChange }}

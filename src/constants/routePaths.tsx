@@ -24,6 +24,8 @@ const routePaths = {
 	REPORTS_WEEKLY: 'reportes/semanal',
 	REPORTS_ANNUAL: 'reportes/anual',
 	SETTINGS: 'configuracion',
+	SETTINGS_FORMS: 'formularios',
+	SETTINGS_FIELDS: 'campos',
 };
 
 export default routePaths;

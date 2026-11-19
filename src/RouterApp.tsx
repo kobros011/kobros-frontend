@@ -54,6 +54,7 @@ const ReportsAnnualView = lazy(() => import('./UI/Routes/ReportsView/AnnualRepor
 
 // Configuración
 const SettingsView = lazy(() => import('@routes/SettingsView/index'));
+const FormsConfigView = lazy(() => import('@routes/SettingsView/FormsConfig/index'));
 
 const HomeRoutes = () => {
 	const { typeUser } = useUserStore(state => state.user);
@@ -166,7 +167,12 @@ const HomeRoutes = () => {
 		{
 			path: routePaths.SETTINGS,
 			children: (
-				<Route index element={<SettingsView />} />
+				<>
+					<Route index element={<SettingsView />} />
+					<Route path={routePaths.SETTINGS_FORMS} element={<Navigate to={`../${routePaths.SETTINGS_FIELDS}/obligatorios`} replace />} />
+					<Route path={routePaths.SETTINGS_FIELDS} element={<Navigate to="obligatorios" replace />} />
+					<Route path={`${routePaths.SETTINGS_FIELDS}/:tab`} element={<FormsConfigView />} />
+				</>
 			),
 		},
 	];

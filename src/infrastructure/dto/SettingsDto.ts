@@ -1,3 +1,33 @@
+export interface FieldSettingDto {
+	required: boolean
+	visible: boolean
+}
+
+export interface CustomFieldDefDto {
+	key: string
+	label: string
+	type: 'text' | 'number' | 'money' | 'email' | 'phone' | 'date' | 'select' | 'boolean'
+	required: boolean
+	visible: boolean
+	archived: boolean
+	options: string[]
+	show_in_table: boolean
+	show_in_card: boolean
+	filterable: boolean
+}
+
+export interface FormConfigDto {
+	version: number
+	clients: {
+		fields: Record<'current_phone' | 'neighborhood' | 'linking_date', FieldSettingDto>
+		sections: Record<'fiador' | 'referencia', FieldSettingDto>
+		custom: CustomFieldDefDto[]
+	}
+	loans?: { custom: CustomFieldDefDto[] }
+	expenses?: { custom: CustomFieldDefDto[] }
+	routes?: { custom: CustomFieldDefDto[] }
+}
+
 export interface SettingsDto {
 	brand_id: string | null
 	brand_name: string | null
@@ -18,4 +48,5 @@ export interface SettingsDto {
 	number_decimals: 0 | 2
 	currencies: string[]
 	logo_enabled: boolean
+	form_config?: FormConfigDto
 }

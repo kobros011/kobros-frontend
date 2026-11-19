@@ -37,4 +37,5 @@ export interface ClientDto extends BaseDto {
 	active_loans_count?: number
 	loan_id?: string | null
 	loan_number?: number | null
+	custom_fields?: Record<string, unknown>
 }

@@ -1,11 +1,13 @@
 import { Expense } from '@/domain/Expenses';
 import { ExpensesConcepts } from '@/domain/ExpensesConcepts';
 import { useRoutes } from '@/infrastructure/hooks/useRoutes';
+import { customColumns } from '@/UI/Components/Table/customColumns';
+import type { CustomFieldDef } from '@/domain/Settings';
 import { BuildColumns, CustomColumn } from '@/infrastructure/utils/BuildColumns';
 import { OnClickActions, useRowActions } from '@/UI/Components/RowActions';
 import { TagConcept } from '@/UI/Components/TagConcept';
 
-export const getColumns = (actions: OnClickActions<Expense>) => {
+export const getColumns = (actions: OnClickActions<Expense>, customFields: CustomFieldDef[] = []) => {
 
 	const { routes } = useRoutes();
 	const { columnActions } = useRowActions<Expense>(actions);
@@ -61,6 +63,7 @@ export const getColumns = (actions: OnClickActions<Expense>) => {
 			width: 200,
 			defaultVisible: false,
 		},
+		...customColumns<Expense>(customFields),
 		columnActions,
 	];
 

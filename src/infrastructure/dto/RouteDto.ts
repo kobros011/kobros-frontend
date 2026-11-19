@@ -9,4 +9,5 @@ export interface RouteDto extends BaseDto {
 	allowed_users_ids: string[]
 	loans_number: number
 	currency: string
+	custom_fields?: Record<string, unknown>
 }

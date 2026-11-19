@@ -1,19 +1,23 @@
-import { Alert, App, Button, Card, Col, ColorPicker, Divider, Empty, Flex, Form, Input, Radio, Row, Select, Typography } from 'antd';
+import { CheckOutlined, PlusOutlined, SettingOutlined } from '@ant-design/icons';
+import useUnsavedChangesGuard from '@/infrastructure/hooks/useUnsavedChangesGuard';
+import { Alert, App, Button, Card, Col, ColorPicker, Empty, Flex, Form, Input, Radio, Row, Select, theme, Typography } from 'antd';
 import type { ColorPickerProps } from 'antd';
 import { ChangeEvent, FC, ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import BrandLogo, { BrandLogoInfo } from '@/UI/Components/BrandLogo';
-import { DEFAULT_APP_NAME, LogoVariant, Settings, SettingsForm } from '@/domain/Settings';
+import { LogoVariant, Settings, SettingsForm } from '@/domain/Settings';
 import { queryKeySettings } from '@/constants/queryKeys';
 import { TypeUser } from '@/constants/types';
 import useUserStore from '@/infrastructure/context/User/UserDataStore';
+import useAppSettingsStore from '@/infrastructure/context/AppSettingsStore';
+import useSettingsBrandStore from '@/infrastructure/context/SettingsBrandStore';
 import useUserModeStore from '@/infrastructure/context/User/UserModeStore';
 import { getListBrands } from '@/infrastructure/querys/Brand';
 import { deleteLogo, getSettings, updateSettings, uploadLogo } from '@/infrastructure/querys/Settings';
 import { normalizeTypeUser } from '@/infrastructure/utils/defaultHomeRoute';
 import { handleError } from '@/infrastructure/utils/handleError';
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 type Color = Parameters<NonNullable<ColorPickerProps['onChange']>>[0];
 type SizeType = 'small' | 'middle';
@@ -177,8 +181,11 @@ const LogoSlotEditor: FC<{
 						// clásico de flexbox) y una foto grande se sale de la caja aunque tenga max-width: 100%.
 						style={{ maxHeight: '100%', maxWidth: '100%', minWidth: 0, minHeight: 0, objectFit: 'contain', display: 'block' }}
 					/>
-				) : (
+				) : ownLogoUrl ? (
 					<BrandLogo key={`${variant}-${logoInfo.logoFullUrl ?? ''}-${logoInfo.logoMarkUrl ?? ''}`} variant={variant} height={previewHeight} {...logoInfo} />
+				) : (
+					// Sin logo propio la casilla queda vacía: no se muestra el logo de respaldo.
+					<PlusOutlined aria-hidden style={{ fontSize: 16, opacity: 0.4 }} />
 				)}
 			</LogoPickerBox>
 
@@ -194,7 +201,7 @@ const LogoSlotEditor: FC<{
 							<Button type="primary" size={size} loading={uploadMutation.isPending} onClick={onSave}>
 								Guardar logo
 							</Button>
-							<Button size={size} disabled={uploadMutation.isPending} onClick={discardPending}>
+							<Button size={size} type="primary" danger ghost disabled={uploadMutation.isPending} onClick={discardPending}>
 								Cancelar
 							</Button>
 						</Flex>
@@ -211,7 +218,11 @@ const LogoSlotEditor: FC<{
 	);
 };
 
-import { CurrenciesCard } from './CurrenciesCard';
+import { CurrenciesField } from './CurrenciesField';
+import './settings.css';
+import FormFooter from '@/UI/Components/FormFooter';
+import PageTitle from '@/UI/Components/PageTitle';
+import SettingsTabs from './SettingsTabs';
 
 const toForm = (settings?: Settings): SettingsForm => ({
 	brandName: settings?.brandName ?? '',
@@ -229,12 +240,17 @@ const SettingsView: FC = () => {
 	const { notification } = App.useApp();
 	const queryClient = useQueryClient();
 	const isMobile = useUserModeStore(state => state.isMobile);
+	// En móvil el título con icono vive en la barra del layout; si la marca tiene logo, la barra muestra el logo y el título queda en la tarjeta.
+	const hasBrandLogo = useAppSettingsStore(state => !!(state.logoFullUrl || state.logoMarkUrl));
+	const showCardTitle = !isMobile || hasBrandLogo;
+	const { token } = theme.useToken();
 	const size: SizeType = isMobile ? 'small' : 'middle';
 
 	const { typeUser, brandId: ownBrandId } = useUserStore(state => state.user);
 	const isDev = normalizeTypeUser(typeUser) === TypeUser.dev;
 
-	const [selectedBrand, setSelectedBrand] = useState<string | undefined>(undefined);
+	const selectedBrand = useSettingsBrandStore(state => state.brandId);
+	const setSelectedBrand = useSettingsBrandStore(state => state.setBrandId);
 	const brandId = isDev ? selectedBrand : ownBrandId || undefined;
 	const canLoad = !isDev || !!selectedBrand;
 
@@ -244,6 +260,7 @@ const SettingsView: FC = () => {
 	const [form] = Form.useForm<SettingsForm>();
 	const primaryColor = Form.useWatch('primaryColor', form);
 	const [dirty, setDirty] = useState(false);
+	useUnsavedChangesGuard(dirty);
 
 	const updateMutation = updateSettings(brandId);
 	const uploadMutation = uploadLogo(brandId);
@@ -303,118 +320,102 @@ const SettingsView: FC = () => {
 	const primaryTooLight = luminance !== null && luminance > 0.75;
 
 	return (
-		<Card>
-			<div className="page-header">
-				<Title level={2} style={{ marginBottom: 0 }}>Configuración</Title>
-				<Text type="secondary">Personaliza la marca y el formato con el que se muestran los datos.</Text>
-			</div>
+		<Card
+			className="kb-form-card"
+			title={showCardTitle ? <PageTitle icon={<SettingOutlined />} title="Configuración" /> : undefined}
+		>
+			<div className="kb-settings">
+				<SettingsTabs active="general" />
 
-			<Divider />
-
-			{isDev && (
-				<Flex vertical gap={4} style={{ marginBottom: 24, maxWidth: 420 }}>
-					<Text strong>Marca a configurar</Text>
+				{isDev && (
 					<Select
 						showSearch
 						optionFilterProp="label"
 						placeholder="Elige una marca"
+						aria-label="Marca a configurar"
 						value={selectedBrand}
 						onChange={setSelectedBrand}
 						options={brandOptions}
-						size={size}
+						style={{ width: '100%', maxWidth: 320, marginBottom: 16 }}
 					/>
-				</Flex>
-			)}
+				)}
 
-			{!canLoad ? (
-				<Empty description="Elige una marca para ver y editar su configuración" />
-			) : (
-				<Form
-					form={form}
-					layout="vertical"
-					disabled={isLoading}
-					initialValues={toForm(settings)}
-					onFinish={onSave}
-					onValuesChange={() => setDirty(true)}
-				>
-					<Row gutter={[24, 24]} style={{ marginBottom: 24 }}>
-						<Col xs={24}>
-							<Card type="inner" title="Información de la organización">
+				{!canLoad ? (
+					<Empty description="Elige una marca para ver y editar su configuración" />
+				) : (
+					<Form
+						form={form}
+						layout="vertical"
+						disabled={isLoading}
+						initialValues={toForm(settings)}
+						onFinish={onSave}
+						onValuesChange={() => setDirty(true)}
+					>
+						<section className="kb-settings-row">
+							<div className="kb-settings-label">Organización</div>
+							<div>
+								<Form.Item label="Nombre" name="brandName" rules={[{ required: true, whitespace: true, message: 'El nombre es requerido' }]}>
+									<Input maxLength={80} />
+								</Form.Item>
 								<Row gutter={16}>
-									<Col xs={24} md={12}>
-										<Form.Item label="Nombre" name="brandName" rules={[{ required: true, whitespace: true, message: 'El nombre es requerido' }]}>
-											<Input maxLength={80} />
-										</Form.Item>
-									</Col>
-									<Col xs={24} md={12}>
+									<Col xs={24} sm={12}>
 										<Form.Item
 											label="Código"
 											name="brandCode"
 											rules={[{ required: true, whitespace: true, message: 'El código es requerido' }]}
-											extra="Es el código de verificación que se pide al iniciar sesión."
+											extra="Se pide al iniciar sesión"
 										>
 											<Input maxLength={20} />
 										</Form.Item>
 									</Col>
-									<Col xs={24} md={12}>
-										<Form.Item
-											label="Correo de contacto"
-											name="contactEmail"
-											rules={[{ type: 'email', message: 'Ingresa un correo válido' }]}
-										>
-											<Input type="email" placeholder="contacto@organizacion.com" maxLength={120} />
-										</Form.Item>
-									</Col>
-									<Col xs={24} md={12}>
-										<Form.Item label="Teléfono" name="contactPhone">
-											<Input inputMode="tel" placeholder="Teléfono de contacto" maxLength={40} />
+									<Col xs={24} sm={12}>
+										<Form.Item label="Correo de contacto" name="contactEmail" rules={[{ type: 'email', message: 'Ingresa un correo válido' }]}>
+											<Input type="email" maxLength={120} />
 										</Form.Item>
 									</Col>
 								</Row>
-							</Card>
-						</Col>
-					</Row>
+								<Row gutter={16}>
+									<Col xs={24} sm={12}>
+										<Form.Item label="Teléfono" name="contactPhone">
+											<Input inputMode="tel" maxLength={40} />
+										</Form.Item>
+									</Col>
+								</Row>
+							</div>
+						</section>
 
-					<Row gutter={[24, 24]}>
-						<Col xs={24} lg={12}>
-							<Card type="inner" title="Marca (white label)">
-								<Form.Item
-									label="Nombre de la aplicación"
-									name="appName"
-									extra="Aparece en el título de la pestaña y, si no subes un logo propio, en vez del logo de Kobros."
-								>
-									<Input placeholder={DEFAULT_APP_NAME} maxLength={40} />
+						<section className="kb-settings-row">
+							<div className="kb-settings-label">Marca</div>
+							<div>
+								<Form.Item label="Nombre de la aplicación" name="appName">
+									<Input maxLength={40} />
 								</Form.Item>
 
 								<Form.Item label="Color principal">
-									<Flex align="center" gap={10} wrap>
+									<Flex align="center" gap={12} wrap>
 										<Form.Item name="primaryColor" noStyle getValueFromEvent={(color: Color) => color.toHexString()}>
 											<ColorPicker showText />
 										</Form.Item>
 										{primaryColor && (
 											<Button
-												size="small"
+												type="link"
+												style={{ padding: 0, color: token.colorPrimary }}
 												onClick={() => {
 													form.setFieldValue('primaryColor', null);
 													setDirty(true);
 												}}
 											>
-												Usar el verde de Kobros
+												Usar color por defecto
 											</Button>
 										)}
 									</Flex>
 									{primaryTooLight && (
-										<Alert
-											style={{ marginTop: 8 }}
-											type="warning"
-											showIcon
-											message="Este color es muy claro: el texto blanco de los botones puede verse difícil de leer sobre él."
-										/>
+										<Alert style={{ marginTop: 8 }} type="warning" showIcon message="Color muy claro: el texto blanco de los botones puede no leerse bien." />
 									)}
 								</Form.Item>
 
-								<Form.Item label="Logo" extra="Haz clic en una caja para elegir su logo. Son independientes: puedes subir uno, el otro o ambos — PNG, JPG, WEBP o SVG, máximo 5 MB.">
-									<Flex vertical gap={20}>
+								<Form.Item label="Logo">
+									<Flex vertical gap={16}>
 										<LogoSlotEditor
 											variant="full"
 											label="Menú expandido"
@@ -430,7 +431,6 @@ const SettingsView: FC = () => {
 											onSaved={onLogoSaved}
 											onError={onLogoError}
 										/>
-										<Divider style={{ margin: 0 }} />
 										<LogoSlotEditor
 											variant="mark"
 											label="Menú colapsado"
@@ -448,19 +448,21 @@ const SettingsView: FC = () => {
 										/>
 									</Flex>
 									{settings && !settings.logoEnabled && (
-										<Alert style={{ marginTop: 8 }} type="info" showIcon message="El almacenamiento de archivos no está configurado en el servidor: no se puede subir el logo." />
+										<Alert style={{ marginTop: 8 }} type="info" showIcon message="El almacenamiento de archivos no está configurado: no se puede subir el logo." />
 									)}
 								</Form.Item>
-							</Card>
-						</Col>
+							</div>
+						</section>
 
-						<Col xs={24}>
-							<CurrenciesCard form={form} size={size} />
-						</Col>
+						<section className="kb-settings-row">
+							<div className="kb-settings-label">Monedas</div>
+							<CurrenciesField form={form} />
+						</section>
 
-						<Col xs={24} lg={12}>
-							<Card type="inner" title="Formato de números">
-								<Form.Item label="Separador de miles y decimales" name="numberFormatStyle">
+						<section className="kb-settings-row">
+							<div className="kb-settings-label">Números</div>
+							<div>
+								<Form.Item label="Formato de miles y decimales" name="numberFormatStyle">
 									<Radio.Group
 										optionType="button"
 										options={[
@@ -469,42 +471,38 @@ const SettingsView: FC = () => {
 										]}
 									/>
 								</Form.Item>
-
-								<Form.Item
-									label="Decimales por defecto"
-									name="numberDecimals"
-									extra="Con 'Sin decimales' ninguna moneda muestra decimales. Con 'Dos decimales' cada moneda usa los suyos (COP sin decimales; USD y BRL con centavos). Una columna que ya define sus decimales no se ve afectada."
-								>
+								<Form.Item label="Decimales" name="numberDecimals">
 									<Radio.Group
 										optionType="button"
 										options={[
-											{ label: 'Sin decimales (1,235)', value: 0 },
-											{ label: 'Dos decimales (1,234.57)', value: 2 },
+											{ label: 'Sin decimales', value: 0 },
+											{ label: 'Dos decimales', value: 2 },
 										]}
 									/>
 								</Form.Item>
-							</Card>
-						</Col>
-					</Row>
+							</div>
+						</section>
 
-					<Flex justify="end" gap={8} style={{ marginTop: 24 }}>
-						<Button
-							danger
-							size={size}
-							disabled={!dirty}
-							onClick={() => {
-								form.setFieldsValue(toForm(settings));
-								setDirty(false);
-							}}
-						>
-							Cancelar
-						</Button>
-						<Button type="primary" htmlType="submit" size={size} disabled={!dirty} loading={updateMutation.isPending}>
-							Guardar cambios
-						</Button>
-					</Flex>
-				</Form>
-			)}
+						<FormFooter>
+							<Button
+								type="primary"
+								danger
+								ghost
+								disabled={!dirty}
+								onClick={() => {
+									form.setFieldsValue(toForm(settings));
+									setDirty(false);
+								}}
+							>
+								Cancelar
+							</Button>
+							<Button type="primary" htmlType="submit" icon={<CheckOutlined />} disabled={!dirty} loading={updateMutation.isPending}>
+								Guardar cambios
+							</Button>
+						</FormFooter>
+					</Form>
+				)}
+			</div>
 		</Card>
 	);
 };

@@ -5,6 +5,8 @@ import { getPageLoans } from '@/infrastructure/querys/Loan';
 import CustomTable from '@/UI/Components/Table';
 import { FC, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import useModuleCustomFields from '@/infrastructure/hooks/useModuleCustomFields';
+import { customFiltersPayload } from '@/UI/Routes/ClientsView/customFieldsPayload';
 import { getColumns } from './Columns';
 import { filtersStore } from '@/infrastructure/context/FiltersStore';
 import { usePagination } from '@/infrastructure/hooks/usePagination';
@@ -14,13 +16,18 @@ interface TableLoansProps {
 }
 
 export const TablesLoans: FC<TableLoansProps> = ({ isSearching }) => {
+	const customView = useModuleCustomFields('loans');
 	const moduleName = MODULESNAME.loans;
 	const filters = filtersStore(state => state.filtersMap[moduleName]) ?? {};
 	const navigate = useNavigate();
 
 	const { page, pageSize, onChange, clampToTotal } = usePagination(JSON.stringify(filters));
 
-	const { loans, total, isRefetching, isLoading, isFetching } = getPageLoans(filters, { page, pageSize }, isSearching);
+	const { loans, total, isRefetching, isLoading, isFetching } = getPageLoans(
+		{ ...filters, customFilters: customFiltersPayload(filters.customFilters as Record<string, unknown> | undefined, customView.filterableCustomFields) },
+		{ page, pageSize },
+		isSearching,
+	);
 
 	useEffect(() => clampToTotal(total), [total, clampToTotal]);
 
@@ -33,7 +40,7 @@ export const TablesLoans: FC<TableLoansProps> = ({ isSearching }) => {
 		<CustomTable<LoanFullRead>
 			isLoading={isFetching || isLoading || isRefetching}
 			dataSource={loans}
-			columns={getColumns(seeLoan)}
+			columns={getColumns(seeLoan, customView.activeCustomFields)}
 			moduleName={moduleName}
 			titleField="fullName"
 			onRowClick={seeLoan}

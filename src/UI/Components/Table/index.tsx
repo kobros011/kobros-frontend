@@ -1,5 +1,6 @@
 import { ConfigProvider, Flex, Table } from 'antd';
 import { ReactNode, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { IRecord, PropsTables } from './types';
 import LoadingComponent from '../LoadingComponent';
 import useUserModeStore from '@/infrastructure/context/User/UserModeStore';
@@ -12,7 +13,7 @@ import { PAGE_SIZE_OPTIONS } from '@/domain/Pagination';
 
 function CustomTable<
 	RecordType extends IRecord = IRecord,
->({ dataSource, loading, onRow, columns = [], moduleName, titleField, onRowClick, cardFooterBadge, pagination, selection, ...props }: PropsTables<RecordType>) {
+>({ dataSource, loading, onRow, columns = [], moduleName, titleField, onRowClick, cardFooterBadge, pagination, selection, toolbarTarget, ...props }: PropsTables<RecordType>) {
 	const { isMobile } = useUserModeStore(state => state);
 
 	const modulePrefs = useTableViewStore(state => (moduleName ? state.modules[moduleName] : undefined));
@@ -20,7 +21,8 @@ function CustomTable<
 	const setTableFields = useTableViewStore(state => state.setTableFields);
 	const setCardFields = useTableViewStore(state => state.setCardFields);
 
-	const viewMode = modulePrefs?.viewMode ?? 'table';
+	// Por defecto: lista (tarjetas) en móvil y tabla en escritorio. Si el usuario ya eligió, se respeta.
+	const viewMode = modulePrefs?.viewMode ?? (isMobile ? 'list' : 'table');
 	const fields = useMemo(() => getConfigurableFields(columns), [columns]);
 	const tableFieldPrefs = useMemo(
 		() => mergeFieldPrefs(fields, modulePrefs?.tableFields ?? []),
@@ -84,31 +86,45 @@ function CustomTable<
 		return table;
 	}
 
+	// Con `toolbarTarget` la barra se dibuja fuera (p. ej. en la fila de tabs): solo icono en los ajustes.
+	const inExternalTarget = toolbarTarget !== undefined;
+
+	const toolbar = (
+		<Flex
+			justify={inExternalTarget ? 'flex-end' : 'space-between'}
+			align="center"
+			wrap={inExternalTarget ? 'nowrap' : 'wrap'}
+			gap={8}
+		>
+			<ViewSwitcher value={viewMode} onChange={mode => setViewMode(moduleName, mode)} size={inExternalTarget ? 'middle' : undefined} />
+			{viewMode === 'table' ? (
+				<FieldSettingsPopover
+					title="Columnas"
+					fields={fields}
+					prefs={tableFieldPrefs}
+					onChange={prefs => setTableFields(moduleName, prefs)}
+					iconOnly={inExternalTarget}
+				/>
+			) : (
+				<FieldSettingsPopover
+					title="Tarjeta"
+					fields={fields}
+					prefs={cardFieldPrefs}
+					onChange={prefs => setCardFields(moduleName, prefs)}
+					iconOnly={inExternalTarget}
+				/>
+			)}
+		</Flex>
+	);
+
+	let toolbarNode: ReactNode = toolbar;
+	if (inExternalTarget) {
+		toolbarNode = toolbarTarget ? createPortal(toolbar, toolbarTarget) : null;
+	}
+
 	return (
 		<Flex vertical gap={8} style={{ height: '100%', minHeight: 0 }}>
-			<Flex
-				justify="space-between"
-				align="center"
-				wrap="wrap"
-				gap={8}
-			>
-				<ViewSwitcher value={viewMode} onChange={mode => setViewMode(moduleName, mode)} />
-				{viewMode === 'table' ? (
-					<FieldSettingsPopover
-						title="Columnas"
-						fields={fields}
-						prefs={tableFieldPrefs}
-						onChange={prefs => setTableFields(moduleName, prefs)}
-					/>
-				) : (
-					<FieldSettingsPopover
-						title="Tarjeta"
-						fields={fields}
-						prefs={cardFieldPrefs}
-						onChange={prefs => setCardFields(moduleName, prefs)}
-					/>
-				)}
-			</Flex>
+			{toolbarNode}
 
 			{viewMode === 'table' ? (
 				table

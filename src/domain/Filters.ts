@@ -13,6 +13,8 @@ export interface Filters {
 	expenseConceptId: string
 	date: string
 	clientId: string,
+	/** Filtros de campos personalizados del cliente: clave -> valor (se envían como cf_<clave>). */
+	customFilters: Record<string, string>,
 }
 
 export const FiltersKeys = [
@@ -37,10 +39,17 @@ type FiltersDto = {
 
 export class FiltersModel {
 	static toDto(model: Partial<Filters>): Partial<FiltersDto> {
-		return Object.fromEntries(
+		const base: Record<string, unknown> = Object.fromEntries(
 			FiltersKeys
-				.map(({ dto, domain }) => [dto, model[domain]])
+				.map(({ dto, domain }) => [dto, model[domain]] as [string, unknown])
 				.filter(([, value]) => value !== undefined && value !== null),
-		) as Partial<FiltersDto>;
+		);
+		// Campos personalizados: cada valor no vacío viaja como cf_<clave>. Las claves ya vienen validadas por la configuración.
+		const custom = Object.fromEntries(
+			Object.entries(model.customFilters ?? {})
+				.filter(([, value]) => value !== undefined && value !== null && String(value).trim() !== '')
+				.map(([key, value]) => [`cf_${key}`, String(value).trim()]),
+		);
+		return { ...base, ...custom } as Partial<FiltersDto>;
 	}
 }

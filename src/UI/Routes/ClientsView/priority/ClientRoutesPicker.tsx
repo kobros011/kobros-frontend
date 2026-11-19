@@ -81,7 +81,7 @@ export const ClientRoutesPicker: FC<ClientRoutesPickerProps> = ({ value = [], on
 
 	return (
 		<DashboardShell>
-			<section className="pr-card" aria-label="Rutas y prioridad asignadas">
+			<section className="pr-card" aria-label="Rutas y prioridad asignadas" style={{ marginTop: 16 }}>
 				<header>
 					<strong>Rutas y prioridad asignadas</strong> <span className="kb-mono" style={{ fontSize: 11, color: 'var(--kb-muted)' }}>({value.length} {value.length === 1 ? 'ruta activa' : 'rutas activas'})</span>
 					<div className="pr-hint" style={{ marginTop: 2 }}>Un cliente puede estar en más de una ruta con prioridades independientes. Sin prioridad queda al final.</div>
@@ -101,7 +101,7 @@ export const ClientRoutesPicker: FC<ClientRoutesPickerProps> = ({ value = [], on
 					))}
 				</div>
 
-				<div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+				<div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center' }}>
 					<Select
 						size="small" style={{ minWidth: 220 }} showSearch optionFilterProp="label" placeholder={value.length === 0 ? 'Elegir ruta…' : 'Asignar a otra ruta…'} aria-label="Ruta a agregar"
 						value={newRoute} onChange={setNewRoute} disabled={available.length === 0}

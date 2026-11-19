@@ -1,7 +1,7 @@
 import { MODULESNAME } from '@/constants/MODULESNAME';
 import { GlobalFilters } from '@/UI/Components/Filters';
 import { CheckSquareOutlined, PlusOutlined, SwapOutlined, ControlOutlined } from '@ant-design/icons';
-import { App, Button, Col, Row, Space, Tabs, Typography } from 'antd';
+import { App, Button, Col, Flex, Row, Space, Tabs, Tag, Typography } from 'antd';
 import { FC, useState } from 'react';
 import { Client } from '@/domain/Client';
 import { deleteClient } from '@/infrastructure/querys/Client';
@@ -12,8 +12,10 @@ import { useQueryClient } from '@tanstack/react-query';
 import { queryKeyClients, queryKeyDefault } from '@/constants/queryKeys';
 import { TableClients } from './Tables';
 import { ClientFiltersFields } from '@/UI/Components/Filters/FiltersFields/Client';
+import { useClientFormConfig } from '@/infrastructure/hooks/useClientFormConfig';
 import { useRoutes } from '@/infrastructure/hooks/useRoutes';
 import { filtersStore } from '@/infrastructure/context/FiltersStore';
+import useUserModeStore from '@/infrastructure/context/User/UserModeStore';
 import { MoveClientsModal } from './priority/MoveClientsModal';
 import { PriorityDrawer } from './priority/PriorityDrawer';
 import { SelectionBar } from './priority/SelectionBar';
@@ -23,8 +25,11 @@ export const Layout: FC = () => {
 	const moduleName = MODULESNAME.clients;
 	const [isSearching, setSearching] = useState<boolean>(false);
 	const [activeTab, setActiveTab] = useState(`${moduleName}-active`);
+	const isMobile = useUserModeStore(state => state.isMobile);
+	// En móvil el selector de vista se dibuja en la fila de tabs (ver `toolbarTarget` de CustomTable).
+	const [toolbarTarget, setToolbarTarget] = useState<HTMLDivElement | null>(null);
 
-	const filtersFields = ClientFiltersFields();
+	const clientView = useClientFormConfig();
 	const { routes } = useRoutes();
 	const [count, setCount] = useState<{ active: number, inactive: number }>({ active: 0, inactive: 0 });
 
@@ -86,38 +91,82 @@ export const Layout: FC = () => {
 		],
 	};
 
+	// En móvil los botones ocupan todo el ancho (`block`) con el tamaño estándar de antd.
+
+	const orderButton = (
+		<Button
+			block={isMobile}
+			icon={<SwapOutlined />}
+			onClick={() => void navigate(`${routePaths.CLIENTS_ORDER}${filteredRouteId ? `?ruta=${filteredRouteId}` : ''}`)}
+		>
+			Ordenar ruta
+		</Button>
+	);
+
+	const selectButton = (
+		<Button
+			block={isMobile}
+			icon={<CheckSquareOutlined />}
+			type={selectionMode ? 'primary' : 'default'}
+			ghost={selectionMode}
+			onClick={() => (selectionMode ? stopSelecting() : setSelectionMode(true))}
+		>
+			{selectionMode ? 'Salir de selección' : 'Seleccionar'}
+		</Button>
+	);
+
+	const newClientButton = (
+		<Button
+			block={isMobile}
+			icon={<PlusOutlined />}
+			type='primary'
+			onClick={() => void navigate(`${routePaths.DEFAULT_CREATE}`)}
+		>
+			Nuevo Cliente
+		</Button>
+	);
+
 	return (
 		<>
-			<div className='page-header '>
-				<Row justify="space-between" align="middle">
-					<Col>
-						<Typography.Title level={2}>Clientes</Typography.Title>
-					</Col>
-					<Col>
-						<Space wrap>
-							{canManage && (
-								<>
-									<Button icon={<SwapOutlined />} onClick={() => void navigate(`${routePaths.CLIENTS_ORDER}${filteredRouteId ? `?ruta=${filteredRouteId}` : ''}`)}>Ordenar ruta</Button>
-									<Button icon={<CheckSquareOutlined />} type={selectionMode ? 'primary' : 'default'} ghost={selectionMode} onClick={() => (selectionMode ? stopSelecting() : setSelectionMode(true))}>
-										{selectionMode ? 'Salir de selección' : 'Seleccionar'}
-									</Button>
-								</>
-							)}
-							<Button
-								icon={<PlusOutlined />}
-								type='primary'
-								onClick={() => void navigate(`${routePaths.DEFAULT_CREATE}`)}
-							>
-								Nuevo Cliente
-							</Button>
-						</Space>
-					</Col>
-				</Row>
-			</div>
+			{isMobile ? (
+				// El header del layout ya muestra "Clientes": aquí solo van las acciones.
+				<Flex vertical gap={8} style={{ marginBottom: 12 }}>
+					{newClientButton}
+					{canManage && (
+						<Row gutter={8}>
+							<Col span={12}>{orderButton}</Col>
+							<Col span={12}>{selectButton}</Col>
+						</Row>
+					)}
+				</Flex>
+			) : (
+				<div className='page-header '>
+					<Row justify="space-between" align="middle">
+						<Col>
+							<Flex align='center' gap={12}>
+								<Typography.Title level={2} style={{ margin: 0 }}>Clientes</Typography.Title>
+								<Tag color='success' bordered={false} style={{ borderRadius: 999, margin: 0, fontWeight: 600 }}>{count.active} registrados</Tag>
+							</Flex>
+							<Typography.Text type='secondary'>Gestión de cartera, asignación de ruta territorial y scoring de contacto operativo.</Typography.Text>
+						</Col>
+						<Col>
+							<Space wrap>
+								{canManage && (
+									<>
+										{orderButton}
+										{selectButton}
+									</>
+								)}
+								{newClientButton}
+							</Space>
+						</Col>
+					</Row>
+				</div>
+			)}
 			<GlobalFilters
 				placeholderSearch='Buscar(EJ: Nombre o Documento del cliente)'
 				moduleName={MODULESNAME.clients}
-				filters={hasMultipleRoutes ? filtersFields : []}
+				filters={ClientFiltersFields(clientView.filterableCustomFields, hasMultipleRoutes)}
 				onSearch={onHandlerFilter}
 				initialFilters={{ text: '', routeId: hasMultipleRoutes ? undefined : routes?.map(item => item.id)?.[0] }}
 			/>
@@ -126,18 +175,19 @@ export const Layout: FC = () => {
 				style={{ width: '100%' }}
 				activeKey={activeTab}
 				onChange={(activeKey: string) => setActiveTab(activeKey)}
+				tabBarExtraContent={isMobile ? <div ref={setToolbarTarget} style={{ minWidth: 0 }} /> : undefined}
 				items={[
 					{
 						key: `${moduleName}-active`,
 						label: `Activos (${count.active})`,
 						forceRender: true,
-						children: <TableClients key={'active'} setCount={setCount} type='active' actions={actions} isSearching={isSearching} selection={selectionMode ? { clients: selected, onChange: setSelected } : undefined} />,
+						children: <TableClients key={'active'} setCount={setCount} type='active' actions={actions} isSearching={isSearching} selection={selectionMode ? { clients: selected, onChange: setSelected } : undefined} toolbarTarget={isMobile && activeTab === `${moduleName}-active` ? toolbarTarget : undefined} />,
 					},
 					{
 						key: `${moduleName}-inactive`,
 						forceRender: true,
 						label: `Inactivos (${count.inactive})`,
-						children: <TableClients key={'inactive'} setCount={setCount} type='inactive' actions={actions} isSearching={isSearching} />,
+						children: <TableClients key={'inactive'} setCount={setCount} type='inactive' actions={actions} isSearching={isSearching} toolbarTarget={isMobile && activeTab === `${moduleName}-inactive` ? toolbarTarget : undefined} />,
 					},
 				]}
 			/>

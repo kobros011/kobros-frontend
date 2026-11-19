@@ -9,4 +9,5 @@ export interface ExpenseDto extends BaseDto {
 	expensesconcept_id: string;
 	expenseconcept?: ExpensesConceptsDto,
 	name: string;
+	custom_fields?: Record<string, unknown>;
 }

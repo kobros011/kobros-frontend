@@ -2,12 +2,14 @@ import { Client } from '@/domain/Client';
 import { BuildColumns, CustomColumn } from '@/infrastructure/utils/BuildColumns';
 import { OnClickActions, useRowActions } from '@/UI/Components/RowActions';
 import { PriorityBadge, RouteChips } from './priority/PriorityChip';
+import type { ClientFormView } from '@/infrastructure/hooks/useClientFormConfig';
+import { displayCustomValue } from './customFieldsPayload';
 
-export const getColumns = (actions: OnClickActions<Client>, routeId?: string, selectedIds: ReadonlySet<string> = new Set()) => {
+export const getColumns = (actions: OnClickActions<Client>, routeId?: string, selectedIds: ReadonlySet<string> = new Set(), formView?: ClientFormView) => {
 
 	const { columnActions } = useRowActions<Client>(actions);
 
-	const columns: CustomColumn<Client>[] = [
+	const standard: CustomColumn<Client>[] = [
 		// Con una ruta filtrada la lista viene ordenada por su prioridad: se muestra el número de esa ruta.
 		...(routeId ? [{
 			key: 'priority',
@@ -34,7 +36,7 @@ export const getColumns = (actions: OnClickActions<Client>, routeId?: string, se
 		},
 		{
 			key: 'idDocument',
-			title: 'Documento (Cédula, DNI)',
+			title: 'Documento',
 			dataIndex: 'idDocument',
 			width: 200,
 		},
@@ -102,6 +104,27 @@ export const getColumns = (actions: OnClickActions<Client>, routeId?: string, se
 			typeRender: 'date',
 			defaultVisible: false,
 		},
+	];
+
+	// Campos estándar que la marca oculta no aparecen como columna.
+	const hidden = new Set<string>();
+	if (formView && !formView.isFieldVisible('neighborhood')) hidden.add('neighborhood');
+	if (formView && !formView.isFieldVisible('current_phone')) hidden.add('currentPhone');
+
+	// Campos personalizados activos: una columna por campo; "mostrar como columna" los deja visibles por defecto.
+	const custom: CustomColumn<Client>[] = (formView?.activeCustomFields ?? []).map(field => ({
+		key: `custom_${field.key}`,
+		title: field.label,
+		dataIndex: 'customFields',
+		width: 140,
+		render: (_value: unknown, record: Client) => displayCustomValue(record.customFields?.[field.key], field),
+		defaultVisible: field.showInTable,
+		cardDefaultVisible: field.showInCard,
+	}));
+
+	const columns: CustomColumn<Client>[] = [
+		...standard.filter(column => !hidden.has(String(column.key))),
+		...custom,
 		columnActions,
 	];
 

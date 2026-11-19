@@ -68,7 +68,7 @@ const HomeView: FC = () => {
 
 	return (
 		<div style={{ padding: '8px 0' }}>
-			<Title level={4} style={{ marginBottom: 16 }}>Inicio</Title>
+			<Title level={4} className="kb-title-desktop-only" style={{ marginBottom: 16 }}>Inicio</Title>
 
 			<Row gutter={[12, 12]} style={{ marginBottom: 16 }}>
 				<Col xs={24} sm={12} md={8}>

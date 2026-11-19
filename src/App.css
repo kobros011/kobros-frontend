@@ -3,7 +3,17 @@ body {
 }
 
 body.dark {
-    background-color: #1a1a1a;
+    background-color: #0f0f11;
+}
+
+/* Títulos con Plus Jakarta Sans; el resto de la interfaz usa Inter (token fontFamily en App.tsx). */
+.ant-typography h1,
+.ant-typography h2,
+.ant-typography h3,
+.ant-typography h4,
+.ant-typography h5 {
+    font-family: "Plus Jakarta Sans", Inter, sans-serif;
+    letter-spacing: -0.015em;
 }
 
 button, a, [role="button"] {
@@ -20,51 +30,115 @@ button, a, [role="button"] {
     border-bottom: 1px solid #f0f0f0;
 }
 
-body::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
+/* Scroll interno de las tarjetas de formulario: solo en escritorio. En móvil scrollea únicamente la página. */
+@media (min-width: 768px) {
+	.kb-form-card {
+		overflow-x: hidden;
+		overflow-y: auto;
+		max-height: 84vh;
+	}
 }
 
-body::-webkit-scrollbar-track {
-  background: white;
-  border-radius: 10px;
+/* En móvil el encabezado y el cuerpo de la tarjeta de formulario ganan ancho: el título queda lo más a la izquierda posible. */
+@media (max-width: 767px) {
+	.kb-form-card .ant-card-head {
+		padding-inline: 12px;
+	}
+
+	.kb-form-card .ant-card-body {
+		padding: 12px;
+	}
 }
 
-body::-webkit-scrollbar-thumb {
-  background: #ccc;
-  border-radius: 10px;
+/* Pie fijo de formulario (componente FormFooter): pegado abajo de la tarjeta y a todo su ancho (compensa el padding del cuerpo).
+   En móvil se ancla sobre el menú inferior (4rem + zona segura) y los botones comparten la fila. */
+.kb-form-footer {
+	position: sticky;
+	bottom: 0;
+	z-index: 5;
+	margin: 20px -24px -24px;
+	padding: 12px 24px;
+	border-radius: 0 0 8px 8px;
 }
 
-body::-webkit-scrollbar-thumb:hover {
-  background: #a0a0a0;
+@media (max-width: 767px) {
+	.kb-form-footer {
+		bottom: calc(4rem + env(safe-area-inset-bottom, 0px));
+		margin: 16px -12px -12px;
+		padding: 8px 12px;
+		border-radius: 0;
+	}
+
+	.kb-form-footer .ant-btn {
+		flex: 1 1 0;
+		min-width: 0;
+		max-width: 200px;
+	}
 }
 
-body {
+/* Selector de secciones de Configuración (a todo el ancho): etiquetas completas en dos líneas si hace falta y la
+   sección activa rellena con el color primario de la marca (`--kb-primary` se pasa en línea desde el componente). */
+.kb-section-switch .ant-segmented-item {
+	flex: 1 1 0 !important;
+}
+
+.kb-section-switch .ant-segmented-item-label {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 40px;
+	padding: 4px 6px;
+	font-size: 13px;
+	line-height: 1.2;
+	text-align: center;
+	white-space: normal;
+	overflow: visible;
+	text-overflow: clip;
+}
+
+.kb-section-switch .ant-segmented-thumb,
+.kb-section-switch .ant-segmented-item-selected {
+	background: var(--kb-primary, #84cc16) !important;
+}
+
+.kb-section-switch .ant-segmented-item-selected {
+	color: #09090b !important;
+	font-weight: 600;
+}
+
+.kb-section-switch .ant-segmented-item-selected .ant-segmented-item-label {
+	color: #09090b;
+}
+
+/* Scrollbar discreto en toda la plataforma: delgado, sin pista, y verde lima al pasar el mouse. */
+* {
 	scrollbar-width: thin;
-	scrollbar-color: #ccc white;
+	scrollbar-color: rgba(140, 140, 150, 0.35) transparent;
 }
 
-body.dark::-webkit-scrollbar-track {
-	background: #1a1a1a;
+*:hover {
+	scrollbar-color: rgba(132, 204, 22, 0.6) transparent;
 }
 
-body.dark::-webkit-scrollbar-thumb {
-	background: #888;
-	border-radius: 10px;
+*::-webkit-scrollbar {
+	width: 6px;
+	height: 6px;
 }
 
-body.dark::-webkit-scrollbar-thumb:hover {
-	background: #a0a0a0;
+*::-webkit-scrollbar-track,
+*::-webkit-scrollbar-corner {
+	background: transparent;
 }
 
-body.dark {
-	scrollbar-color: #888 transparent;
+*::-webkit-scrollbar-thumb {
+	background: rgba(140, 140, 150, 0.35);
+	border-radius: 999px;
 }
 
-body::-webkit-scrollbar-corner {
-	background: white;
+*:hover::-webkit-scrollbar-thumb {
+	background: rgba(132, 204, 22, 0.45);
 }
 
-body.dark::-webkit-scrollbar-corner {
-	background: #1a1a1a;
+*::-webkit-scrollbar-thumb:hover {
+	background: rgba(132, 204, 22, 0.85);
 }

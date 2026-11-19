@@ -2,11 +2,13 @@ import { Client } from '@/domain/Client';
 import { getClient, useMutationType } from '@/infrastructure/querys/Client';
 import useUserModeStore from '@/infrastructure/context/User/UserModeStore';
 import useLoading from '@/infrastructure/hooks/useLoading';
-import InputDate from '@/UI/Components/Fields/InputDate';
-import { App, Button, Col, Drawer, Form, Input, Row } from 'antd';
+import { App, Button, Col, Drawer, Form, Row } from 'antd';
 import { FC } from 'react';
-import { ruleRequired } from '@/constants/rules';
 import { ClientContactsList } from '@/UI/Routes/ClientsView/ClientContactsList';
+import { ClientFields } from '@/UI/Routes/ClientsView/ClientFields';
+import { customFieldsPayload } from '@/UI/Routes/ClientsView/customFieldsPayload';
+import { useClientFormConfig } from '@/infrastructure/hooks/useClientFormConfig';
+import { ContactKind } from '@/domain/Client';
 
 
 interface ClientEditDrawerProps {
@@ -23,13 +25,25 @@ export const ClientEditDrawer: FC<ClientEditDrawerProps> = ({ clientId, open, on
 	const { startLoading, stopLoading, isLoading } = useLoading();
 
 	const { client, isLoading: isLoadingClient } = getClient(clientId);
+	const config = useClientFormConfig();
+	const contactKinds = (['fiador', 'referencia'] as ContactKind[]).filter(kind => config.isSectionVisible(kind));
 	const updateMutation = useMutationType('update');
 
 	const onFinish = (values: Partial<Client>) => {
 		if (!client?.id) return;
+		const contacts = values.contacts?.filter(contact => config.isSectionVisible(contact.kind));
+		if (config.isSectionRequired('fiador') && !(contacts ?? []).some(contact => contact?.kind === 'fiador')) {
+			notification.error({ message: 'Debes agregar al menos un fiador' });
+			return;
+		}
 		startLoading();
 		updateMutation.mutate(
-			{ ...client, ...values },
+			{
+				...client,
+				...values,
+				...(contacts ? { contacts } : {}),
+				customFields: customFieldsPayload(values.customFields as Record<string, unknown>, config.activeCustomFields),
+			},
 			{
 				onSuccess: () => {
 					notification.success({ message: 'Cliente actualizado exitosamente' });
@@ -72,45 +86,12 @@ export const ClientEditDrawer: FC<ClientEditDrawerProps> = ({ clientId, open, on
 					onFinish={onFinish}
 				>
 					<Row gutter={[16, 0]}>
-						<Col xs={24} md={12}>
-							<Form.Item label="Nombre completo" name="fullName" rules={[ruleRequired]}>
-								<Input placeholder="Nombre completo del cliente" />
-							</Form.Item>
-						</Col>
-						<Col xs={24} md={12}>
-							<Form.Item label="Documento" name="idDocument" rules={[ruleRequired]}>
-								<Input inputMode="numeric" placeholder="Documento del cliente" />
-							</Form.Item>
-						</Col>
-						<Col xs={24} md={12}>
-							<Form.Item label="Celular" name="currentMobile" rules={[ruleRequired]}>
-								<Input inputMode="tel" placeholder="Celular del cliente" />
-							</Form.Item>
-						</Col>
-						<Col xs={24} md={12}>
-							<Form.Item label="Dirección" name="currentAddress" rules={[ruleRequired]}>
-								<Input placeholder="Dirección del cliente" />
-							</Form.Item>
-						</Col>
-						<Col xs={24} md={12}>
-							<Form.Item label="Barrio" name="neighborhood">
-								<Input placeholder="Barrio" />
-							</Form.Item>
-						</Col>
-						<Col xs={24} md={12}>
-							<Form.Item label="Teléfono" name="currentPhone">
-								<Input inputMode="tel" placeholder="Teléfono fijo" />
-							</Form.Item>
-						</Col>
-						<Col xs={24} md={12}>
-							<Form.Item label="Fecha vinculación" name="linkingDate" rules={[ruleRequired]}>
-								<InputDate useCurrentDate disabled placeholder="Fecha vinculación" />
-							</Form.Item>
-						</Col>
-
-						<Col xs={24}>
-							<ClientContactsList />
-						</Col>
+						<ClientFields isDev={false} isCreate={false} />
+						{contactKinds.length > 0 && (
+							<Col xs={24}>
+								<ClientContactsList kinds={contactKinds} />
+							</Col>
+						)}
 					</Row>
 				</Form>
 			)}

@@ -10,6 +10,8 @@ export interface Expense extends BaseDomain {
 	expensesConceptId: string;
 	expenseConcept?: ExpensesConcepts;
 	name: string
+	/** Valores de los campos personalizados de la marca (clave → valor). */
+	customFields?: Record<string, unknown>
 }
 
 export class ExpenseModel {
@@ -29,6 +31,7 @@ export class ExpenseModel {
 			expensesConceptId: DTO.expensesconcept_id,
 			expenseConcept: DTO?.expenseconcept ? ExpensesConceptsModel.ToDomain(DTO.expenseconcept) : undefined,
 			name: DTO.name,
+			customFields: DTO.custom_fields ?? {},
 			active: DTO.active,
 			createdAt: DTO.created_at,
 			updatedAt: DTO.updated_at,
@@ -43,6 +46,7 @@ export class ExpenseModel {
 			expensesconcept_id: domain.expensesConceptId,
 			name: domain.name,
 			user_generated: domain.userGenerated,
+			...(domain.customFields ? { custom_fields: domain.customFields } : {}),
 			...(domain?.id ? { id: domain.id } : {}),
 		};
 	}

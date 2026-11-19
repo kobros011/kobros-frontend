@@ -3,10 +3,13 @@ import { getMe } from '@/infrastructure/querys/User';
 import { useEffect, useState } from 'react';
 import LoadingComponent from '../LoadingComponent';
 import ErrorView from '@components/ErrorView';
-import { Layout, App as Apps, Flex, theme, Button } from 'antd';
-import { Outlet } from 'react-router-dom';
+import PageTitle from '@/UI/Components/PageTitle';
+import { Layout, App as Apps, Flex, theme, Button, Breadcrumb, Typography } from 'antd';
+import { Outlet, useLocation } from 'react-router-dom';
 import './layout.css';
 import { ModulesMenu } from '../ModulesMenu';
+import { getModuleIcon, getModuleLabel } from '../ModulesMenu/menuItems';
+import usePageTitleStore from '@/infrastructure/context/PageTitleStore';
 import BrandLogo from '../BrandLogo';
 import { DropdownUser } from './DropdonwUser';
 import useUserModeStore from '@/infrastructure/context/User/UserModeStore';
@@ -20,6 +23,7 @@ import useCurrencyStore from '@/infrastructure/context/CurrencyStore';
 import { useCurrencyBootstrap } from '@/infrastructure/querys/Currency';
 import { getSettings } from '@/infrastructure/querys/Settings';
 import { DEFAULT_APP_NAME } from '@/domain/Settings';
+import routePaths from '@/constants/routePaths';
 
 const { Header, Sider, Content } = Layout;
 
@@ -34,9 +38,9 @@ const App: React.FC = () => {
 	const { getBrand } = useBrandStore(state => state);
 	const { getRoutes } = useRouteStore(state => state);
 	const setUser = useUserStore(state => state.setUser);
-	const darkMode = useUserModeStore(state => state.darkMode);
 	const { isMobile, setIsMobile } = useUserModeStore(state => state);
-	const { token: { colorBgContainer, colorBorder } } = theme.useToken();
+	const { token: { colorBgContainer, colorBgLayout, colorBorder } } = theme.useToken();
+	const location = useLocation();
 
 	const { user, isLoading, isError, isFetching } = getMe();
 	const { settings, isError: isSettingsError } = getSettings(undefined, !!user);
@@ -59,6 +63,18 @@ const App: React.FC = () => {
 	}));
 
 	const [collapsed, setCollapsed] = useState(false);
+
+	// El logo solo se muestra si la marca lo configuró; si no, no se pinta ningún logo por defecto.
+	const hasBrandLogo = !!(brandLogo.logoFullUrl || brandLogo.logoMarkUrl);
+	const moduleKey = location.pathname.match(new RegExp(`${routePaths.DEFAULT_HOME}/([^/]+)`))?.[1];
+	const moduleLabel = getModuleLabel(moduleKey);
+	const pageLabel = location.pathname.endsWith('/campos/obligatorios')
+		? 'Campos obligatorios'
+		: location.pathname.endsWith('/campos/personalizados') ? 'Campos personalizados' : undefined;
+	const moduleIcon = getModuleIcon(moduleKey);
+	// Una pantalla (ver/editar/crear) puede poner su propio título en la barra móvil; si no, va el nombre del módulo.
+	const pageTitle = usePageTitleStore(state => state.title);
+	const headerTitle = pageTitle ?? moduleLabel;
 
 	useEffect(() => {
 		const mediaQuery = window.matchMedia('(min-width: 768px)');
@@ -115,6 +131,8 @@ const App: React.FC = () => {
 						right: 0,
 						height: '60px',
 						maxHeight: '60px',
+						// Ant Design deja 50 px a cada lado: en móvil el contenido va pegado a 12 px.
+						paddingInline: isMobile ? 12 : undefined,
 						zIndex: FIXED_CHROME_Z_INDEX,
 						background: colorBgContainer,
 						borderBottom: '2px solid' + colorBorder,
@@ -122,15 +140,20 @@ const App: React.FC = () => {
 						alignItems: 'center',
 					}}
 				>
-					<Flex justify="space-between" align="center" style={{ width: '100%' }}>
-						{!isMobile &&
-							<Button onClick={() => setCollapsed(!collapsed)}>
-								{collapsed ? <MenuFoldOutlined /> : <MenuUnfoldOutlined />}
-							</Button>
-						}
-						{isMobile &&
-							<BrandLogo key={`${brandLogo.logoFullUrl ?? 'default'}`} variant="full" height={36} {...brandLogo} />
-						}
+					<Flex justify="space-between" align="center" style={{ width: '100%', minWidth: 0 }}>
+						<Flex align="center" gap={12} style={{ minWidth: 0 }}>
+							{isMobile && hasBrandLogo &&
+								<BrandLogo key={`${brandLogo.logoFullUrl ?? 'default'}`} variant="full" height={36} {...brandLogo} />
+							}
+							{/* Móvil: el título del módulo (icono + nombre) vive aquí, pegado a la izquierda; las pantallas no lo repiten. */}
+							{isMobile && !hasBrandLogo && headerTitle && (moduleIcon && typeof headerTitle === 'string'
+								? <PageTitle icon={moduleIcon} title={headerTitle} level={5} />
+								: <Typography.Title level={5} style={{ margin: 0 }}>{headerTitle}</Typography.Title>)
+							}
+							{!isMobile &&
+								<Breadcrumb items={[{ title: 'Inicio' }, ...(moduleLabel ? [{ title: moduleLabel }] : []), ...(pageLabel ? [{ title: pageLabel }] : [])]} />
+							}
+						</Flex>
 
 						<DropdownUser />
 					</Flex>
@@ -150,12 +173,19 @@ const App: React.FC = () => {
 						}}
 						width={collapsed ? '190px' : '75px'}
 					>
-						<Flex justify="center" align="center" style={{ height: '60px' }}>
-							{collapsed ? (
+						<Flex justify={hasBrandLogo ? 'space-between' : 'flex-end'} align="center" style={{ height: '60px', padding: '0 12px' }}>
+							{hasBrandLogo && (collapsed ? (
 								<BrandLogo key={`${brandLogo.logoFullUrl ?? 'default'}`} variant="full" height={36} {...brandLogo} />
 							) : (
 								<BrandLogo key={`${brandLogo.logoMarkUrl ?? 'default'}-${brandLogo.logoFullUrl ?? 'default'}`} variant="mark" height={40} {...brandLogo} />
-							)}
+							))}
+							<Button
+								type="text"
+								onClick={() => setCollapsed(!collapsed)}
+								aria-label={collapsed ? 'Contraer menú' : 'Expandir menú'}
+							>
+								{collapsed ? <MenuFoldOutlined /> : <MenuUnfoldOutlined />}
+							</Button>
 						</Flex>
 						<div>
 							<ModulesMenu collapsed={!collapsed} />
@@ -167,9 +197,10 @@ const App: React.FC = () => {
 					style={{
 						marginLeft: isMobile ? 0 : collapsed ? '190px' : '75px',
 						minHeight: 'calc(100vh - 60px)',
-						marginTop: '60px',
-						background: darkMode ? '#1a1a1a' : '#f5f5f5',
-						padding: isMobile ? '10px' : '1.5rem',
+						background: colorBgLayout,
+						// El contenido empieza desde arriba (por debajo del header fijo, de 60px) para que no quede hueco
+						// del fondo del layout entre el header y el cuerpo; el espacio del header va como padding superior.
+						padding: isMobile ? 'calc(60px + 10px) 10px 10px' : 'calc(60px + 1.5rem) 1.5rem 1.5rem',
 						paddingBottom: isMobile ? 'calc(4rem + env(safe-area-inset-bottom, 0px) + 10px)' : '1.5rem',
 						overscrollBehaviorY: 'contain',
 					}}

@@ -8,20 +8,22 @@ interface MenuItemProps {
 	mobile: boolean,
 	isActive: boolean
 	to: string
+	/** Navega a la ruta (con confirmación si hay cambios sin guardar). */
+	onNavigate: (path: string) => void
 }
 
-const MenuItem: FC<MenuItemProps> = ({ label, icon, mobile, isActive, to }) => {
+const MenuItem: FC<MenuItemProps> = ({ label, icon, mobile, isActive, to, onNavigate }) => {
 
 	const { token } = theme.useToken();
 
 	const style: CSSProperties = {
 		height: 'auto',
 		minHeight: 44,
-		minWidth: 0,
-		width: '100%',
+		minWidth: 44,
+		width: 'auto',
 		flex: 1,
 		paddingTop: 5,
-		paddingInline: 2,
+		paddingInline: 10,
 		border: 'none',
 		display: 'flex',
 		alignItems: 'center',
@@ -29,14 +31,15 @@ const MenuItem: FC<MenuItemProps> = ({ label, icon, mobile, isActive, to }) => {
 		background: isActive ? token.colorPrimaryBgHover : 'inherit',
 	};
 	return (
-		<Flex justify="center" align="center" vertical style={mobile ? { flex: '1 1 0', minWidth: 0 } : {}}>
+		<Flex justify="center" align="center" vertical style={mobile ? { flex: '0 1 auto', minWidth: 0 } : {}}>
 			<Button
 				type='text'
 				style={mobile ? style : {}}
+				onClick={() => onNavigate(`/${to}`)}
 			>
 				<Flex justify="center" align="center" vertical className='flex-menu-item' style={{ color: isActive ?  token.colorPrimary : 'inherit' }} >
 					{icon}
-					<Link to={to} style={{ color: isActive ?  token.colorPrimary : 'inherit' }}>{label}</Link>
+					<Link to={to} onClick={event => event.preventDefault()} style={{ color: isActive ?  token.colorPrimary : 'inherit', ...(mobile ? { fontSize: 11, maxWidth: '100%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' } : {}) }}>{label}</Link>
 				</Flex>
 			</Button>
 		</Flex>

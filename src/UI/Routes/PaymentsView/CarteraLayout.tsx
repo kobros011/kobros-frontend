@@ -1,5 +1,6 @@
 import { FC, ReactNode } from 'react';
-import { Col, Row, Tabs, Typography } from 'antd';
+import { Tabs } from 'antd';
+import PageHeaderActions from '@/UI/Components/PageHeaderActions';
 import { useLocation, useNavigate } from 'react-router-dom';
 import routePaths from '@/constants/routePaths';
 
@@ -16,13 +17,7 @@ export const CarteraLayout: FC<CarteraLayoutProps> = ({ children }) => {
 
 	return (
 		<>
-			<div className='page-header '>
-				<Row justify="space-between" align="middle">
-					<Col>
-						<Typography.Title level={2}>Cartera</Typography.Title>
-					</Col>
-				</Row>
-			</div>
+			<PageHeaderActions title="Cartera" />
 
 			<Tabs
 				activeKey={activeKey}

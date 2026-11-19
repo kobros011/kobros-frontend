@@ -1,15 +1,19 @@
 import routePaths from '@/constants/routePaths';
 import { PlusOutlined } from '@ant-design/icons';
-import { App, Button, Col, Flex, Row, Tabs, Typography } from 'antd';
+import { App, Button, Tabs } from 'antd';
 import { FC, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TbListDetails } from 'react-icons/tb';
 import { useQueryClient } from '@tanstack/react-query';
 import { ConceptsDrawer } from '@/UI/Components/ConceptDrawer';
 import { TableExpenses } from './Table';
+import PageHeaderActions from '@/UI/Components/PageHeaderActions';
+import { useTabsToolbar } from '@/infrastructure/hooks/useTabsToolbar';
+import useUserModeStore from '@/infrastructure/context/User/UserModeStore';
 import { GlobalFilters } from '@/UI/Components/Filters';
 import { MODULESNAME } from '@/constants/MODULESNAME';
 import { queryKeyDefault, queryKeyExpenses } from '@/constants/queryKeys';
+import useModuleCustomFields from '@/infrastructure/hooks/useModuleCustomFields';
 import { ExpenseFiltersFields } from '@/UI/Components/Filters/FiltersFields/Expenses';
 import { OnClickActions } from '@/UI/Components/RowActions';
 import { Expense } from '@/domain/Expenses';
@@ -24,6 +28,8 @@ export const Layout: FC = () => {
 	const [isSearching, setSearching] = useState<boolean>(false);
 	const [isOpen, setIsOpen] = useState<boolean>(false);
 	const [activeTab, setActiveTab] = useState(`${moduleName}-active`);
+	const { tabBarExtraContent, toolbarTargetFor } = useTabsToolbar(activeTab);
+	const isMobile = useUserModeStore(state => state.isMobile);
 	const [count, setCount] = useState<{ active: number, inactive: number }>({ active: 0, inactive: 0 });
 
 	const { notification } = App.useApp();
@@ -34,7 +40,8 @@ export const Layout: FC = () => {
 	const { hasManageExpenses } = getPermission(typeUser);
 
 	const deleteMutation = deleteExpense();
-	const filtersFields = ExpenseFiltersFields(routes?.length > 1);
+	const customView = useModuleCustomFields('expenses');
+	const filtersFields = ExpenseFiltersFields(routes?.length > 1, customView.filterableCustomFields);
 
 	const onHandlerFilter = () => {
 		if (!isSearching) setSearching(true);
@@ -65,31 +72,28 @@ export const Layout: FC = () => {
 
 	return (
 		<>
-			<div className="page-header">
-				<Row justify='space-between' align={'middle'}>
-					<Col>
-						<Typography.Title level={2}>Gastos</Typography.Title>
-					</Col>
-					<Col>
-						<Flex gap={5} justify="center" align="center">
-							<Button
-								icon={<PlusOutlined />}
-								type='primary'
-								onClick={() => void navigate(`${routePaths.DEFAULT_CREATE}`)}
-							>
-								Registrar
-							</Button>
-							<Button
-								icon={<TbListDetails />}
-								type="primary"
-								onClick={() => setIsOpen(true)}
-							>
-								Conceptos
-							</Button>
-						</Flex>
-					</Col>
-				</Row>
-			</div>
+			<PageHeaderActions
+				title="Gastos"
+				primary={
+					<Button
+						icon={<PlusOutlined />}
+						type='primary'
+						onClick={() => void navigate(`${routePaths.DEFAULT_CREATE}`)}
+					>
+						Registrar
+					</Button>
+				}
+				secondary={[
+					<Button
+						key="concepts"
+						icon={<TbListDetails />}
+						type={isMobile ? 'default' : 'primary'}
+						onClick={() => setIsOpen(true)}
+					>
+						Conceptos
+					</Button>,
+				]}
+			/>
 
 			<GlobalFilters
 				placeholderSearch='Buscar(EJ: Nombre gasto)'
@@ -103,18 +107,19 @@ export const Layout: FC = () => {
 				style={{ width: '100%' }}
 				activeKey={activeTab}
 				onChange={(activeKey: string) => setActiveTab(activeKey)}
+				tabBarExtraContent={tabBarExtraContent}
 				items={[
 					{
 						key: `${moduleName}-active`,
 						label: `Activos (${count.active})`,
 						forceRender: true,
-						children: <TableExpenses key={'active'} setCount={setCount} type='active' actions={actions} isSearching={isSearching} />,
+						children: <TableExpenses key={'active'} setCount={setCount} type='active' actions={actions} isSearching={isSearching} toolbarTarget={toolbarTargetFor(`${moduleName}-active`)} />,
 					},
 					{
 						key: `${moduleName}-inactive`,
 						label: `Inactivos (${count.inactive})`,
 						forceRender: true,
-						children: <TableExpenses key={'inactive'} setCount={setCount} type='inactive' actions={actions} isSearching={isSearching} />,
+						children: <TableExpenses key={'inactive'} setCount={setCount} type='inactive' actions={actions} isSearching={isSearching} toolbarTarget={toolbarTargetFor(`${moduleName}-inactive`)} />,
 					},
 				]}
 			/>

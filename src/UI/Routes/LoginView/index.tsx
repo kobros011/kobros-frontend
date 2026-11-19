@@ -2,13 +2,11 @@ import { esES } from '@clerk/localizations';
 import { SignIn } from '@clerk/clerk-react';
 import { Flex, Typography, theme } from 'antd';
 import { useMemo } from 'react';
-import useUserModeStore from '@/infrastructure/context/User/UserModeStore';
 
 const { Text } = Typography;
 
 const LoginView = () => {
 	const { token } = theme.useToken();
-	const darkMode = useUserModeStore(state => state.darkMode);
 
 	const appearance = useMemo(
 		() => ({
@@ -57,7 +55,7 @@ const LoginView = () => {
 			style={{
 				minHeight: '100vh',
 				padding: '24px 16px',
-				background: darkMode ? '#1a1a1a' : token.colorBgLayout,
+				background: token.colorBgLayout,
 			}}
 		>
 			<SignIn routing="hash" appearance={appearance} localization={esES} />

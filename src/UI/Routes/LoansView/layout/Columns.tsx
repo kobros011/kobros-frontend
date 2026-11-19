@@ -3,8 +3,10 @@ import { BuildColumns, CustomColumn } from '@/infrastructure/utils/BuildColumns'
 import { EyeOutlined } from '@ant-design/icons';
 import { Button, Tag } from 'antd';
 import { PrimaryTooltip } from '@/UI/Components/PrimaryTooltip';
+import { customColumns } from '@/UI/Components/Table/customColumns';
+import type { CustomFieldDef } from '@/domain/Settings';
 
-export const getColumns = (onSee: (record: LoanFullRead) => void) => {
+export const getColumns = (onSee: (record: LoanFullRead) => void, customFields: CustomFieldDef[] = []) => {
 
 	const columns: CustomColumn<LoanFullRead>[] = [
 		{
@@ -98,6 +100,7 @@ export const getColumns = (onSee: (record: LoanFullRead) => void) => {
 				return <Tag color="blue" >{paymentMethod?.toUpperCase() ?? '--'}</Tag>;
 			},
 		},
+		...customColumns<LoanFullRead>(customFields),
 		{
 			key: 'actions',
 			title: 'Acciones',

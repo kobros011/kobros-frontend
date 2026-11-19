@@ -1,7 +1,8 @@
 import axios from 'axios';
 import { ImplementationBase } from './base';
-import { LogoVariant, Settings, SettingsForm } from '@/domain/Settings';
+import { FormConfig, LogoVariant, Settings, SettingsForm } from '@/domain/Settings';
 import { SettingsDto } from '../dto/SettingsDto';
+import { formConfigToDomain, formConfigToDto } from '../mappers/formConfigMapper';
 
 const toDomain = (dto: SettingsDto): Settings => ({
 	brandId: dto.brand_id,
@@ -23,6 +24,7 @@ const toDomain = (dto: SettingsDto): Settings => ({
 	numberDecimals: dto.number_decimals,
 	currencies: dto.currencies ?? [],
 	logoEnabled: dto.logo_enabled,
+	formConfig: formConfigToDomain(dto.form_config),
 });
 
 export class ImplementationSettingsRepository extends ImplementationBase {
@@ -47,6 +49,16 @@ export class ImplementationSettingsRepository extends ImplementationBase {
 				number_decimals: data.numberDecimals,
 				currencies: data.currencies,
 			},
+			{ params: brandId ? { brand_id: brandId } : undefined },
+		);
+		return toDomain(response.data);
+	}
+
+	/** Guarda la configuración de formularios. `expectedVersion` es la versión que vio el usuario (409 si cambió). */
+	async updateFormConfig(config: FormConfig, expectedVersion: number, brandId?: string) {
+		const response = await axios.put<SettingsDto>(
+			this.baseUrl,
+			{ form_config: formConfigToDto(config), expected_version: expectedVersion },
 			{ params: brandId ? { brand_id: brandId } : undefined },
 		);
 		return toDomain(response.data);

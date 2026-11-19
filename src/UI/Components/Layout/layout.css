@@ -6,7 +6,7 @@
     bottom: 0;
     left: 0;
     width: 100vw;
-    justify-content: space-around;
+    justify-content: space-evenly;
     align-items: center;
     border-radius: 10px 10px 0 0;
     height: calc(4rem + env(safe-area-inset-bottom, 0px));
@@ -32,4 +32,18 @@
 
 .flex-menu-item > span > a {
     color: inherit
+}
+
+/* Sin borde de foco al tocar en la barra inferior; el foco de teclado (:focus-visible) se conserva. */
+.menu .ant-btn:focus:not(:focus-visible) {
+    outline: none;
+    box-shadow: none;
+}
+
+
+/* Título duplicado de la página: en móvil lo muestra el header global (mismo corte que isMobile, 768px). */
+@media (max-width: 767px) {
+    .kb-title-desktop-only {
+        display: none !important;
+    }
 }

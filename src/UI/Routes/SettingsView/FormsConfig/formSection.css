@@ -1,0 +1,33 @@
+/* El último renglón de cada grupo no lleva línea inferior: ya la pone el divisor de la sección siguiente. */
+.kb-config-row:last-child {
+	border-bottom: 0 !important;
+}
+
+/* Fila de campo personalizado: apilada en móvil, en una sola línea (cuadrícula) desde 768 px. */
+.kb-field-row {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	grid-template-areas:
+		"name actions"
+		"meta meta"
+		"chips chips";
+	gap: 6px 8px;
+	align-items: center;
+	padding: 12px 0;
+}
+
+.kb-field-name { grid-area: name; min-width: 0; }
+.kb-field-meta { grid-area: meta; }
+.kb-field-chips { grid-area: chips; }
+.kb-field-actions { grid-area: actions; }
+.kb-field-chips:empty { display: none; }
+
+@media (min-width: 768px) {
+	.kb-field-row {
+		grid-template-columns: minmax(200px, 1.3fr) 150px minmax(0, 2fr) auto;
+		grid-template-areas: "name meta chips actions";
+		gap: 12px;
+	}
+
+	.kb-field-chips:empty { display: flex; }
+}

@@ -11,6 +11,8 @@ import { Col, Form, FormInstance, Row, Select, Typography } from 'antd';
 import { FC, useMemo } from 'react';
 import { FieldDateTable } from '@/UI/Components/Fields/MultiFieldsFormItem';
 import { AvailableCashHint } from './AvailableCashHint';
+import CustomFieldsSection from '@/UI/Components/Fields/CustomFieldsSection';
+import type { CustomFieldDef } from '@/domain/Settings';
 import { computeLoanDerived, describeInitialPayment, formatLoanEndDate } from '../Hooks/useChangeDataLoan';
 
 const { Text } = Typography;
@@ -31,6 +33,8 @@ interface LoanFieldsProps {
 	compact?: boolean
 	/** Ruta del crédito: con ella se muestra el efectivo disponible en caja bajo el capital. */
 	routeId?: string
+	/** Campos personalizados de créditos de la marca (activos). */
+	customFields?: CustomFieldDef[]
 }
 
 const SummaryRow: FC<{ label: string; value: string | number | undefined; bold?: boolean }> = ({ label, value, bold }) => (
@@ -44,7 +48,7 @@ const SummaryRow: FC<{ label: string; value: string | number | undefined; bold?:
 	</div>
 );
 
-export const LoanFields: FC<LoanFieldsProps> = ({ form, prefix = [], disabled, optional = false, compact = false, routeId }) => {
+export const LoanFields: FC<LoanFieldsProps> = ({ form, prefix = [], disabled, optional = false, compact = false, routeId, customFields = [] }) => {
 	const money = useMoney();
 	const currency = useCurrency();
 	const path = (field: string) => (prefix.length ? [...prefix, field] : field);
@@ -112,7 +116,7 @@ export const LoanFields: FC<LoanFieldsProps> = ({ form, prefix = [], disabled, o
 					<Form.Item label="Valor capital" name={path('valueCapital')} rules={rules} className="loan-wizard-field" style={routeId ? { marginBottom: 4 } : undefined}>
 						<InputNumber size="small" thousandsSeparator addonAfter={currency} style={{ width: '100%' }} disabled={disabled} />
 					</Form.Item>
-					{routeId && <AvailableCashHint routeId={routeId} capital={parseFormNumber(valueCapital)} />}
+					{routeId && <AvailableCashHint routeId={routeId} amount={parseFormNumber(valueCapital)} />}
 				</Col>
 				<Col {...half}>
 					<Form.Item label="Valor cuota fija" name={path('valueQuotaFixed')} rules={rules} className="loan-wizard-field">
@@ -145,6 +149,12 @@ export const LoanFields: FC<LoanFieldsProps> = ({ form, prefix = [], disabled, o
 			{!compact && date}
 
 			{compact ? <>{paymentBlock}{summaryBlock}</> : <>{summaryBlock}{paymentBlock}</>}
+
+			{customFields.length > 0 && (
+				<Row gutter={[compact ? 8 : 12, 4]}>
+					<CustomFieldsSection fields={customFields} namePrefix={prefix} span={{ span: 24 }} />
+				</Row>
+			)}
 		</div>
 	);
 };

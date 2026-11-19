@@ -1,6 +1,6 @@
 import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query';
 import { queryKeySettings } from '@/constants/queryKeys';
-import { LogoVariant, SettingsForm } from '@/domain/Settings';
+import { FormConfig, LogoVariant, SettingsForm } from '@/domain/Settings';
 import { repository } from '../repositories/Settings';
 import useUserStore from '../context/User/UserDataStore';
 
@@ -23,6 +23,11 @@ export const getSettings = (brandId?: string, enabled = true) => {
 
 export const updateSettings = (brandId?: string) => useMutation({
 	mutationFn: (data: SettingsForm) => repository.update(data, brandId),
+});
+
+/** Guarda la configuración de formularios; al terminar, la consulta de ajustes se refresca (ver FormsConfig). */
+export const updateFormConfig = (brandId?: string) => useMutation({
+	mutationFn: ({ config, expectedVersion }: { config: FormConfig; expectedVersion: number }) => repository.updateFormConfig(config, expectedVersion, brandId),
 });
 
 export const uploadLogo = (brandId?: string) => useMutation({

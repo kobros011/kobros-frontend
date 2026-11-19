@@ -16,6 +16,8 @@ interface ClientContactsListProps {
 	renderHeader?: (count: number) => ReactNode
 	/** Texto cuando todavía no hay contactos. */
 	emptyText?: string
+	/** Tipos de contacto visibles según la configuración de la marca (por defecto, ambos). */
+	kinds?: ContactKind[]
 }
 
 /** Fiadores y referencias del cliente: varios de cada tipo, se agregan y se quitan; nombre y celular obligatorios. Va dentro de un `Form`. */
@@ -24,6 +26,7 @@ export const ClientContactsList: FC<ClientContactsListProps> = ({
 	hideHeader = false,
 	renderHeader,
 	emptyText = 'Si no agregas contactos, el cliente se guarda sin fiador ni referencias.',
+	kinds = ['fiador', 'referencia'],
 }) => {
 	const form = Form.useFormInstance();
 	const contacts = (Form.useWatch(name, form) ?? []) as ClientContact[];
@@ -85,8 +88,8 @@ export const ClientContactsList: FC<ClientContactsListProps> = ({
 							})}
 
 							<div className="kb-contacts-actions">
-								<Button size="small" type="primary" ghost icon={<PlusOutlined />} onClick={() => addContact('fiador')}>Agregar fiador</Button>
-								<Button size="small" icon={<PlusOutlined />} onClick={() => addContact('referencia')}>Agregar referencia</Button>
+								{kinds.includes('fiador') && <Button size="small" type="primary" ghost icon={<PlusOutlined />} onClick={() => addContact('fiador')}>Agregar fiador</Button>}
+								{kinds.includes('referencia') && <Button size="small" icon={<PlusOutlined />} onClick={() => addContact('referencia')}>Agregar referencia</Button>}
 							</div>
 						</div>
 					);

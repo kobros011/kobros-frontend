@@ -1,10 +1,12 @@
 import { Select } from 'antd';
 import { ItemFilter } from '..';
+import type { CustomFieldDef } from '@/domain/Settings';
+import { customFilterItems } from './Client';
 import { PaymentMethodOptions } from '@/constants/OptionsSelects';
 import { SelectRoute } from '../../Fields/SelectRoute';
 import RangeDate from '../../Fields/RangePickerField';
 
-export const LoansFiltersFields = (hasMultipleRoutes: boolean) => {
+export const LoansFiltersFields = (hasMultipleRoutes: boolean, customFields: CustomFieldDef[] = []) => {
 
 	const fields: ItemFilter[] = [
 		{
@@ -36,5 +38,5 @@ export const LoansFiltersFields = (hasMultipleRoutes: boolean) => {
 		},
 	];
 
-	return fields;
+	return [...fields, ...customFilterItems(customFields)];
 };

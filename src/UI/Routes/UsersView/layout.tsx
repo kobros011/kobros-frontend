@@ -1,6 +1,6 @@
 import { MODULESNAME } from '@/constants/MODULESNAME';
 import { PlusOutlined } from '@ant-design/icons';
-import { App, Button, Col, Row, Tabs, Typography } from 'antd';
+import { App, Button, Tabs } from 'antd';
 import { FC, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import routePaths from '@/constants/routePaths';
@@ -11,11 +11,14 @@ import { GlobalFilters } from '@/UI/Components/Filters';
 import { useQueryClient } from '@tanstack/react-query';
 import { queryKeyDefault, queryKeyUsers } from '@/constants/queryKeys';
 import { TableUsers } from './Table';
+import PageHeaderActions from '@/UI/Components/PageHeaderActions';
+import { useTabsToolbar } from '@/infrastructure/hooks/useTabsToolbar';
 
 export const Layout: FC = () => {
 	const moduleName = MODULESNAME.users;
 	const [isSearching, setSearching] = useState<boolean>(false);
 	const [activeTab, setActiveTab] = useState(`${moduleName}-active`);
+	const { tabBarExtraContent, toolbarTargetFor } = useTabsToolbar(activeTab);
 
 	const [count, setCount] = useState<{ active: number, inactive: number }>({ active: 0, inactive: 0 });
 
@@ -51,22 +54,18 @@ export const Layout: FC = () => {
 	
 	return (
 		<>
-			<div className='page-header '>
-				<Row justify="space-between" align="middle">
-					<Col>
-						<Typography.Title level={2}>Usuarios</Typography.Title>
-					</Col>
-					<Col>
-						<Button
-							icon={<PlusOutlined />}
-							type='primary'
-							onClick={() => void navigate(`${routePaths.DEFAULT_CREATE}`)}
-						>
+			<PageHeaderActions
+				title="Usuarios"
+				primary={
+					<Button
+						icon={<PlusOutlined />}
+						type='primary'
+						onClick={() => void navigate(`${routePaths.DEFAULT_CREATE}`)}
+					>
 							Nuevo Usuario
-						</Button>
-					</Col>
-				</Row>
-			</div>
+					</Button>
+				}
+			/>
 			<GlobalFilters
 				placeholderSearch='Buscar(EJ: Nombre del usuario)'
 				moduleName={MODULESNAME.users}
@@ -80,18 +79,19 @@ export const Layout: FC = () => {
 				style={{ width: '100%' }}
 				activeKey={activeTab}
 				onChange={(activeKey: string) => setActiveTab(activeKey)}
+				tabBarExtraContent={tabBarExtraContent}
 				items={[
 					{
 						key: `${moduleName}-active`,
 						label: `Activos (${count.active})`,
 						forceRender: true,
-						children: <TableUsers key={'active'} setCount={setCount} type='active' actions={actions} isSearching={isSearching} />,
+						children: <TableUsers key={'active'} setCount={setCount} type='active' actions={actions} isSearching={isSearching} toolbarTarget={toolbarTargetFor(`${moduleName}-active`)} />,
 					},
 					{
 						key: `${moduleName}-inactive`,
 						forceRender: true,
 						label: `Inactivos (${count.inactive})`,
-						children: <TableUsers key={'inactive'} setCount={setCount} type='inactive' actions={actions} isSearching={isSearching} />,
+						children: <TableUsers key={'inactive'} setCount={setCount} type='inactive' actions={actions} isSearching={isSearching} toolbarTarget={toolbarTargetFor(`${moduleName}-inactive`)} />,
 					},
 				]}
 			/>

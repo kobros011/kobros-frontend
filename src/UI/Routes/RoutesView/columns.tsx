@@ -1,8 +1,10 @@
 import { Route } from '@/domain/Route';
 import { BuildColumns, CustomColumn } from '@/infrastructure/utils/BuildColumns';
 import { OnClickActions, useRowActions } from '@/UI/Components/RowActions';
+import { customColumns } from '@/UI/Components/Table/customColumns';
+import type { CustomFieldDef } from '@/domain/Settings';
 
-export const getColumns = (actions: OnClickActions<Route>) => {
+export const getColumns = (actions: OnClickActions<Route>, customFields: CustomFieldDef[] = []) => {
 
 	const { columnActions } = useRowActions<Route>(actions);
 
@@ -66,6 +68,7 @@ export const getColumns = (actions: OnClickActions<Route>) => {
 			typeRender: 'date',
 			defaultVisible: false,
 		},
+		...customColumns<Route>(customFields),
 		columnActions,
 	];
 

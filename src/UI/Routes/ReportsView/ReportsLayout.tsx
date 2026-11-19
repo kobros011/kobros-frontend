@@ -1,9 +1,9 @@
+import PageHeaderActions from '@/UI/Components/PageHeaderActions';
 import { FC, ReactNode } from 'react';
-import { Tabs, Typography } from 'antd';
+import { Tabs } from 'antd';
 import { useLocation, useNavigate } from 'react-router-dom';
 import routePaths from '@/constants/routePaths';
 
-const { Title } = Typography;
 
 const TABS = [
 	{ key: 'resumen', label: 'Resumen' },
@@ -19,9 +19,7 @@ export const ReportsLayout: FC<{ children: ReactNode }> = ({ children }) => {
 
 	return (
 		<>
-			<div className="page-header">
-				<Title level={2} style={{ margin: 0 }}>Reportes</Title>
-			</div>
+			<PageHeaderActions title="Reportes" />
 
 			<Tabs
 				activeKey={activeKey}

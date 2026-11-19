@@ -1,5 +1,5 @@
 import { create } from '@/infrastructure/utils/storeCreate';
-import { LogoTone, NumberFormatStyle, Settings } from '@/domain/Settings';
+import { DEFAULT_FORM_CONFIG, FormConfig, LogoTone, NumberFormatStyle, Settings } from '@/domain/Settings';
 
 interface State {
 	appName: string
@@ -16,10 +16,14 @@ interface State {
 	numberDecimals: 0 | 2
 	/** Monedas de la marca (códigos ISO); la primera es la principal. Sin moneda por defecto: vacío hasta que cargan los ajustes. */
 	currencies: string[]
+	/** Configuración de formularios de la marca (requeridos, visibles y campos personalizados). */
+	formConfig: FormConfig
 	/** true una vez que se resolvió (con éxito o error) la configuración de la marca. */
 	loaded: boolean
 	apply: (settings: Settings) => void
 	markLoaded: () => void
+	/** Actualiza solo la configuración de formularios (tras guardarla). */
+	setFormConfig: (formConfig: FormConfig) => void
 	resetStore: () => void
 }
 
@@ -57,6 +61,7 @@ const initialState: Omit<State, 'apply' | 'markLoaded' | 'resetStore'> = {
 	numberFormatStyle: 'comma-thousands',
 	numberDecimals: 2,
 	currencies: [],
+	formConfig: DEFAULT_FORM_CONFIG,
 	loaded: false,
 };
 
@@ -79,10 +84,12 @@ const useAppSettingsStore = create<State>()((set) => ({
 			numberFormatStyle: settings.numberFormatStyle,
 			numberDecimals: settings.numberDecimals,
 			currencies: settings.currencies,
+			formConfig: settings.formConfig,
 			loaded: true,
 		});
 	},
 	markLoaded: () => set({ loaded: true }),
+	setFormConfig: (formConfig) => set({ formConfig }),
 	resetStore: () => set({ ...initialState }),
 }));
 

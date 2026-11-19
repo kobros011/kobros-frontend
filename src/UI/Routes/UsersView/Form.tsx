@@ -1,4 +1,6 @@
 import { spanConfigForm } from '@/constants/getSpan';
+import useUnsavedChangesGuard from '@/infrastructure/hooks/useUnsavedChangesGuard';
+import useFormHeader from '@/UI/Components/useFormHeader';
 import { TypeUserOptions } from '@/constants/OptionsSelects';
 import { queryKeyUsers, queryKeyDefault } from '@/constants/queryKeys';
 import routePaths from '@/constants/routePaths';
@@ -48,6 +50,8 @@ const FormUser: FC<{ readonly?: boolean }> = ({ readonly = false }) => {
 	const [exit, setExit] = useState<boolean>(false);
 
 	const isCreate = !id;
+	const { bindForm, markClean } = useUnsavedChangesGuard(readonly ? false : undefined);
+	const cardTitle = useFormHeader(routePaths.USERS, `${isCreate ? 'Crear' : readonly ? 'Ver' : 'Actualizar'} usuario`);
 	const role = normalizeTypeUser(typeUserLogin) ?? TypeUser.collector;
 	const isSuperUser = role === TypeUser.dev;
 	const canResetPassword = role === TypeUser.dev || role === TypeUser.super;
@@ -90,6 +94,7 @@ const FormUser: FC<{ readonly?: boolean }> = ({ readonly = false }) => {
 			brandId: values.brandId ? values.brandId : brandId,
 		}, {
 			onSuccess: (response) => {
+				markClean();
 				const data = response?.data;
 				notification.success({ message: `El usuario fue ${isCreate ? 'creado' : 'actualizado'} exitosamente` });
 				void resetUsersStore();
@@ -137,8 +142,8 @@ const FormUser: FC<{ readonly?: boolean }> = ({ readonly = false }) => {
 
 	return (
 		<Card
-			title={`${isCreate ? 'Crear' : readonly ? 'Ver' : 'Actualizar'} usuario`}
-			style={{ overflowX: 'hidden', overflowY: 'auto', maxHeight: '84vh' }}
+			title={cardTitle}
+			className="kb-form-card"
 		>
 			{showRoutesTab && (
 				<Tabs
@@ -154,6 +159,7 @@ const FormUser: FC<{ readonly?: boolean }> = ({ readonly = false }) => {
 			<div hidden={activeTab === 'routes'}>
 				<Form
 					form={form}
+					{...bindForm(form)}
 					layout="vertical"
 					key={user ? `${user.id}-${user.updatedAt}` : 'new'}
 					initialValues={user}

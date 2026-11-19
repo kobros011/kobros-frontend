@@ -4,6 +4,7 @@ import { LoanFields } from '@/UI/Routes/LoansView/components/LoanFields';
 import { DashboardShell } from '@/UI/Components/Dashboard/ui';
 import { CurrencyProvider } from '@/infrastructure/hooks/useMoney';
 import { useRoutes } from '@/infrastructure/hooks/useRoutes';
+import useModuleCustomFields from '@/infrastructure/hooks/useModuleCustomFields';
 import './priority/priority.css';
 
 const { Text } = Typography;
@@ -31,6 +32,7 @@ export const ClientLoanSection: FC<ClientLoanSectionProps> = ({ form, routeIds, 
 	const missing = started && [loan?.valueCapital, loan?.valueQuotaFixed, loan?.agreedQuotas, loan?.paymentMethod].some(value => !isFilled(value));
 	const route = routes.find(item => item.id === routeId);
 	const multiple = routeIds.length > 1;
+	const customView = useModuleCustomFields('loans', route?.brandId);
 
 	return (
 		<CurrencyProvider routeId={routeId}>
@@ -66,7 +68,7 @@ export const ClientLoanSection: FC<ClientLoanSectionProps> = ({ form, routeIds, 
 
 					{submitted && missing && <Alert type="error" showIcon style={{ fontSize: 12 }} message="Completa capital, cuota, cuotas y forma de pago." />}
 
-					<LoanFields form={form} prefix={['loan']} optional compact routeId={routeId} />
+					<LoanFields form={form} prefix={['loan']} optional compact routeId={routeId} customFields={customView.activeCustomFields} />
 				</section>
 			</DashboardShell>
 		</CurrencyProvider>

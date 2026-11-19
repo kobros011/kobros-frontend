@@ -1,4 +1,5 @@
 import { CurrencyProvider } from '@/infrastructure/hooks/useMoney';
+import useFormHeader from '@/UI/Components/useFormHeader';
 import { FC } from 'react';
 import { useNavigate, useParams, useLocation, useSearchParams } from 'react-router-dom';
 import { Card, Tabs } from 'antd';
@@ -17,13 +18,8 @@ const RouteDetail: FC<{ readonly?: boolean }> = ({ readonly = false }) => {
 
 	const { hasRouteCashAccess } = getPermission(typeUser);
 
-	if (!id || !hasRouteCashAccess) {
-		return <FormRoute readonly={readonly} />;
-	}
-
 	const isCashTab = pathname.endsWith('/caja');
 	const activeKey = isCashTab ? 'cash' : 'data';
-
 	// La pestaña "Datos" codifica el modo en la ruta (:id vs :id/editar), pero "Caja"
 	// comparte una única ruta (:id/caja): se usa un query param para no perder si se
 	// llegó desde Ver o Editar al cambiar de pestaña (sobrevive incluso a un refresh).
@@ -31,6 +27,13 @@ const RouteDetail: FC<{ readonly?: boolean }> = ({ readonly = false }) => {
 	const effectiveReadonly = isCashTab
 		? (modeParam ? modeParam === 'ver' : readonly)
 		: readonly;
+	// Sin caja, el formulario de ruta dibuja su propia tarjeta y pone el título; con caja lo pone esta pantalla.
+	const hasOwnCard = !!id && hasRouteCashAccess;
+	const cardTitle = useFormHeader(routePaths.ROUTES, effectiveReadonly ? 'Ver ruta' : 'Actualizar ruta', { enabled: hasOwnCard });
+
+	if (!hasOwnCard) {
+		return <FormRoute readonly={readonly} />;
+	}
 
 	const onChange = (key: string) => {
 		if (key === 'cash') {
@@ -42,8 +45,8 @@ const RouteDetail: FC<{ readonly?: boolean }> = ({ readonly = false }) => {
 
 	return (
 		<Card
-			title={effectiveReadonly ? 'Ver ruta' : 'Actualizar ruta'}
-			style={{ overflowX: 'hidden', overflowY: 'auto', maxHeight: '84vh' }}
+			title={cardTitle}
+			className="kb-form-card"
 		>
 			<Tabs
 				activeKey={activeKey}

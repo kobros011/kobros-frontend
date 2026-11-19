@@ -12,13 +12,15 @@ interface TableBrandsProps {
 	isSearching: boolean
 	actions: OnClickActions<Brand>
 	type: 'active' | 'inactive'
+	/** Dónde dibujar la barra de vista en móvil (ver `toolbarTarget` de CustomTable). */
+	toolbarTarget?: HTMLElement | null
 	setCount:  React.Dispatch<React.SetStateAction<{
 		active: number;
 		inactive: number;
 	}>>
 }
 
-export const TableBrands: FC<TableBrandsProps> = ({ isSearching, actions, type, setCount }) => {
+export const TableBrands: FC<TableBrandsProps> = ({ isSearching, actions, type, setCount, toolbarTarget }) => {
 	const moduleName = MODULESNAME.brands;
 	const filters = filtersStore(state => state.filtersMap[moduleName]);
 
@@ -57,6 +59,7 @@ export const TableBrands: FC<TableBrandsProps> = ({ isSearching, actions, type, 
 			dataSource={brands}
 			columns={getColumns(actions)}
 			moduleName={moduleName}
+			toolbarTarget={toolbarTarget}
 			titleField="name"
 			onRowClick={actions.see}
 			pagination={{ page, pageSize, total, onChange }}

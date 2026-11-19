@@ -1,9 +1,13 @@
 import { Route } from '@/domain/Route';
+import useUnsavedChangesGuard from '@/infrastructure/hooks/useUnsavedChangesGuard';
+import useFormHeader from '@/UI/Components/useFormHeader';
+import routePaths from '@/constants/routePaths';
 import useRouteStore from '@/infrastructure/context/RoutesStore';
 import useLoading from '@/infrastructure/hooks/useLoading';
 import { getClientMoreInfo } from '@/infrastructure/querys/Client';
 import { handleError } from '@/infrastructure/utils/handleError';
-import { App, Card, Collapse, CollapseProps, Form } from 'antd';
+import { App, Button, Card, Collapse, CollapseProps, Form } from 'antd';
+import { CheckOutlined } from '@ant-design/icons';
 import { ExceptionStatusType } from 'antd/es/result';
 import { Result } from 'antd/lib';
 import { AxiosError } from 'axios';
@@ -18,6 +22,9 @@ import { LoanFull } from '@/domain/Loan';
 import { ClientInfoStep } from './components/ClientInfoStep';
 import { LoanHistoryStep } from './components/LoanHistoryStep';
 import { LoanDataStep } from './components/LoanDataStep';
+import FormFooter from '@/UI/Components/FormFooter';
+import useModuleCustomFields from '@/infrastructure/hooks/useModuleCustomFields';
+import { customFieldsPayload } from '@/UI/Routes/ClientsView/customFieldsPayload';
 import { confirmWithinAvailableCash } from './availableCash';
 import { parseFormNumber } from '@/infrastructure/utils/formaNumber';
 import { StepHeader } from './components/StepHeader';
@@ -76,6 +83,8 @@ const FormLoan: FC = () => {
 	const { notification, modal } = App.useApp();
 	const navigate = useNavigate();
 	const { startLoading, stopLoading, isLoading } = useLoading();
+	const { bindForm, markClean } = useUnsavedChangesGuard();
+	const cardTitle = useFormHeader(routePaths.LOANS, 'Crear crédito');
 
 	const { client, isError: isErrorClient, error: errorClient, refetch, isLoading: isLoadingClient, isFetching: isFetchingClient } =
 		getClientMoreInfo(availableClientId, availableRoute?.id);
@@ -84,6 +93,7 @@ const FormLoan: FC = () => {
 	const { loans: clientLoans } = getListLoans({ clientId: availableClientId }, !!availableClientId);
 
 	const { clientRoutes, getClientRoutes } = useClientRoutes(availableRoute?.id);
+	const customView = useModuleCustomFields('loans', availableRoute?.brandId);
 	const loanMutation = useMutationType('create');
 
 	useEffect(() => {
@@ -139,9 +149,11 @@ const FormLoan: FC = () => {
 				...values,
 				clientrouteId: clientRoutes.find(item => item.clientId == client?.id)?.id,
 				clientId: client?.id,
+				customFields: customFieldsPayload(values.customFields, customView.activeCustomFields),
 			},
 			{
 				onSuccess: (response) => {
+					markClean();
 					// El servidor asigna el número real del crédito.
 					const created = response?.data?.loan_number;
 					notification.success({ message: created ? `El crédito #${created} fue creado exitosamente` : 'El crédito fue creado exitosamente' });
@@ -298,10 +310,8 @@ const FormLoan: FC = () => {
 				<LoanDataStep
 					form={form}
 					routeId={availableRoute?.id}
+					customFields={customView.activeCustomFields}
 					disabled={isLoading}
-					onCancel={() => void navigate(-1)}
-					onSave={() => void handleSubmit()}
-					isLoading={isLoading}
 				/>
 			),
 		},
@@ -310,11 +320,11 @@ const FormLoan: FC = () => {
 	return (
 		<CurrencyProvider routeId={availableRoute?.id}>
 			<Card
-				title="Crear crédito"
-				style={{ overflowX: 'hidden', overflowY: 'auto', maxHeight: '84vh' }}
+				title={cardTitle}
+				className="kb-form-card"
 			>
 				<LoanWizardShell>
-					<Form form={form} layout="vertical">
+					<Form form={form} layout="vertical" {...bindForm(form)}>
 						<Collapse
 							activeKey={activeKey}
 							onChange={handleCollapseChange}
@@ -322,6 +332,10 @@ const FormLoan: FC = () => {
 						/>
 					</Form>
 				</LoanWizardShell>
+				<FormFooter>
+					<Button type="primary" danger ghost onClick={() => void navigate(-1)} disabled={isLoading}>Cancelar</Button>
+					<Button type="primary" icon={<CheckOutlined />} onClick={() => void handleSubmit()} loading={isLoading} disabled={!step2Done}>Crear crédito</Button>
+				</FormFooter>
 			</Card>
 		</CurrencyProvider>
 	);

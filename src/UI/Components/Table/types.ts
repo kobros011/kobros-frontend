@@ -35,6 +35,12 @@ export interface PropsTables<
 	pagination?: ServerPagination
 	/** Selección múltiple (casillas en la tabla y en las tarjetas). `keys` son los id seleccionados, incluso de otras páginas. */
 	selection?: ServerSelection<RecordType>
+	/**
+	 * Dónde se dibuja la barra de vista (selector Tabla/Lista + ajustes).
+	 * `undefined`: dentro de la tabla, como siempre. Un elemento: se dibuja ahí con un portal
+	 * (p. ej. la fila de tabs en móvil). `null`: el destino aún no existe, no se dibuja nada.
+	 */
+	toolbarTarget?: HTMLElement | null
 }
 
 export interface ServerSelection<RecordType> {

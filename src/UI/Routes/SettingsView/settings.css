@@ -1,0 +1,42 @@
+/* Configuración: filas de ajustes planas (etiqueta a la izquierda, campos a la derecha). En móvil se apilan. */
+.kb-settings {
+	max-width: 720px;
+	margin: 0 auto;
+}
+
+.kb-settings-row {
+	display: grid;
+	grid-template-columns: 160px minmax(0, 1fr);
+	gap: 24px;
+	padding: 24px 0;
+	border-top: 1px solid rgba(128, 128, 140, 0.25);
+}
+
+.kb-settings-label {
+	font-size: 11px;
+	font-weight: 600;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	opacity: 0.6;
+	padding-top: 6px;
+}
+
+.kb-settings-row .ant-form-item {
+	margin-bottom: 16px;
+}
+
+.kb-settings-row .ant-form-item:last-child {
+	margin-bottom: 0;
+}
+
+@media (max-width: 767px) {
+	.kb-settings-row {
+		grid-template-columns: minmax(0, 1fr);
+		gap: 12px;
+		padding: 16px 0;
+	}
+
+	.kb-settings-label {
+		padding-top: 0;
+	}
+}

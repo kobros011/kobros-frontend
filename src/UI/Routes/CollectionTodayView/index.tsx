@@ -1,11 +1,12 @@
 import { CurrencyProvider } from '@/infrastructure/hooks/useMoney';
-import { Card, Col, DatePicker, Empty, Row, Typography } from 'antd';
+import { Col, DatePicker, Empty, Row, Typography } from 'antd';
 import { FC, useEffect, useMemo, useState } from 'react';
 import { SelectRoute } from '@components/Fields/SelectRoute';
 import LoadingComponent from '@components/LoadingComponent';
 import ErrorView from '@components/ErrorView';
 import { getListCollection } from '@/infrastructure/querys/Collection';
 import { ClientGroupCard } from './ClientGroupCard';
+import ResponsiveCard from '@/UI/Components/ResponsiveCard';
 import { CollectionTodayKpis } from './CollectionTodayKpis';
 import { CollectionTodayShell } from './CollectionTodayShell';
 import dayjs, { Dayjs } from 'dayjs';
@@ -53,8 +54,8 @@ const CollectionTodayView: FC = () => {
 	return (
 		<CurrencyProvider routeId={routeId}>
 			<CollectionTodayShell>
-				<Card className="collection-today-module-card" style={{ maxHeight: '90vh' }}>
-					<div className="page-header">
+				<ResponsiveCard className="collection-today-module-card" style={{ maxHeight: '90vh' }}>
+					<div className="page-header kb-title-desktop-only">
 						<Title level={2} style={{ margin: 0 }}>
 						Cobro del día
 						</Title>
@@ -107,7 +108,7 @@ const CollectionTodayView: FC = () => {
 							</div>
 						)}
 					</div>
-				</Card>
+				</ResponsiveCard>
 			</CollectionTodayShell>
 		</CurrencyProvider>
 	);

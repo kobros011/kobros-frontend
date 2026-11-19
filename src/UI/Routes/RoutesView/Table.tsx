@@ -6,19 +6,23 @@ import { FC, useEffect } from 'react';
 import { OnClickActions } from '@/UI/Components/RowActions';
 import { getPageRoutes } from '@/infrastructure/querys/Route';
 import { usePagination } from '@/infrastructure/hooks/usePagination';
+import useModuleCustomFields from '@/infrastructure/hooks/useModuleCustomFields';
 import { getColumns } from './columns';
 
 interface TableRoutesProps {
 	isSearching: boolean
 	actions: OnClickActions<Route>
 	type: 'active' | 'inactive'
+	/** Dónde dibujar la barra de vista en móvil (ver `toolbarTarget` de CustomTable). */
+	toolbarTarget?: HTMLElement | null
 	setCount:  React.Dispatch<React.SetStateAction<{
 		active: number;
 		inactive: number;
 	}>>
 }
 
-export const TableRoutes: FC<TableRoutesProps> = ({ isSearching, actions, type, setCount }) => {
+export const TableRoutes: FC<TableRoutesProps> = ({ isSearching, actions, type, setCount, toolbarTarget }) => {
+	const customView = useModuleCustomFields('routes');
 	const moduleName = MODULESNAME.routes;
 	const filters = filtersStore(state => state.filtersMap[moduleName]);
 
@@ -56,8 +60,9 @@ export const TableRoutes: FC<TableRoutesProps> = ({ isSearching, actions, type, 
 		<CustomTable<Route>
 			isLoading={isFetching || isLoading || isRefetching}
 			dataSource={routes}
-			columns={getColumns(actions)}
+			columns={getColumns(actions, customView.activeCustomFields)}
 			moduleName={moduleName}
+			toolbarTarget={toolbarTarget}
 			titleField="name"
 			onRowClick={actions.see}
 			pagination={{ page, pageSize, total, onChange }}

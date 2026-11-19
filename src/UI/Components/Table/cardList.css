@@ -1,0 +1,11 @@
+/* Los valores que vienen de las columnas (p. ej. dirección, "largeText") traen ancho fijo,
+   texto centrado y una sola línea con puntos suspensivos. Dentro de la tarjeta deben ocupar
+   todo el ancho, alinearse a la izquierda y poder partirse en varias líneas, sin cortarse. */
+.kb-card-value .ant-typography {
+    width: 100% !important;
+    text-align: left !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    overflow-wrap: anywhere;
+}

@@ -1,9 +1,12 @@
 import { MODULESNAME } from '@/constants/MODULESNAME';
 import { GlobalFilters } from '@/UI/Components/Filters';
 import { PlusOutlined } from '@ant-design/icons';
-import { Button, Card, Col, Row, Typography } from 'antd';
+import { Button } from 'antd';
+import ResponsiveCard from '@/UI/Components/ResponsiveCard';
+import PageHeaderActions from '@/UI/Components/PageHeaderActions';
 import { FC, useState } from 'react';
 import { TablesLoans } from './Tables';
+import useModuleCustomFields from '@/infrastructure/hooks/useModuleCustomFields';
 import { LoansFiltersFields } from '@/UI/Components/Filters/FiltersFields/Loans';
 import { useNavigate } from 'react-router-dom';
 import routePaths from '@/constants/routePaths';
@@ -13,7 +16,8 @@ const LoansView: FC = () => {
 	const { routes } = useRouteStore(store => store);
 	const [isSearching, setSearching] = useState<boolean>(false);
 
-	const fieldFiltersLoans = LoansFiltersFields(true);
+	const customView = useModuleCustomFields('loans');
+	const fieldFiltersLoans = LoansFiltersFields(true, customView.filterableCustomFields);
 
 	const onHandlerFilter = () => {
 		if (!isSearching) setSearching(true);
@@ -22,24 +26,19 @@ const LoansView: FC = () => {
 	const navigate = useNavigate();
 
 	return (
-		<Card>
-			<div className='page-header'>
-				<Row justify={'space-between'} align={'middle'}>
-					<Col>
-						<Typography.Title level={2}>Créditos</Typography.Title>
-					</Col>
-					<Col>
-						<Button
-							icon={<PlusOutlined />}
-							type='primary'
-							onClick={() => void navigate(`${routePaths.DEFAULT_CREATE}`, { state: { clientId: undefined, routeIds: routes?.map(route => route.id) } })}
-						>
-							Nuevo crédito
-						</Button>
-					</Col>
-				</Row>
-
-			</div>
+		<ResponsiveCard>
+			<PageHeaderActions
+				title="Créditos"
+				primary={
+					<Button
+						icon={<PlusOutlined />}
+						type='primary'
+						onClick={() => void navigate(`${routePaths.DEFAULT_CREATE}`, { state: { clientId: undefined, routeIds: routes?.map(route => route.id) } })}
+					>
+						Nuevo crédito
+					</Button>
+				}
+			/>
 
 			<GlobalFilters
 				placeholderSearch='Buscar(Ej: No. crédito, Nombre o documento cliente)'
@@ -52,7 +51,7 @@ const LoansView: FC = () => {
 			<TablesLoans
 				isSearching={isSearching}
 			/>
-		</Card>
+		</ResponsiveCard>
 	);
 };
 

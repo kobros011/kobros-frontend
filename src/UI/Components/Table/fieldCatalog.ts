@@ -10,6 +10,8 @@ export interface FieldDef {
 	render?: (value: any, record: any, index: number) => ReactNode;
 	/** Si es false, el campo existe y es activable desde "Columnas"/"Tarjeta", pero no viene visible por defecto. */
 	defaultVisible?: boolean;
+	/** Visible por defecto en la vista de tarjetas (si no viene, se usan los primeros campos). */
+	cardDefaultVisible?: boolean;
 }
 
 export const DEFAULT_CARD_FIELDS_COUNT = 4;
@@ -29,6 +31,7 @@ export const getConfigurableFields = (columns: ColumnType<any>[]): FieldDef[] =>
 			dataIndex: String(column.dataIndex ?? column.key ?? ''),
 			render: column.render as FieldDef['render'],
 			defaultVisible: (column as { defaultVisible?: boolean }).defaultVisible,
+			cardDefaultVisible: (column as { cardDefaultVisible?: boolean }).cardDefaultVisible,
 		}))
 		.filter(field => field.key);
 };
@@ -51,7 +54,9 @@ export const mergeFieldPrefs = (
 		if (!storedKeys.has(field.key)) {
 			ordered.push({
 				key: field.key,
-				visible: defaultVisibleCount === undefined ? (field.defaultVisible ?? true) : index < defaultVisibleCount,
+				visible: defaultVisibleCount === undefined
+					? (field.defaultVisible ?? true)
+					: (field.cardDefaultVisible ?? index < defaultVisibleCount),
 			});
 		}
 	});

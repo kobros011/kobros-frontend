@@ -62,6 +62,8 @@ export interface ClientLoanDraft {
 	dateFirstQuota?: string
 	fixedPaymentDay?: string | number
 	valuePayment?: string | number
+	/** Valores de los campos personalizados de créditos. */
+	customFields?: Record<string, unknown>
 }
 
 export interface Client extends BaseDomain {
@@ -87,6 +89,8 @@ export interface Client extends BaseDomain {
 	order?: number,
 	contacts?: ClientContact[]
 	activeLoansCount?: number
+	/** Valores de los campos personalizados de la marca (clave -> valor). Al guardar, `undefined` no se envía. */
+	customFields?: Record<string, unknown>
 }
 
 
@@ -131,6 +135,7 @@ export class ClientModel {
 				address: c.address ?? null,
 			})),
 			activeLoansCount: DTO.active_loans_count ?? 0,
+			customFields: DTO.custom_fields ?? {},
 		};
 	}
 
@@ -152,6 +157,7 @@ export class ClientModel {
 			date_first_quota: loan.dateFirstQuota,
 			...(loan.fixedPaymentDay ? { fixed_payment_day: num(loan.fixedPaymentDay) } : {}),
 			...(loan.valuePayment ? { value_payment: num(loan.valuePayment) } : {}),
+			...(loan.customFields ? { custom_fields: loan.customFields } : {}),
 		};
 	}
 
@@ -170,6 +176,7 @@ export class ClientModel {
 			...(domain.loan ? { loan: ClientModel.loanToDto(domain.loan) } : {}),
 			...(domain.id ? { id: domain.id } : {}),
 			...(domain.contacts ? { contacts: ClientModel.contactsToDto(domain.contacts) } : {}),
+			...(domain.customFields !== undefined ? { custom_fields: domain.customFields } : {}),
 		};
 	}
 }

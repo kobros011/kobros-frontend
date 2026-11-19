@@ -12,6 +12,7 @@ import { FieldDef } from './fieldCatalog';
 import { FieldPref } from '@/infrastructure/context/TableViewStore';
 import { IRecord, ServerPagination } from './types';
 import { PAGE_SIZE_OPTIONS } from '@/domain/Pagination';
+import './cardList.css';
 
 const { Text, Title } = Typography;
 
@@ -118,8 +119,8 @@ function InfoBlock({ label, icon, primary, secondary }: { label: string; icon: R
 				<Text type="secondary" style={{ fontSize: 11, letterSpacing: 0.4, textTransform: 'uppercase' }}>{icon} {label}</Text>
 			</Flex>
 			<div style={{ minWidth: 0 }}>
-				<Text strong ellipsis style={{ fontSize: 13, display: 'block' }}>{primary}</Text>
-				{secondary && <Text type="secondary" ellipsis style={{ fontSize: 12, display: 'block' }}>{secondary}</Text>}
+				<Text strong className="kb-card-value" style={{ fontSize: 13, display: 'block', wordBreak: 'break-word' }}>{primary}</Text>
+				{secondary && <Text type="secondary" className="kb-card-value" style={{ fontSize: 12, display: 'block', wordBreak: 'break-word' }}>{secondary}</Text>}
 			</div>
 		</Flex>
 	);
@@ -171,15 +172,18 @@ export function CardListView<T extends IRecord>({ dataSource, fields, prefs, tit
 						.filter((field): field is FieldDef => Boolean(field) && field!.dataIndex !== String(titleField ?? '') && field!.dataIndex !== 'active');
 
 					// Subtítulo bajo el nombre: el primer campo corto tipo identificador/texto.
-					const subtitleField = rest[0];
-					const tail = rest.slice(1);
+					// Los campos personalizados (`custom_*`) nunca van arriba: siempre quedan como bloques bajo el divider.
+					const isCustom = (field: FieldDef) => String(field.key).startsWith('custom_');
+					const subtitleField = rest.find(field => !isCustom(field));
+					const tail = rest.filter(field => field !== subtitleField);
+					const subtitleContent = subtitleField ? getContent(subtitleField) : undefined;
 
 					// Píldora de estado: un campo de tipo estado/método si el módulo lo tiene configurado.
-					const statusField = tail.find(field => getFieldRole(field.key, field.dataIndex) === 'status');
+					const statusField = tail.find(field => !isCustom(field) && getFieldRole(field.key, field.dataIndex) === 'status');
 					const blockFields = tail.filter(field => field !== statusField);
 
 					// Fecha para el pie: se saca de los bloques para no repetirla.
-					const dateField = blockFields.find(field => getFieldRole(field.key, field.dataIndex) === 'date');
+					const dateField = blockFields.find(field => !isCustom(field) && getFieldRole(field.key, field.dataIndex) === 'date');
 					const infoFields = blockFields.filter(field => field !== dateField);
 
 					const handleActivate = () => onCardClick?.(record);
@@ -241,14 +245,17 @@ export function CardListView<T extends IRecord>({ dataSource, fields, prefs, tit
 										</div>
 										<div style={{ minWidth: 0 }}>
 											{title && (
-												<Title level={5} style={{ margin: 0, lineHeight: 1.25 }} ellipsis={{ tooltip: title }}>
+												<Title level={5} style={{ margin: 0, lineHeight: 1.25 }} ellipsis={{ tooltip: title, rows: 2 }}>
 													{title}
 												</Title>
 											)}
-											{subtitleField && (
+											{typeof subtitleContent === 'string' && (
 												<Text type="secondary" ellipsis style={{ fontSize: 12, display: 'block' }}>
-													{getContent(subtitleField)}
+													{subtitleContent}
 												</Text>
+											)}
+											{subtitleContent != null && typeof subtitleContent !== 'string' && (
+												<div style={{ minWidth: 0, marginTop: 4 }}>{subtitleContent}</div>
 											)}
 										</div>
 									</Flex>
@@ -310,7 +317,12 @@ export function CardListView<T extends IRecord>({ dataSource, fields, prefs, tit
 
 			{pagination ? (
 				pagination.total > PAGE_SIZE_OPTIONS[0] && (
-					<Flex justify="center">
+					<Flex vertical align="center" gap={8}>
+						{isMobile && (
+							<Text type="secondary" style={{ fontSize: 12 }}>
+								{`Mostrando ${(pagination.page - 1) * pagination.pageSize + 1} a ${Math.min(pagination.page * pagination.pageSize, pagination.total)} de ${pagination.total}`}
+							</Text>
+						)}
 						<Pagination
 							current={pagination.page}
 							pageSize={pagination.pageSize}
@@ -318,7 +330,8 @@ export function CardListView<T extends IRecord>({ dataSource, fields, prefs, tit
 							onChange={pagination.onChange}
 							showSizeChanger={!isMobile}
 							pageSizeOptions={PAGE_SIZE_OPTIONS}
-							simple={isMobile}
+							size={isMobile ? 'small' : 'default'}
+							showLessItems={isMobile}
 						/>
 					</Flex>
 				)
